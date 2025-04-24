@@ -432,3 +432,145 @@ h2 {
     border-radius: 10px;
     border: 2px solid var(--secondary-color);
 }
+/* Add these styles (or modify existing ones) */
+
+/* ... (Keep existing styles from previous answer) ... */
+
+/* Boosts Page Specifics */
+#boosts-page section {
+    margin-bottom: 30px; /* Add space between sections */
+}
+
+#boosts-page h3 {
+    color: var(--primary-color);
+    font-size: 1.4em;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent-color);
+    text-align: center;
+}
+
+.passive-income-info {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1em; /* Slightly larger */
+    color: var(--text-muted-color);
+    background-color: rgba(15, 52, 96, 0.7); /* Semi-transparent accent */
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: flex; /* Align icon and text */
+    justify-content: center;
+    align-items: center;
+    gap: 6px; /* Space between icon and text */
+}
+
+/* Shop Item Styling Refinements (Optional) */
+.shop-item {
+    background-color: var(--accent-color);
+    padding: 15px;
+    border-radius: 12px; /* Slightly more rounded */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease; /* Subtle hover effect */
+}
+
+.shop-item:hover {
+     background-color: rgba(15, 52, 96, 0.9); /* Slightly lighter on hover */
+}
+
+
+.shop-item-name {
+    font-size: 1.15em; /* Slightly bigger name */
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 4px; /* Space below name */
+}
+
+.shop-item-desc {
+    font-size: 0.9em;
+    color: var(--text-muted-color);
+    margin: 4px 0 8px 0; /* Adjust spacing */
+}
+
+.shop-item-level {
+    font-size: 0.85em; /* Slightly bigger level text */
+    color: var(--text-color);
+    background-color: var(--secondary-color);
+    padding: 3px 8px;
+    border-radius: 5px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.buy-button {
+    /* Keep previous styles, ensure padding is comfortable */
+    padding: 10px 18px;
+    min-width: 100px; /* Ensure buttons have a decent minimum width */
+    text-align: center;
+}
+
+.shop-item-cost {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center cost within button */
+    font-weight: bold;
+    gap: 4px; /* Space between icon and number */
+}
+
+
+/* Navigation Adjustments for 3 items */
+.bottom-nav {
+    /* flex: 1 on buttons should distribute space evenly */
+}
+
+.nav-button {
+    /* flex: 1 and max-width: 33.33% should work well */
+     max-width: 33.33%; /* Explicitly set for 3 items */
+}
+
+
+/* Ensure new coin image size is appropriate */
+.coin-icon-small {
+    width: 24px; /* Adjust if needed */
+    height: 24px;
+    object-fit: contain; /* Prevent stretching */
+}
+.coin-icon-tiny {
+    width: 16px; /* Adjust if needed */
+    height: 16px;
+     object-fit: contain;
+}
+#clicker-image {
+    width: 150px; /* Adjust if needed */
+    height: 150px;
+     object-fit: contain;
+     filter: drop-shadow(0 0 8px var(--coin-glow)); /* Add a subtle glow */
+}
+
+/* Clicker button active state refinement */
+.clicker-button:active #clicker-image {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 15px var(--coin-glow)); /* Enhance glow on click */
+}
+.clicker-button:active {
+     transform: none; /* Prevent double scaling if button itself scales */
+}
+
+
+/* Responsive adjustments might need tweaking */
+@media (max-width: 360px) {
+    #boosts-page h3 {
+        font-size: 1.2em;
+    }
+     .shop-item {
+        /* Consider keeping flex-direction: row on small screens if space allows */
+        /* flex-direction: column; */ /* Uncomment if items MUST stack */
+        /* align-items: stretch; */
+    }
+     .buy-button {
+        /* margin-top: 10px; */ /* Only if stacking */
+        /* width: 100%; */
+    }
+}
