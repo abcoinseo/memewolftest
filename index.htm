@@ -10,222 +10,217 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- (Keep ALL CSS from the previous version) --- */
-        /* --- Styles for Task Page and Code Popup --- */
+        /* --- Global Styles & Reset --- */
+        :root {
+            /* ... (keep all :root variables from previous version) ... */
+            --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6);
+            --claimed-color: #5cb85c; /* Green for claimed */
+        }
+
+        /* --- (Keep ALL General CSS - body, #app, #loading, page, nav, game screen, shop screen, profile screen, buttons, popups, etc.) --- */
+        /* --- Omitted for brevity --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; width: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); color: var(--text-color); overscroll-behavior: none; font-size: 16px; }
+        body { display: flex; flex-direction: column; touch-action: manipulation; }
+        #app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
+        #loading { display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
+        #main-content { flex-grow: 1; display: flex; overflow: hidden; }
+        .page { width: 100%; height: 100%; display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 85px 15px; scroll-behavior: smooth; }
+        .page.active { display: flex; }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; background-color: rgba(15, 23, 42, 0.85); border-top: 1px solid var(--accent-color); padding: 8px 0; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 100; box-shadow: 0 -2px 10px var(--shadow-color); }
+        nav button { background: none; border: none; color: var(--icon-color); cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 0.7em; padding: 5px 10px; transition: color 0.2s ease; flex-grow: 1; flex-basis: 0; }
+        nav button .material-icons { font-size: 26px; margin-bottom: 3px; }
+        nav button:hover { color: var(--icon-active-color); }
+        nav button.active { color: var(--accent-color); }
+        #game-screen { justify-content: space-between; align-items: center; text-align: center; padding-top: 10px; }
+        .stats-bar { display: flex; justify-content: space-around; width: 100%; max-width: 350px; margin-bottom: 10px; font-size: 0.85em; color: var(--text-muted-color); background-color: var(--secondary-bg); padding: 8px 10px; border-radius: 10px; box-shadow: 0 1px 3px var(--shadow-color); }
+        .stat-item { display: flex; align-items: center; gap: 5px; }
+        .stat-item .material-icons { font-size: 16px; color: var(--coin-color); }
+        .coin-balance-container { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        #coin-icon-balance { width: 30px; height: 30px; margin-right: 8px; vertical-align: middle; }
+        #coin-balance { font-size: 2.2em; font-weight: bold; color: var(--coin-color); text-shadow: 0 0 8px var(--glow-color); }
+        .coin-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 10px; }
+        #coin-container { position: relative; width: clamp(180px, 50vmin, 250px); height: clamp(180px, 50vmin, 250px); cursor: pointer; user-select: none; -webkit-user-drag: none; border-radius: 50%; }
+        #coin-image { width: 100%; height: 100%; transition: transform 0.08s ease-out; border-radius: 50%; box-shadow: 0 0 30px var(--glow-color); filter: drop-shadow(0 5px 15px var(--shadow-color)); }
+        #coin-container:active #coin-image { transform: scale(0.94); filter: drop-shadow(0 2px 8px var(--shadow-color)); }
+        #click-feedback { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 99; }
+        .click-value { position: absolute; font-size: clamp(1.2em, 4vw, 1.8em); font-weight: bold; color: var(--coin-color); user-select: none; pointer-events: none; animation: floatUpFadeOut 1.2s ease-out forwards; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        @keyframes floatUpFadeOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(0.8); } }
+        #shop-screen h2, #profile-screen h2, #tasks-screen h2 { text-align: center; margin-bottom: 25px; color: var(--accent-color); font-size: 1.6em; text-shadow: 1px 1px 2px var(--shadow-color); }
+        .shop-tabs { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: -20px; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding-top: 15px; z-index: 10; }
+        .shop-tabs button { background: none; border: none; color: var(--icon-color); padding: 12px 20px; cursor: pointer; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; }
+        .shop-tabs button:hover { color: var(--icon-active-color); }
+        .shop-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+        .shop-category { display: none; flex-direction: column; gap: 12px; }
+        .shop-category.active { display: flex; }
+        .shop-item { background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .shop-item-info { flex-grow: 1; }
+        .shop-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
+        .shop-item-details { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; }
+        .shop-item-cost { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
+        .shop-item-cost img { width: 16px; height: 16px; }
+        .buy-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .buy-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .buy-button:active:not(:disabled) { transform: scale(0.97); }
+        .buy-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .profile-section { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .profile-info p { margin-bottom: 12px; font-size: 1em; line-height: 1.5; word-break: break-all; display: flex; align-items: center; flex-wrap: wrap; }
+        .profile-info p strong { color: var(--coin-color); margin-right: 8px; min-width: 120px; display: inline-block; }
+        .profile-info p span { flex-grow: 1; }
+        .wallet-section label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-muted-color); }
+        #ton-wallet-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; }
+        #save-wallet-button { background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: background 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        #save-wallet-button:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        #save-wallet-button:active { transform: scale(0.98); }
+        #save-status { margin-top: 12px; text-align: center; color: var(--success-color); font-size: 0.9em; height: 1.2em; font-weight: 500; }
+        .mission-section { text-align: center; }
+        .mission-title { font-size: 1.2em; font-weight: 600; margin-bottom: 10px; color: var(--text-color); }
+        .mission-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 15px; line-height: 1.5; }
+        .mission-emoji { font-size: 2em; margin: 0 5px; display: inline-block; cursor: default; }
+        .copy-emoji-button { background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 10px; font-size: 0.8em; border-radius: 5px; cursor: pointer; margin-left: 10px; transition: background-color 0.2s ease, color 0.2s ease; }
+        .copy-emoji-button:hover { background-color: var(--accent-color); color: white; }
+        .mission-status { font-weight: bold; margin: 15px 0; font-size: 1em; }
+        .mission-status.incomplete { color: var(--text-muted-color); }
+        .mission-status.claimed { color: var(--coin-color); }
+        .mission-action-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .mission-action-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .mission-action-button:active:not(:disabled) { transform: scale(0.97); }
+        .mission-action-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .reward-display { display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; color: var(--coin-color); margin-top: 5px; }
+        .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
+        .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
+
+
+        /* --- Tasks Screen CSS --- */
+        #tasks-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Space between task items */
+        }
 
         .task-item {
             background-color: var(--secondary-bg);
             padding: 15px;
             border-radius: 10px;
             display: flex;
-            /* justify-content: space-between; */ /* Removed for better structure */
-            align-items: center;
-            gap: 15px; /* Increased gap */
+            align-items: center; /* Vertically align items */
+            gap: 15px; /* Space between image, info, button */
             box-shadow: 0 3px 8px var(--shadow-color);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 15px; /* Space between tasks */
+            transition: opacity 0.3s ease;
         }
 
-        .task-item-image {
+        .task-item.claimed-visual { /* Style for completed tasks */
+             opacity: 0.7;
+             border-left: 5px solid var(--claimed-color);
+         }
+
+        .task-image {
             width: 50px;
             height: 50px;
             border-radius: 8px;
             object-fit: cover; /* Crop image nicely */
-            flex-shrink: 0; /* Prevent image shrinking */
+            flex-shrink: 0; /* Prevent image from shrinking */
         }
-         .task-item-image.missing {
-             background-color: rgba(255,255,255,0.1); /* Placeholder bg */
+         .task-image.placeholder { /* Style if no image URL provided */
+             background-color: var(--disabled-bg);
              display: flex;
              align-items: center;
              justify-content: center;
+             font-size: 24px;
              color: var(--text-muted-color);
          }
-         .task-item-image.missing .material-icons {
-             font-size: 30px;
-         }
 
-        .task-item-info {
+        .task-info {
             flex-grow: 1; /* Take remaining space */
             display: flex;
             flex-direction: column;
-            gap: 4px; /* Space within info block */
+            gap: 4px;
         }
 
-        .task-item-name {
+        .task-name {
             font-weight: 600;
-            font-size: 1.05em;
+            font-size: 1.1em;
             color: var(--text-color);
         }
 
-        .task-item-description {
-            font-size: 0.85em;
+        .task-description {
+            font-size: 0.9em;
             color: var(--text-muted-color);
-            line-height: 1.3;
+            line-height: 1.4;
         }
-        .task-item-reward {
+
+        .task-reward {
             display: flex;
             align-items: center;
             gap: 5px;
             font-weight: bold;
             color: var(--coin-color);
             font-size: 0.95em;
+            margin-top: 5px;
         }
+         .task-reward img { width: 16px; height: 16px; }
 
-        .task-item-action {
-             display: flex;
-             flex-direction: column;
-             align-items: flex-end; /* Align button to the right */
-             flex-shrink: 0; /* Prevent shrinking */
+
+        .task-action {
+            flex-shrink: 0; /* Prevent button area from shrinking */
         }
 
         .task-button {
-            background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
-            color: var(--text-color);
-            border: none;
-            padding: 8px 15px; /* Slightly smaller padding */
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85em; /* Smaller font */
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
-            min-width: 80px; /* Minimum width */
-            text-align: center;
+             background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
+             color: var(--text-color);
+             border: none;
+             padding: 10px 15px;
+             border-radius: 8px;
+             cursor: pointer;
+             font-weight: 600;
+             font-size: 0.9em;
+             transition: all 0.2s ease;
+             white-space: nowrap;
+             box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
+             min-width: 80px; /* Ensure decent button width */
+             text-align: center;
         }
         .task-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
-            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
-            transform: translateY(-1px);
-        }
+             background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
+             box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
+             transform: translateY(-1px);
+         }
          .task-button:active:not(:disabled) {
              transform: scale(0.97);
          }
 
-        .task-button.verifying {
-            background: linear-gradient(135deg, var(--warning-color), #ffb74d); /* Orange gradient */
-            cursor: not-allowed;
-        }
-        .task-button.completed {
-            background: linear-gradient(135deg, var(--success-color), #81c784); /* Green gradient */
-            color: white;
-            cursor: default;
-            box-shadow: none;
-            opacity: 0.8;
-        }
+        .task-button.verify-btn { /* Specific style for verify button */
+             background: linear-gradient(135deg, var(--warning-color), #ffb74d); /* Orange gradient */
+         }
+         .task-button.verify-btn:hover:not(:disabled) {
+             background: linear-gradient(135deg, #ffb74d, var(--warning-color));
+         }
 
-        .task-button:disabled:not(.completed):not(.verifying) {
-            background: var(--disabled-bg);
-            color: var(--disabled-text);
-            cursor: not-allowed;
+
+         .task-button.claimed-btn { /* Style for claimed button */
+             background: var(--claimed-color);
+             color: white;
+             cursor: not-allowed;
+             box-shadow: none;
+             opacity: 0.8;
+         }
+         .task-button:disabled:not(.claimed-btn) { /* General disabled (e.g., during timer) */
+             background: var(--disabled-bg);
+             color: var(--disabled-text);
+             cursor: not-allowed;
              box-shadow: none;
              opacity: 0.7;
-        }
-
-        /* Code Entry Popup Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
-        }
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: var(--secondary-bg);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 350px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-             transform: scale(0.9);
-             transition: transform 0.3s ease;
-        }
-        .modal-overlay.visible .modal-content {
-             transform: scale(1);
-        }
-
-        .modal-content h3 {
-            color: var(--accent-color);
-            margin-bottom: 15px;
-        }
-        .modal-content p {
-            color: var(--text-muted-color);
-            font-size: 0.9em;
-            margin-bottom: 20px;
-        }
-        #task-code-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: rgba(0, 0, 0, 0.2);
-            color: var(--text-color);
-            font-size: 1.1em;
-            text-align: center;
-            text-transform: uppercase; /* Optional: Force uppercase codes */
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: space-between; /* Space out buttons */
-            gap: 10px;
-        }
-
-        .modal-button {
-            flex-grow: 1; /* Make buttons share space */
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s ease, transform 0.1s ease;
-        }
-
-        .modal-button.submit {
-            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-            color: white;
-        }
-        .modal-button.submit:hover {
-             background: linear-gradient(135deg, var(--accent-hover), var(--accent-color));
-        }
-
-        .modal-button.cancel {
-            background-color: var(--disabled-bg);
-            color: var(--text-muted-color);
-        }
-         .modal-button.cancel:hover {
-             background-color: #555;
-         }
-         .modal-button:active {
-              transform: scale(0.97);
-         }
-         #code-error-message {
-             color: var(--error-color);
-             font-size: 0.85em;
-             margin-top: -10px; /* Pull up slightly */
-             margin-bottom: 15px;
-             height: 1em; /* Reserve space */
-             display: block; /* Ensure it takes space */
          }
 
-        /* --- (Rest of CSS from previous version) --- */
+         .task-timer { /* Optional: display timer countdown */
+              font-size: 0.8em;
+              color: var(--warning-color);
+              margin-top: 5px;
+              text-align: center;
+         }
+
 
     </style>
 </head>
@@ -237,521 +232,605 @@
             <div id="game-screen" class="page active"> /* ... Game Content ... */ </div>
             <!-- Page: Shop -->
             <div id="shop-screen" class="page"> /* ... Shop Content ... */ </div>
+             <!-- Page: Tasks -->
+             <div id="tasks-screen" class="page">
+                 <h2>Daily Tasks</h2>
+                 <div id="tasks-list">
+                     <!-- Task items will be loaded here -->
+                     <p>Loading tasks...</p>
+                 </div>
+             </div>
             <!-- Page: Profile -->
             <div id="profile-screen" class="page"> /* ... Profile Content ... */ </div>
-
-            <!-- Page: Tasks -->
-            <div id="tasks-screen" class="page">
-                <h2>Available Tasks</h2>
-                <div id="tasks-list">
-                    <!-- Tasks will be loaded here -->
-                    <p id="tasks-loading-message">Loading tasks...</p>
-                </div>
-            </div>
-
         </div>
-        <!-- Navigation Bar (Add Tasks Button) -->
+        <!-- Navigation Bar -->
         <nav id="navbar" style="display: none;">
             <button id="nav-game" class="active" onclick="showPage('game-screen')"><span class="material-icons">pets</span><span>Game</span></button>
             <button id="nav-shop" onclick="showPage('shop-screen')"><span class="material-icons">shopping_bag</span><span>Shop</span></button>
-            <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button> <!-- New Tasks Button -->
+             <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button> {/* <<< Task Nav Button */}
             <button id="nav-profile" onclick="showPage('profile-screen')"><span class="material-icons">account_circle</span><span>Profile</span></button>
         </nav>
-
-        <!-- Code Entry Modal -->
-        <div id="code-entry-modal" class="modal-overlay">
-            <div class="modal-content">
-                <h3>Enter Task Code</h3>
-                <p>Enter the code you found to complete the task.</p>
-                <span id="code-error-message"> </span> <!-- For error messages -->
-                <input type="text" id="task-code-input" placeholder="ENTER CODE">
-                <div class="modal-actions">
-                    <button id="modal-cancel-button" class="modal-button cancel">Cancel</button>
-                    <button id="modal-submit-button" class="modal-button submit" data-task-id="">Submit Code</button>
-                </div>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        // --- Config (Keep previous config) ---
-        const firebaseConfig = { /* ... */
-             apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345"
-         };
+        // --- Config ---
+        // (Keep Firebase Config, Constants like BASE_TAP_EARN, WOLF_EMOJI, etc.)
+        const firebaseConfig = { apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345" };
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
-        // ... (Keep other constants: BASE_TAP_EARN, SAVE_INTERVAL, etc.) ...
         const BASE_TAP_EARN = 1; const SAVE_INTERVAL = 5000; const PASSIVE_INCOME_INTERVAL = 1000; const INCREASING_COST_BASE = 10000; const WOLF_MISSION_REWARD = 50000; const WOLF_EMOJI = '🐺'; const CHEAT_FINE = 100000;
 
-        // --- Telegram & Firebase Vars ---
-        // ... (Keep previous vars: tg, db, currentUser, userData, etc.) ...
-        let tg = null; let db = null; let currentUser = null; let userData = null; let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null; let isLoading = true;
-        let availableTasks = {}; // To store fetched tasks from Firebase
-        let taskVerificationTimers = {}; // To store setTimeout IDs for link tasks
+        // --- State Vars ---
+        let tg = null; let db = null; let currentUser = null; let userData = null;
+        let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null;
+        let isLoading = true;
+        let availableTasks = {}; // Store fetched task definitions { taskId: taskData }
+        let activeLinkTaskTimers = {}; // Store active timers { taskId: { timeoutId: ..., endTime: ... } }
 
         // --- DOM Elements ---
-        // ... (Keep previous DOM elements) ...
-        const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display'); const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
-        // Task Page Elements
-        const tasksListDiv = document.getElementById('tasks-list');
-        const tasksLoadingMessage = document.getElementById('tasks-loading-message');
-        // Code Modal Elements
-        const codeEntryModal = document.getElementById('code-entry-modal');
-        const taskCodeInput = document.getElementById('task-code-input');
-        const modalCancelButton = document.getElementById('modal-cancel-button');
-        const modalSubmitButton = document.getElementById('modal-submit-button');
-        const codeErrorMessage = document.getElementById('code-error-message');
+        // (Keep all previous DOM elements)
+        const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display');
+        const tasksListDiv = document.getElementById('tasks-list'); // <<< Task List Container
+        const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
 
 
         // --- Upgrade Definitions (Keep full list) ---
-        const upgrades = [ /* Omitted for brevity - paste the full upgrades array here */
-             { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' }, { id: 'click_2', name: 'Sharper Claws', description: '+2 coins per tap', baseCost: 100000, baseEffect: 2, type: 'click' }, { id: 'click_3', name: 'Meme Energy', description: '+5 coins per tap', baseCost: 500000, baseEffect: 5, type: 'click' }, { id: 'click_4', name: 'Wolf Pack Call', description: '+10 coins per tap', baseCost: 2000000, baseEffect: 10, type: 'click' }, { id: 'click_5', name: 'Lunar Boost', description: '+25 coins per tap', baseCost: 10000000, baseEffect: 25, type: 'click' }, { id: 'click_6', name: 'Golden Howl', description: '+50 coins per tap', baseCost: 50000000, baseEffect: 50, type: 'click' }, { id: 'click_7', name: 'Diamond Fangs', description: '+100 coins per tap', baseCost: 250000000, baseEffect: 100, type: 'click' }, { id: 'click_8', name: 'Alpha Presence', description: '+200 coins per tap', baseCost: 1000000000, baseEffect: 200, type: 'click' }, { id: 'click_9', name: 'Meme Lord Aura', description: '+500 coins per tap', baseCost: 5000000000, baseEffect: 500, type: 'click' }, { id: 'click_10', name: 'Cosmic Wolf', description: '+1000 coins per tap', baseCost: 20000000000, baseEffect: 1000, type: 'click' }, { id: 'passive_1', name: 'Sniffing Out Coins', description: '+100 profit/hour', baseCost: 10000, baseEffect: 100, type: 'passive' }, { id: 'passive_2', name: 'Digging Spot', description: '+250 profit/hour', baseCost: 50000, baseEffect: 250, type: 'passive' }, { id: 'passive_3', name: 'Buried Treasure Map', description: '+600 profit/hour', baseCost: 150000, baseEffect: 600, type: 'passive' }, { id: 'passive_4', name: 'Meme Stash', description: '+1,500 profit/hour', baseCost: 500000, baseEffect: 1500, type: 'passive' }, { id: 'passive_5', name: 'Coin Tree Sapling', description: '+3,500 profit/hour', baseCost: 1500000, baseEffect: 3500, type: 'passive' }, { id: 'passive_6', name: 'Howling ATM', description: '+8,000 profit/hour', baseCost: 5000000, baseEffect: 8000, type: 'passive' }, { id: 'passive_7', name: 'Loyal Pack Tribute', description: '+18,000 profit/hour', baseCost: 15000000, baseEffect: 18000, type: 'passive' }, { id: 'passive_8', name: 'Wolf Den Bank', description: '+40,000 profit/hour', baseCost: 50000000, baseEffect: 40000, type: 'passive' }, { id: 'passive_9', name: 'Meme Coin Mine', description: '+90,000 profit/hour', baseCost: 150000000, baseEffect: 90000, type: 'passive' }, { id: 'passive_10', name: 'Moonlit Mint', description: '+200K profit/hour', baseCost: 500000000, baseEffect: 200000, type: 'passive' }, { id: 'passive_11', name: 'Crypto Kennel', description: '+450K profit/hour', baseCost: 1200000000, baseEffect: 450000, type: 'passive' }, { id: 'passive_12', name: 'Decentralized Den', description: '+1M profit/hour', baseCost: 3000000000, baseEffect: 1000000, type: 'passive' }, { id: 'passive_13', name: 'Blockchain Burrow', description: '+2.2M profit/hour', baseCost: 7000000000, baseEffect: 2200000, type: 'passive' }, { id: 'passive_14', name: 'Wolf Street Journal', description: '+5M profit/hour', baseCost: 15000000000, baseEffect: 5000000, type: 'passive' }, { id: 'passive_15', name: 'Golden Bone Fund', description: '+11M profit/hour', baseCost: 35000000000, baseEffect: 11000000, type: 'passive' }, { id: 'passive_16', name: 'Diamond Paw Trust', description: '+25M profit/hour', baseCost: 80000000000, baseEffect: 25000000, type: 'passive' }, { id: 'passive_17', name: 'Alpha Investment Group', description: '+55M profit/hour', baseCost: 180000000000, baseEffect: 55000000, type: 'passive' }, { id: 'passive_18', name: 'Meme Hegemony', description: '+120M profit/hour', baseCost: 400000000000, baseEffect: 120000000, type: 'passive' }, { id: 'passive_19', name: 'Lunar Treasury', description: '+250M profit/hour', baseCost: 900000000000, baseEffect: 250000000, type: 'passive' }, { id: 'passive_20', name: 'Cosmic Coin Flow', description: '+500M profit/hour', baseCost: 2000000000000, baseEffect: 500000000, type: 'passive' },
-         ];
+        const upgrades = [ /* Omitted for brevity - paste the full upgrades array here */ ];
 
         // --- Initialization ---
         window.onload = () => {
-            // (Keep previous window.onload logic, ensure it calls loadUserDataAndInit)
              try {
-                 isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
-                 tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+                 isLoading = true;
+                 loadingDiv.textContent = "Initializing Meme Wolf...";
+                 tg = window.Telegram.WebApp;
+                 tg.ready();
+                 tg.expand();
                  try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
+
                  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable. Please launch from Telegram."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; }
                  currentUser = tg.initDataUnsafe.user;
-                 firebase.initializeApp(firebaseConfig); db = firebase.database();
-                 loadUserDataAndInit(); // This now handles loading user data AND tasks
-                 setupEventListeners();
-             } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
-        };
 
-        // --- Popup Helpers (Keep wrappers) ---
-        function showPopup(params) { if (tg) { tg.showPopup(params); } else { alert(`${params.title}\n\n${params.message}`); } }
-        function showInfoPopup(title, message) { showPopup({ title: title || "Info", message: message, buttons: [{ type: "ok" }] }); }
-        function showWarningPopup(title, message) { showPopup({ title: title || "⚠️ Warning", message: message, buttons: [{ type: "ok" }] }); }
-        function showRewardPopup(title, message) { showPopup({ title: title || "🎉 Reward!", message: message, buttons: [{ type: "ok" }] }); }
+                 firebase.initializeApp(firebaseConfig);
+                 db = firebase.database();
+
+                 // Chain loading: User Data -> Tasks -> Init App
+                 loadUserDataAndInitTasks();
+                 setupEventListeners();
+
+             } catch (error) {
+                 console.error("Critical Initialization Error:", error);
+                 showError(`Initialization failed: ${error.message}. Please try reloading.`);
+             }
+         };
+
+        // --- Popup Helpers (Keep) ---
+        function showPopup(params) { /* ... same ... */ }
+        function showInfoPopup(title, message) { /* ... same ... */ }
+        function showWarningPopup(title, message) { /* ... same ... */ }
+        function showRewardPopup(title, message) { /* ... same ... */ }
+
 
         // --- Firebase Functions ---
-        function loadUserDataAndInit() {
-            // Modified to also load tasks AFTER user data is processed
-            if (!currentUser || !db) { showError("User/DB not ready."); return; }
-            const userId = currentUser.id.toString();
-            const userRef = db.ref('users/' + userId);
-            loadingDiv.textContent = "Loading your progress...";
+        function loadUserDataAndInitTasks() {
+             // 1. Load User Data
+             if (!currentUser || !db) { showError("User/DB not ready."); return; }
+             const userId = currentUser.id.toString();
+             const userRef = db.ref('users/' + userId);
+             loadingDiv.textContent = "Loading your progress...";
 
-            userRef.once('value')
-                .then((snapshot) => {
-                    // --- 1. Process User Data ---
-                    const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
-                    if (snapshot.exists()) {
-                        userData = snapshot.val();
-                        // Merge defaults, including completedTasks
-                        userData.coins = userData.coins ?? defaultData.coins;
-                        userData.upgrades = userData.upgrades ?? defaultData.upgrades;
-                        userData.missions = userData.missions ?? defaultData.missions;
-                        userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
-                        userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks; // Ensure completedTasks exists
-                        userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet;
-                        userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate;
-                        userData.telegramInfo = defaultData.telegramInfo;
-                    } else {
-                        console.log("New user detected:", userId);
-                        userData = defaultData;
-                        saveUserData(true); // Save new user immediately
-                    }
+             userRef.once('value')
+                 .then(snapshot => {
+                     // Process user data (ensure tasksCompleted exists)
+                     const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, tasksCompleted: {}, /* <<< Initialize */ tonWallet: '', lastUpdate: Date.now(), telegramInfo: { /*...*/ } };
+                     if (snapshot.exists()) {
+                         userData = snapshot.val();
+                         // Merge defaults robustly
+                         userData.coins = userData.coins ?? defaultData.coins; userData.upgrades = userData.upgrades ?? defaultData.upgrades; userData.missions = userData.missions ?? defaultData.missions; userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
+                         userData.tasksCompleted = userData.tasksCompleted ?? defaultData.tasksCompleted; // <<< Ensure exists
+                         userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet; userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate; userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
+                     } else {
+                         console.log("New user detected:", userId);
+                         userData = defaultData;
+                         saveUserData(true);
+                     }
 
-                    // --- 2. Anti-Cheat Check ---
-                    const cheatDetected = performAntiCheatCheck();
+                      // Perform Anti-Cheat Check (modifies userData potentially)
+                     const cheatDetected = performAntiCheatCheck();
+                     // Calculate Offline Progress (AFTER anti-cheat)
+                     if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); }
 
-                    // --- 3. Offline Progress ---
-                    if (!cheatDetected) { calculateOfflineProgress(); }
-                    else { userData.lastUpdate = Date.now(); } // Still update time
 
-                    // --- 4. Load Tasks ---
-                    return loadTasksFromFirebase(); // Chain the promise
-                })
-                .then(() => {
-                    // --- 5. Final Initialization (After User Data AND Tasks Loaded) ---
-                    initializeAppUI(); // Renders everything including tasks
-                    startPassiveIncome();
-                    isLoading = false;
-                    console.log("Initialization complete.");
-                })
-                .catch((error) => {
-                    // Robust Error Handling (from previous step)
-                    console.error("------------------------------------"); console.error("Firebase Load Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------");
-                    let displayMessage = `Failed to load data. Check connection & reload.`;
-                    if (error?.code) { displayMessage += ` (Code: ${error.code})`; }
-                    if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); }
-                    showError(displayMessage);
-                    isLoading = false;
-                });
+                     // 2. Fetch Tasks AFTER user data is loaded
+                     return fetchAllTasks(); // Chain the promise
+                 })
+                 .then(() => {
+                     // 3. Final Initialization (Tasks are now in availableTasks)
+                     initializeAppUI();
+                     startPassiveIncome();
+                     isLoading = false;
+                     console.log("App Initialized Successfully.");
+                 })
+                 .catch(error => {
+                      // Robust Error Handling
+                      console.error("------------------------------------"); console.error("Firebase Load Error (User or Tasks):"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------");
+                      let displayMessage = `Failed to load data. Please check connection and reload.`;
+                      if (error?.code) { displayMessage += ` (Code: ${error.code})`; }
+                      if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); }
+                      showError(displayMessage);
+                      isLoading = false;
+                 });
+         }
+
+        function fetchAllTasks() {
+             console.log("Fetching tasks from Firebase...");
+             loadingDiv.textContent = "Loading available tasks...";
+             return db.ref('tasks').once('value')
+                 .then(snapshot => {
+                     if (snapshot.exists()) {
+                         availableTasks = snapshot.val();
+                         console.log("Tasks loaded:", Object.keys(availableTasks).length);
+                     } else {
+                         console.warn("No tasks found in Firebase '/tasks' node.");
+                         availableTasks = {};
+                     }
+                 })
+                 .catch(error => {
+                     console.error("Firebase Task Fetch Error:", error);
+                     availableTasks = {}; // Ensure it's an empty object on error
+                     // Optional: Propagate error or show specific task loading error
+                     // showError("Could not load tasks. Some features might be unavailable.");
+                     throw error; // Re-throw to be caught by the main chain's catch block
+                 });
+         }
+
+
+        function saveUserData(force = false) {
+             // (Keep previous saveUserData logic, ensures tasksCompleted is saved)
+             if (isLoading || !currentUser || !db || !userData) return; const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout); if (force || now - lastSaveTime > SAVE_INTERVAL) { console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }; db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error)); } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
         }
 
-        function loadTasksFromFirebase() {
-            // Returns a promise that resolves when tasks are loaded
-            return new Promise((resolve, reject) => {
-                 if (!db) {
-                     console.error("Database not initialized for loading tasks.");
-                     return reject(new Error("Database not ready"));
-                 }
-                 const tasksRef = db.ref('tasks');
-                 tasksLoadingMessage.textContent = "Loading tasks...";
-                 tasksLoadingMessage.style.display = 'block';
+        // --- Anti-Cheat Logic (Keep) ---
+        function performAntiCheatCheck() { /* ... same as before ... */ if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none'; if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) { const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered for user ${currentUser.id}. Fine: ${fineAmount}`); showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied. Add the emoji back to complete the mission (no second reward).`); fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block'; return true; } return false; }
 
-                 tasksRef.once('value')
-                    .then(snapshot => {
-                        if (snapshot.exists()) {
-                            availableTasks = snapshot.val();
-                            console.log("Tasks loaded:", availableTasks);
-                        } else {
-                            availableTasks = {}; // No tasks defined
-                            console.log("No tasks found in Firebase.");
-                        }
-                         tasksLoadingMessage.style.display = 'none';
-                        resolve(); // Resolve the promise
-                    })
-                    .catch(error => {
-                        console.error("Firebase Task Load Error:", error);
-                         tasksLoadingMessage.textContent = "Failed to load tasks.";
-                         tasksLoadingMessage.style.color = 'var(--error-color)';
-                        reject(error); // Reject the promise
-                    });
-            });
-        }
-
-        function saveUserData(force = false) { /* ... Keep the improved version ... */ if (isLoading || !currentUser || !db || !userData) return; const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout); if (force || now - lastSaveTime > SAVE_INTERVAL) { console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }; db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error)); } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); } }
-
-        // --- Anti-Cheat Logic ---
-        function performAntiCheatCheck() { /* ... Keep the improved version ... */ if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none'; if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) { const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered user ${currentUser.id}. Fine: ${fineAmount}`); showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming!\nA fine of ${formatNumber(fineAmount)} coins applied. Add emoji back (no second reward).`); fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block'; return true; } return false; }
-
-        // --- Game Logic ---
-        // (handleTap, calculateTapPower, calculatePassiveIncomeRate, applyPassiveIncome, startPassiveIncome, scheduleSave, calculateOfflineProgress - Keep improved versions)
+        // --- Game Logic (Keep: handleTap, calculates, applyPassive, startPassive, scheduleSave) ---
+        // ... (handleTap, calculateTapPower, calculatePassiveIncomeRate, applyPassiveIncome, startPassiveIncome, scheduleSave are the same) ...
         function handleTap(event) { if (isLoading || !userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
         function calculateTapPower() { let power = BASE_TAP_EARN; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'click') { const level = userData.upgrades[upgradeId]?.level || 0; power += upgradeDef.baseEffect * level; } } } return power; }
         function calculatePassiveIncomeRate() { let rate = 0; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'passive') { const level = userData.upgrades[upgradeId]?.level || 0; rate += upgradeDef.baseEffect * level; } } } return rate; }
         function applyPassiveIncome() { if (isLoading || !userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); } }
         function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); }
         function scheduleSave() { saveUserData(); }
-        function calculateOfflineProgress() { if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds; if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); } /* Update handled later */ }
 
+        function calculateOfflineProgress() {
+             // (Keep previous logic with popup helper)
+             if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds; if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); }
+        }
 
-        // --- Mission Logic (checkAndClaimMission, copyMissionEmoji - Keep improved versions) ---
-        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Mission Status", "Reward already claimed."); updateMissionUI(missionId, 'claimed', false); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed. Reward: ${WOLF_MISSION_REWARD}`); showRewardPopup("Mission Complete!", `Earned ${formatNumber(WOLF_MISSION_REWARD)} coins for the ${WOLF_EMOJI} name!`); updateMissionUI(missionId, 'claimed', false); updateCoinDisplay(); updateProfileStats(); saveUserData(true); } else { updateMissionUI(missionId, 'incomplete', false); showInfoPopup("Mission Incomplete", `Add ${WOLF_EMOJI} to the end of your Telegram Last Name, then check again.`); } }
+        // --- Mission Logic (Keep: checkAndClaimMission, copyMissionEmoji) ---
+        // ... (checkAndClaimMission, copyMissionEmoji are the same) ...
+        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Mission Status", "You have already claimed the reward for this mission."); updateMissionUI(missionId, 'claimed', false); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed. Reward: ${WOLF_MISSION_REWARD}`); showRewardPopup("Mission Complete!", `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins for adding the ${WOLF_EMOJI} to your name!`); updateMissionUI(missionId, 'claimed', false); updateCoinDisplay(); updateProfileStats(); saveUserData(true); } else { updateMissionUI(missionId, 'incomplete', false); showInfoPopup("Mission Incomplete", `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name, then try checking again.`); } }
         function copyMissionEmoji() { navigator.clipboard.writeText(WOLF_EMOJI).then(() => { copyEmojiBtn.textContent = 'Copied!'; setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500); }).catch(err => { console.error('Failed to copy emoji: ', err); }); }
 
+
         // --- Task Logic ---
-        function renderTasks() {
+        function fetchAndRenderTasks() {
             if (isLoading || !userData) {
-                 tasksLoadingMessage.textContent = "Waiting for user data...";
-                 tasksLoadingMessage.style.display = 'block';
-                 tasksListDiv.innerHTML = ''; // Clear previous tasks if any
+                 tasksListDiv.innerHTML = '<p>Loading user data first...</p>';
                  return;
             }
-             tasksLoadingMessage.style.display = 'none';
-             tasksListDiv.innerHTML = ''; // Clear previous tasks
+            tasksListDiv.innerHTML = ''; // Clear previous tasks
 
-            const completedTasks = userData.completedTasks || {};
-            const taskIds = Object.keys(availableTasks);
-
-            if (taskIds.length === 0) {
-                tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
-                return;
-            }
-
-            taskIds.forEach(taskId => {
-                const task = availableTasks[taskId];
-                if (!task || !task.name || !task.reward || !task.type || !task.link) {
-                     console.warn(`Skipping invalid task data for ID: ${taskId}`, task);
-                     return; // Skip malformed tasks
-                 }
-
-                const isCompleted = completedTasks[taskId] === true;
-
-                const taskItem = document.createElement('div');
-                taskItem.className = 'task-item';
-                taskItem.id = `task-${taskId}`;
-
-                // Image (Optional)
-                const imgContainer = document.createElement('div');
-                 imgContainer.className = 'task-item-image';
-                 if (task.image) {
-                     const img = document.createElement('img');
-                     img.src = task.image;
-                     img.alt = task.name;
-                     img.onerror = () => { // Handle broken images
-                         imgContainer.innerHTML = `<span class="material-icons">task_alt</span>`;
-                         imgContainer.classList.add('missing');
-                     }
-                     imgContainer.appendChild(img);
-                 } else {
-                    imgContainer.innerHTML = `<span class="material-icons">task_alt</span>`; // Default icon
-                    imgContainer.classList.add('missing');
-                 }
-                 taskItem.appendChild(imgContainer);
-
-
-                // Info Section
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'task-item-info';
-                infoDiv.innerHTML = `
-                    <div class="task-item-name">${task.name}</div>
-                    ${task.description ? `<div class="task-item-description">${task.description}</div>` : ''}
-                    <div class="task-item-reward">
-                        +${formatNumber(task.reward)} <img src="${COIN_IMAGE_URL}" class="coin-icon" alt="">
-                    </div>
-                `;
-                taskItem.appendChild(infoDiv);
-
-                // Action Button Section
-                 const actionDiv = document.createElement('div');
-                 actionDiv.className = 'task-item-action';
-                const button = document.createElement('button');
-                button.className = 'task-button';
-                button.dataset.taskId = taskId;
-                button.dataset.taskType = task.type;
-                button.dataset.taskLink = task.link; // Store link for easy access
-
-                if (isCompleted) {
-                    button.textContent = 'Completed';
-                    button.classList.add('completed');
-                    button.disabled = true;
-                } else {
-                    if (task.type === 'link') {
-                        button.textContent = 'Start';
-                    } else if (task.type === 'code') {
-                        button.textContent = 'Get Code';
-                    } else {
-                         button.textContent = 'Unknown'; // Fallback for unknown types
-                         button.disabled = true;
-                    }
-                    button.addEventListener('click', handleTaskAction);
-                }
-                 actionDiv.appendChild(button);
-                 taskItem.appendChild(actionDiv);
-
-                tasksListDiv.appendChild(taskItem);
-            });
-        }
-
-        function handleTaskAction(event) {
-            if (isLoading || !userData) return;
-
-            const button = event.target;
-            const taskId = button.dataset.taskId;
-            const taskType = button.dataset.taskType;
-            const taskLink = button.dataset.taskLink;
-            const task = availableTasks[taskId];
-
-            if (!task) {
-                console.error("Task definition not found for ID:", taskId);
-                showWarningPopup("Error", "Task details not found. Please reload.");
-                return;
-            }
-
-            // Prevent double clicks while processing
-             button.disabled = true;
-             setTimeout(() => { if (!button.classList.contains('completed') && !button.classList.contains('verifying')) button.disabled = false; }, 1000); // Re-enable after 1s if not completed/verifying
-
-            if (taskType === 'link') {
-                // Check current button text to manage state
-                 if (button.textContent === 'Start') {
-                    console.log(`Starting link task: ${taskId}`);
-                    window.open(taskLink, '_blank'); // Open the link
-                    button.textContent = 'Verify';
-                    button.classList.add('verifying');
-                     button.disabled = true; // Keep disabled during delay
-
-                    showInfoPopup("Task Started", `Verify after ~${task.verificationDelay || 10} seconds.`);
-
-                    // Clear any previous timer for this task
-                    if (taskVerificationTimers[taskId]) clearTimeout(taskVerificationTimers[taskId]);
-
-                    // Start verification timer (Client-side only - NOT secure)
-                    taskVerificationTimers[taskId] = setTimeout(() => {
-                        console.log(`Verification ready for task: ${taskId}`);
-                        if (document.getElementById(`task-${taskId}`)) { // Check if element still exists
-                            button.disabled = false; // Enable verify button
-                            button.classList.remove('verifying');
-                            showInfoPopup("Ready to Verify", `Click 'Verify' for task "${task.name}" now!`);
-                        }
-                        delete taskVerificationTimers[taskId]; // Clean up timer ID
-                    }, (task.verificationDelay || 10) * 1000);
-
-                 } else if (button.textContent === 'Verify') {
-                     console.log(`Verifying link task: ${taskId}`);
-                     claimTaskReward(taskId, button); // Pass button to update its state
-                 }
-
-            } else if (taskType === 'code') {
-                 console.log(`Starting code task: ${taskId}`);
-                 window.open(taskLink, '_blank'); // Open link where code might be found
-                 showCodePopup(taskId); // Show modal for code entry
-                 // Re-enable button immediately for code tasks as user needs to come back
-                 button.disabled = false;
-
-            } else {
-                 console.warn("Unknown task type:", taskType);
-                 showWarningPopup("Error", "Unknown task type encountered.");
-                  button.disabled = false; // Re-enable if unknown type
-            }
-        }
-
-        function showCodePopup(taskId) {
-            taskCodeInput.value = ''; // Clear previous input
-            codeErrorMessage.textContent = '\u00A0'; // Clear error message (use non-breaking space for height)
-            modalSubmitButton.dataset.taskId = taskId; // Store task ID for submission
-            codeEntryModal.classList.add('visible');
-            taskCodeInput.focus(); // Focus input field
-        }
-
-        function hideCodePopup() {
-            codeEntryModal.classList.remove('visible');
-        }
-
-        function handleCodeSubmit() {
-            const enteredCode = taskCodeInput.value.trim().toUpperCase(); // Trim and maybe uppercase
-            const taskId = modalSubmitButton.dataset.taskId;
-            const task = availableTasks[taskId];
-
-            if (!task || !task.code) {
-                 codeErrorMessage.textContent = "Task data error. Cannot verify.";
+            if (!availableTasks || Object.keys(availableTasks).length === 0) {
+                 tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
                  return;
-            }
-            if (!enteredCode) {
-                codeErrorMessage.textContent = "Please enter the code.";
-                return;
-            }
-
-            // !!! SECURITY WARNING: Comparing code client-side is insecure !!!
-            if (enteredCode === task.code.toUpperCase()) {
-                console.log(`Code correct for task: ${taskId}`);
-                 codeErrorMessage.textContent = '\u00A0'; // Clear error
-                hideCodePopup();
-                const taskButton = document.querySelector(`#task-${taskId} .task-button`);
-                claimTaskReward(taskId, taskButton); // Claim reward and update button
-            } else {
-                console.log(`Incorrect code entered for task: ${taskId}`);
-                codeErrorMessage.textContent = "Incorrect code. Please try again.";
-                taskCodeInput.focus();
-                 // Optional: Add shake animation to input
-                 taskCodeInput.style.animation = 'shake 0.5s';
-                 setTimeout(() => { taskCodeInput.style.animation = ''; }, 500);
-            }
-        }
-
-        function claimTaskReward(taskId, buttonElement) {
-            if (isLoading || !userData || !availableTasks[taskId]) return;
-
-             // Double check completion status in userData
-            if (userData.completedTasks && userData.completedTasks[taskId]) {
-                console.warn(`Task ${taskId} already completed.`);
-                 showInfoPopup("Already Done", "You have already completed this task.");
-                 // Ensure button is updated if somehow it wasn't
-                 if (buttonElement) {
-                     buttonElement.textContent = 'Completed';
-                     buttonElement.classList.remove('verifying');
-                     buttonElement.classList.add('completed');
-                     buttonElement.disabled = true;
-                 }
-                return;
-            }
-
-            const task = availableTasks[taskId];
-            const reward = task.reward;
-
-            userData.coins += reward;
-            if (!userData.completedTasks) {
-                userData.completedTasks = {}; // Initialize if it doesn't exist
-            }
-            userData.completedTasks[taskId] = true; // Mark as completed
-
-            console.log(`Reward ${formatNumber(reward)} claimed for task: ${taskId}`);
-            showRewardPopup("Task Complete!", `You earned ${formatNumber(reward)} coins for completing "${task.name}"!`);
-
-             // Update UI
-             updateCoinDisplay();
-             updateProfileStats(); // Update profile coin display if visible
-             if (buttonElement) {
-                 buttonElement.textContent = 'Completed';
-                 buttonElement.classList.remove('verifying'); // Remove verifying state if it was a link task
-                 buttonElement.classList.add('completed');
-                 buttonElement.disabled = true;
              }
 
-             saveUserData(true); // Force save immediately
+            // Sort tasks maybe? (e.g., incomplete first)
+            const taskIds = Object.keys(availableTasks);
+            // Example sort: incomplete first, then by original order (or add a 'sortOrder' field in Firebase)
+            taskIds.sort((a, b) => {
+                const completedA = userData.tasksCompleted?.[a] === true;
+                const completedB = userData.tasksCompleted?.[b] === true;
+                if (completedA === completedB) return 0; // Keep original relative order if same status
+                return completedA ? 1 : -1; // Incomplete first (-1)
+            });
+
+
+            let hasVisibleTasks = false;
+            taskIds.forEach(taskId => {
+                 const taskData = availableTasks[taskId];
+                 if (taskData && taskData.isActive === true) { // Only render active tasks
+                    renderTaskItem(taskId, taskData);
+                    hasVisibleTasks = true;
+                 }
+             });
+
+             if (!hasVisibleTasks) {
+                 tasksListDiv.innerHTML = '<p>No active tasks available right now.</p>';
+             }
+        }
+
+        function renderTaskItem(taskId, taskData) {
+             const isCompleted = userData.tasksCompleted?.[taskId] === true;
+             const taskItem = document.createElement('div');
+             taskItem.className = `task-item ${isCompleted ? 'claimed-visual' : ''}`;
+             taskItem.id = `task-${taskId}`;
+
+             // Image or Placeholder
+             let imageHtml = '';
+             if (taskData.imageUrl) {
+                 imageHtml = `<img src="${taskData.imageUrl}" alt="${taskData.name}" class="task-image">`;
+             } else {
+                 // Simple placeholder with first letter
+                 const placeholderLetter = taskData.name ? taskData.name.charAt(0).toUpperCase() : '?';
+                 imageHtml = `<div class="task-image placeholder">${placeholderLetter}</div>`;
+             }
+
+             // Button generation
+             let buttonHtml = '';
+             let timerHtml = ''; // Placeholder for timer display
+
+             if (isCompleted) {
+                 buttonHtml = `<button class="task-button claimed-btn" disabled>Claimed</button>`;
+             } else {
+                  // Check if a timer is currently active for this task (from sessionStorage)
+                  const timerInfo = activeLinkTaskTimers[taskId];
+                  const now = Date.now();
+
+                 if (taskData.type === 'link' && timerInfo && now < timerInfo.endTime) {
+                     // Timer is running for this link task
+                     buttonHtml = `<button class="task-button verify-btn" onclick="handleTaskAction('${taskId}')" disabled>Verify</button>`; // Initially disabled
+                     // Start interval to update timer display and enable button when done
+                     startTimerDisplay(taskId, timerInfo.endTime);
+                 } else if (taskData.type === 'link' && timerInfo && now >= timerInfo.endTime) {
+                      // Timer finished, ready to verify
+                      buttonHtml = `<button class="task-button verify-btn" onclick="handleTaskAction('${taskId}')">Verify</button>`;
+                 }
+                 else {
+                     // Default state: Start button
+                      const buttonText = taskData.type === 'code' ? 'Get Code' : 'Start';
+                     buttonHtml = `<button class="task-button start-task-btn" onclick="handleTaskAction('${taskId}')">${buttonText}</button>`;
+                 }
+             }
+
+
+             taskItem.innerHTML = `
+                 ${imageHtml}
+                 <div class="task-info">
+                     <div class="task-name">${taskData.name || 'Unnamed Task'}</div>
+                     <div class="task-description">${taskData.description || ''}</div>
+                     <div class="task-reward">
+                         <img src="${COIN_IMAGE_URL}" class="coin-icon" alt="Coin">
+                         <span>+${formatNumber(taskData.reward || 0)}</span>
+                     </div>
+                 </div>
+                 <div class="task-action">
+                     ${buttonHtml}
+                     <div class="task-timer" id="timer-${taskId}"></div> {/* Timer display area */}
+                 </div>
+             `;
+             tasksListDiv.appendChild(taskItem);
+         }
+
+        function handleTaskAction(taskId) {
+            if (isLoading || !userData) return;
+            const taskData = availableTasks[taskId];
+            if (!taskData) { console.error("Task data not found for:", taskId); return; }
+
+            const isCompleted = userData.tasksCompleted?.[taskId] === true;
+            if (isCompleted) return; // Do nothing if already claimed
+
+            const taskButton = document.querySelector(`#task-${taskId} .task-button`);
+
+            if (taskData.type === 'link') {
+                const timerInfo = activeLinkTaskTimers[taskId];
+                const now = Date.now();
+                 // If button is 'Verify' (meaning timer exists or just finished)
+                 if (taskButton && taskButton.classList.contains('verify-btn')) {
+                     if (timerInfo && now >= timerInfo.endTime) {
+                         verifyLinkTask(taskId, taskData);
+                     } else {
+                         showInfoPopup("Wait!", "Please wait for the timer to finish before verifying.");
+                     }
+                 } else { // Button is 'Start'
+                     startLinkTask(taskId, taskData);
+                 }
+
+            } else if (taskData.type === 'code') {
+                startCodeTask(taskId, taskData);
+            }
+        }
+
+         function startTimerDisplay(taskId, endTime) {
+             const timerDisplay = document.getElementById(`timer-${taskId}`);
+             const taskButton = document.querySelector(`#task-${taskId} .task-button`);
+             if (!timerDisplay || !taskButton) return;
+
+             // Clear existing interval for this task if any
+             if (activeLinkTaskTimers[taskId]?.intervalId) {
+                 clearInterval(activeLinkTaskTimers[taskId].intervalId);
+             }
+
+             const intervalId = setInterval(() => {
+                 const now = Date.now();
+                 const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000));
+                 timerDisplay.textContent = `Verify in: ${timeLeft}s`;
+
+                 if (timeLeft <= 0) {
+                     clearInterval(intervalId);
+                     timerDisplay.textContent = "Ready to Verify!";
+                     taskButton.disabled = false; // Enable verify button
+                     taskButton.textContent = "Verify";
+                     // Update state representation if needed
+                     if (activeLinkTaskTimers[taskId]) {
+                          delete activeLinkTaskTimers[taskId].intervalId; // Clean up interval ID
+                     }
+                 } else {
+                     taskButton.disabled = true; // Ensure button stays disabled while timer runs
+                 }
+             }, 1000);
+
+              // Store interval ID to clear it later if needed
+             if (activeLinkTaskTimers[taskId]) {
+                  activeLinkTaskTimers[taskId].intervalId = intervalId;
+             }
+
+             // Initial display update
+             const initialTimeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
+             if(initialTimeLeft > 0) {
+                 timerDisplay.textContent = `Verify in: ${initialTimeLeft}s`;
+                 taskButton.disabled = true;
+                 taskButton.textContent = "Waiting..."; // Change button text while waiting
+             } else {
+                 // Timer might already be done if page reloaded just right
+                 timerDisplay.textContent = "Ready to Verify!";
+                 taskButton.disabled = false;
+                 taskButton.textContent = "Verify";
+                 clearInterval(intervalId); // Stop interval immediately
+                 if (activeLinkTaskTimers[taskId]) {
+                     delete activeLinkTaskTimers[taskId].intervalId;
+                 }
+             }
+         }
+
+
+        function startLinkTask(taskId, taskData) {
+            console.log(`Starting link task: ${taskId}`);
+            const verificationTimeMs = (taskData.verificationTime || 5) * 1000; // Default 5s
+            const endTime = Date.now() + verificationTimeMs;
+
+            // Store timer info (use sessionStorage for persistence across refresh within the same session)
+            // NOTE: This won't persist if the user closes and reopens the Mini App completely.
+            // A more robust solution would store start time in Firebase, but increases complexity/writes.
+            activeLinkTaskTimers[taskId] = { endTime: endTime };
+             try { sessionStorage.setItem('activeLinkTaskTimers', JSON.stringify(activeLinkTaskTimers)); } catch (e) { console.warn("SessionStorage not available or failed:", e); }
+
+            // Update UI immediately
+            const taskButton = document.querySelector(`#task-${taskId} .task-button`);
+            const timerDisplay = document.getElementById(`timer-${taskId}`);
+            if (taskButton) {
+                taskButton.disabled = true;
+                taskButton.textContent = 'Waiting...';
+                taskButton.classList.remove('start-task-btn');
+                taskButton.classList.add('verify-btn'); // Change class to indicate verify state
+            }
+             if (timerDisplay) {
+                 timerDisplay.textContent = `Verify in: ${taskData.verificationTime || 5}s`;
+             }
+
+             // Start visual countdown and enable button later
+             startTimerDisplay(taskId, endTime);
+
+
+            // Open the link using Telegram's method
+            if (taskData.link) {
+                showInfoPopup("Task Started", `Opening the link. Please wait ${taskData.verificationTime || 5} seconds after visiting, then return here and click Verify.`);
+                tg.openLink(taskData.link);
+            } else {
+                 showWarningPopup("No Link", "This task has no link configured. Starting timer anyway.");
+            }
+        }
+
+         // Function to load timers from sessionStorage on init
+         function loadActiveTimers() {
+             try {
+                 const storedTimers = sessionStorage.getItem('activeLinkTaskTimers');
+                 if (storedTimers) {
+                     activeLinkTaskTimers = JSON.parse(storedTimers);
+                     console.log("Loaded active timers from sessionStorage:", activeLinkTaskTimers);
+                     // Potentially re-render tasks or start timer displays if needed after tasks are loaded
+                 }
+             } catch (e) {
+                 console.warn("Failed to load timers from sessionStorage:", e);
+                 activeLinkTaskTimers = {};
+             }
+         }
+         // Call this early in the init process, e.g., right after TG init
+         // window.onload = () => { ... loadActiveTimers(); ... } // Add this call
+
+
+        function verifyLinkTask(taskId, taskData) {
+            console.log(`Verifying link task: ${taskId}`);
+            // Double check time locally (anti-cheat basic)
+            const timerInfo = activeLinkTaskTimers[taskId];
+            if (!timerInfo || Date.now() < timerInfo.endTime) {
+                 showWarningPopup("Not Yet!", "The verification timer hasn't finished yet.");
+                 return;
+            }
+
+             // Mark as completed in userData
+             if (!userData.tasksCompleted) userData.tasksCompleted = {};
+             userData.tasksCompleted[taskId] = true;
+             userData.coins += taskData.reward || 0;
+
+             // Clean up timer
+             delete activeLinkTaskTimers[taskId];
+             try { sessionStorage.setItem('activeLinkTaskTimers', JSON.stringify(activeLinkTaskTimers)); } catch (e) { console.warn("SessionStorage clear failed:", e); }
+
+
+             // Update UI
+             const taskItem = document.getElementById(`task-${taskId}`);
+             const taskButton = taskItem?.querySelector('.task-button');
+             const timerDisplay = document.getElementById(`timer-${taskId}`);
+
+             if (taskItem) taskItem.classList.add('claimed-visual');
+             if (taskButton) {
+                 taskButton.textContent = 'Claimed';
+                 taskButton.disabled = true;
+                 taskButton.classList.remove('verify-btn');
+                 taskButton.classList.add('claimed-btn');
+             }
+              if(timerDisplay) timerDisplay.textContent = ''; // Clear timer text
+
+             updateCoinDisplay(); // Update balance display
+             showRewardPopup("Task Verified!", `You earned ${formatNumber(taskData.reward || 0)} coins!`);
+             saveUserData(true); // Force save
+        }
+
+        function startCodeTask(taskId, taskData) {
+            console.log(`Starting code task: ${taskId}`);
+            // SECURITY WARNING: The correct code (taskData.code) is available in the client's memory here.
+            // This is NOT secure for real rewards. A backend check is necessary for production.
+
+            // Optional: Open link first if it exists (e.g., link to where code is found)
+            if (taskData.link) {
+                showInfoPopup("Find the Code", `Visit the link to find the secret code, then come back here to enter it.`);
+                tg.openLink(taskData.link);
+                // Give user time before showing prompt, or show prompt immediately? Let's show prompt after info.
+                setTimeout(() => showCodeInputPopup(taskId, taskData), 1000); // Short delay after info popup
+            } else {
+                showCodeInputPopup(taskId, taskData);
+            }
+        }
+
+        function showCodeInputPopup(taskId, taskData) {
+             const promptMessage = `Enter the secret code for the task: "${taskData.name}"`;
+             // Using browser's prompt - NOT a native Telegram popup style.
+             const enteredCode = prompt(promptMessage);
+
+             if (enteredCode === null) { // User clicked Cancel
+                 console.log("Code entry cancelled by user.");
+                 return;
+             }
+
+             processCodeInput(taskId, taskData, enteredCode.trim());
+         }
+
+        function processCodeInput(taskId, taskData, enteredCode) {
+             // SECURITY FLAW: Comparing code on client-side.
+             const correctCode = taskData.code;
+
+             if (!correctCode) {
+                 console.error("Task has type 'code' but no code defined in Firebase:", taskId);
+                 showWarningPopup("Task Error", "This task is not configured correctly.");
+                 return;
+             }
+
+             if (enteredCode === correctCode) {
+                  // Mark as completed
+                  if (!userData.tasksCompleted) userData.tasksCompleted = {};
+                  userData.tasksCompleted[taskId] = true;
+                  userData.coins += taskData.reward || 0;
+
+                  // Update UI
+                  const taskItem = document.getElementById(`task-${taskId}`);
+                  const taskButton = taskItem?.querySelector('.task-button');
+                   if (taskItem) taskItem.classList.add('claimed-visual');
+                  if (taskButton) {
+                      taskButton.textContent = 'Claimed';
+                      taskButton.disabled = true;
+                       taskButton.classList.remove('start-task-btn');
+                      taskButton.classList.add('claimed-btn');
+                  }
+
+                  updateCoinDisplay();
+                  showRewardPopup("Code Accepted!", `You earned ${formatNumber(taskData.reward || 0)} coins!`);
+                  saveUserData(true); // Force save
+             } else {
+                 // Wrong code
+                 showWarningPopup("Incorrect Code", "The code you entered was incorrect. Please try again.");
+             }
         }
 
 
         // --- UI Functions ---
         function initializeAppUI() {
-            // Now also renders tasks
-            missionEmojiDisplay.textContent = WOLF_EMOJI;
-            renderShopItems();
-            renderTasks(); // <<< Render tasks here
-            updateUI();
-            loadingDiv.style.display = 'none';
-            mainContentDiv.style.display = 'flex';
-            navbar.style.display = 'flex';
-        }
+             // (Initialize all UI elements as before)
+             missionEmojiDisplay.textContent = WOLF_EMOJI;
+             renderShopItems();
+             fetchAndRenderTasks(); // <<< Render tasks now that user data and tasks are loaded
+             updateUI(); // Full initial UI render
+             loadingDiv.style.display = 'none';
+             mainContentDiv.style.display = 'flex';
+             navbar.style.display = 'flex';
+         }
 
         function updateUI() {
-            // (updateUI calls remain the same)
-            if (isLoading || !userData || !currentUser) return;
-            updateCoinDisplay();
-            updateGameStats();
-            updateShopItemsUI();
-            updateProfileStats();
-            updateMissionStatusUI();
-            // Optionally: updateTaskStatesUI(); // If tasks need dynamic updates without full re-render
-        }
+             if (isLoading || !userData || !currentUser) return;
+             updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI();
+             // Could potentially update task list UI here too if needed, but fetchAndRenderTasks handles initial load
+             // updateTasksListUI(); // Optional finer-grained update
+         }
 
-        // (updateCoinDisplay, updateGameStats, updateProfileStats, updateMissionStatusUI, updateMissionUI - Keep improved versions)
-         function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
-         function updateGameStats() { if (!userData) return; tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
-         function updateProfileStats() { if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
-        function updateMissionStatusUI() { if (!userData || !currentUser) return; const missionId = 'lastNameWolf'; const status = userData?.missions?.[missionId] || 'incomplete'; const lastName = currentUser?.last_name || ''; const isConditionMet = lastName.endsWith(WOLF_EMOJI); updateMissionUI(missionId, status, isConditionMet); }
-        function updateMissionUI(missionId, status, isConditionMet) { missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
+        // (Keep updateCoinDisplay, updateGameStats, updateProfileStats)
+        function updateCoinDisplay() { /* ... */ } function updateGameStats() { /* ... */ } function updateProfileStats() { /* ... */ }
 
-        // (renderShopItems, updateShopItemsUI, handleBuyButtonClick, handleUpgradePurchase, calculateUpgradeCost - Keep improved versions)
-        function renderShopItems() { /* ... same ... */ clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData?.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
-        function updateShopItemsUI() { /* ... same ... */ if (!userData) return; const currentCoins = userData.coins; upgrades.forEach(upgrade => { const itemDiv = document.getElementById(`shop-item-${upgrade.id}`); if (!itemDiv) return; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); const nameSpan = itemDiv.querySelector('.shop-item-name'); if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`; const costSpan = itemDiv.querySelector('.cost-value'); if (costSpan) costSpan.textContent = formatNumber(cost); const button = itemDiv.querySelector('.buy-button'); if (button) button.disabled = currentCoins < cost; }); }
-        function handleBuyButtonClick(event) { const upgradeId = event.target.dataset.upgradeId; handleUpgradePurchase(upgradeId); }
-        function handleUpgradePurchase(upgradeId) { /* ... same ... */ if (isLoading || !userData) return; const upgradeDef = upgrades.find(u => u.id === upgradeId); if (!upgradeDef) return; const currentLevel = userData.upgrades?.[upgradeId]?.level || 0; const cost = calculateUpgradeCost(upgradeDef, currentLevel); if (userData.coins >= cost) { userData.coins -= cost; if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 }; userData.upgrades[upgradeId].level += 1; console.log(`Purchased ${upgradeDef.name} (Level ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); updateUI(); scheduleSave(); } else { console.log("Insufficient funds for:", upgradeDef.name); const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`); if (button) { button.style.animation = 'shake 0.5s'; setTimeout(() => button.style.animation = '', 500); } } }
-        function calculateUpgradeCost(upgradeDef, currentLevel) { return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE); }
+        // (Keep updateMissionStatusUI, updateMissionUI)
+        function updateMissionStatusUI() { /* ... */ } function updateMissionUI(missionId, status, isConditionMet) { /* ... */ }
 
-        // (createClickAnimation - Keep improved version)
-        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
+        // (Keep renderShopItems, updateShopItemsUI, handleBuyButtonClick, handleUpgradePurchase, calculateUpgradeCost)
+        function renderShopItems() { /* ... */ } function updateShopItemsUI() { /* ... */ } function handleBuyButtonClick(event) { /* ... */ } function handleUpgradePurchase(upgradeId) { /* ... */ } function calculateUpgradeCost(upgradeDef, currentLevel) { /* ... */ }
 
-        // (showPage, showShopCategory, saveWallet - Keep improved versions, added tasks page refresh)
-        function showPage(pageId) { if (isLoading) return; document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); const pageToShow = document.getElementById(pageId); if(pageToShow) pageToShow.classList.add('active'); else { console.error(`Page with ID ${pageId} not found!`); showPage('game-screen'); return; } navButtons.forEach(button => { button.classList.remove('active'); if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active'); }); if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); } else if (pageId === 'tasks-screen') { renderTasks(); // Re-render tasks when navigating to the page } /* scheduleSave(); */ }
-        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId).classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
-        function saveWallet() { if (isLoading || !userData) return; const newAddress = tonWalletInput.value.trim(); userData.tonWallet = newAddress; saveUserData(true); saveStatusP.textContent = 'Wallet address saved!'; setTimeout(() => saveStatusP.textContent = '', 3000); }
+        // (Keep createClickAnimation)
+        function createClickAnimation(x, y, amount) { /* ... */ }
 
+        // --- Navigation ---
+        function showPage(pageId) {
+             if (isLoading) return;
+             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+             const targetPage = document.getElementById(pageId);
+             if(targetPage) targetPage.classList.add('active');
 
-        // (showError, formatNumber - Keep improved versions)
-        function showError(message) { const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred. Please try again.'; loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false; }
-        function formatNumber(num) { num = Math.floor(num); const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]; let suffixIndex = 0; if (num < 1000) return num.toString(); while (num >= 1000 && suffixIndex < suffixes.length - 1) { num /= 1000; suffixIndex++; } return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex]; }
+             navButtons.forEach(button => {
+                 button.classList.remove('active');
+                  if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active');
+             });
+
+             // Refresh data specific to the viewed page
+             if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); }
+             else if (pageId === 'tasks-screen') { fetchAndRenderTasks(); } // Refresh tasks view
+
+             // scheduleSave(); // Consider if saving on page change is necessary
+         }
+
+        // (Keep showShopCategory, saveWallet)
+        function showShopCategory(categoryId) { /* ... */ } function saveWallet() { /* ... */ }
+
+        // --- Error Display ---
+        function showError(message) {
+             const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred. Please try again.';
+             loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false;
+         }
+
+        // (Keep formatNumber)
+        function formatNumber(num) { /* ... */ }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-            // Remove existing listeners first to prevent duplicates
-             coinContainer.removeEventListener('pointerdown', handleTap);
-             saveWalletButton.removeEventListener('click', saveWallet);
-             copyEmojiBtn.removeEventListener('click', copyMissionEmoji);
-             missionClaimBtn.removeEventListener('click', checkAndClaimMission);
-             modalCancelButton.removeEventListener('click', hideCodePopup);
-             modalSubmitButton.removeEventListener('click', handleCodeSubmit);
-             // Remove task button listeners (handled during render)
+              // Clear previous listeners to prevent duplicates
+              coinContainer.removeEventListener('pointerdown', handleTap);
+              saveWalletButton.removeEventListener('click', saveWallet);
+              copyEmojiBtn.removeEventListener('click', copyMissionEmoji);
+              missionClaimBtn.removeEventListener('click', checkAndClaimMission);
+              // Note: Task button listeners are added dynamically in renderTaskItem via onclick
 
-            // Add listeners
-            coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
-            saveWalletButton.addEventListener('click', saveWallet);
-            copyEmojiBtn.addEventListener('click', copyMissionEmoji);
-            missionClaimBtn.addEventListener('click', checkAndClaimMission);
-            // Modal listeners
-            modalCancelButton.addEventListener('click', hideCodePopup);
-            modalSubmitButton.addEventListener('click', handleCodeSubmit);
-            // Task button listeners are added dynamically in renderTasks
-        }
+              // Add listeners
+              coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
+              saveWalletButton.addEventListener('click', saveWallet);
+              copyEmojiBtn.addEventListener('click', copyMissionEmoji);
+              missionClaimBtn.addEventListener('click', checkAndClaimMission);
+              // Load timers from session storage (best effort)
+               loadActiveTimers();
+         }
 
     </script>
 
