@@ -25,7 +25,8 @@
                 <span id="username-display">Player</span> | <span id="user-id-display"></span>
             </div>
             <div class="balance-container">
-                <img src="./meme-wolf-coin.png" alt="Coin" class="coin-icon-small">
+                <!-- Use new coin image URL -->
+                <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-small">
                 <span id="coin-balance">0</span>
             </div>
         </header>
@@ -40,7 +41,8 @@
                 </div>
                 <div class="clicker-area">
                     <button id="clicker-button" class="clicker-button">
-                        <img src="./meme-wolf-coin.png" alt="Tap Me" id="clicker-image">
+                        <!-- Use new coin image URL -->
+                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me" id="clicker-image">
                     </button>
                     <div id="click-feedback-container"></div> <!-- For +1 animations -->
                 </div>
@@ -49,23 +51,32 @@
                  </div>
             </div>
 
-            <!-- Shop Click Upgrades Page -->
-            <div id="shop-click-page" class="page">
-                <h2>Click Upgrades</h2>
-                <div id="click-upgrades-list" class="shop-list">
-                    <!-- Upgrade items will be loaded here by JS -->
-                    <p>Loading upgrades...</p>
-                </div>
-            </div>
+            <!-- Boosts Page (Combined Shop) -->
+            <div id="boosts-page" class="page">
+                <h2>🚀 Boosts</h2>
 
-            <!-- Shop Passive Income Page -->
-            <div id="shop-passive-page" class="page">
-                <h2>Passive Income Upgrades</h2>
-                 <p>Total Passive Income: <span id="total-passive-income-display">0</span> / hour</p>
-                <div id="passive-upgrades-list" class="shop-list">
-                    <!-- Upgrade items will be loaded here by JS -->
-                     <p>Loading upgrades...</p>
-                </div>
+                <!-- Click Upgrades Section -->
+                <section id="click-upgrades-section">
+                    <h3>Tap Power</h3>
+                    <div id="click-upgrades-list" class="shop-list">
+                        <!-- Click upgrade items will be loaded here by JS -->
+                        <p>Loading tap upgrades...</p>
+                    </div>
+                </section>
+
+                 <!-- Passive Income Section -->
+                <section id="passive-income-section">
+                    <h3>Hourly Income</h3>
+                    <p class="passive-income-info">
+                        Total Passive Income:
+                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-tiny">
+                        <span id="total-passive-income-display">0</span> / hour
+                    </p>
+                    <div id="passive-upgrades-list" class="shop-list">
+                        <!-- Passive upgrade items will be loaded here by JS -->
+                         <p>Loading income upgrades...</p>
+                    </div>
+                </section>
             </div>
 
             <!-- Profile Page -->
@@ -74,32 +85,32 @@
                 <div class="profile-info">
                     <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
                     <p><strong>Telegram ID:</strong> <span id="profile-userid">N/A</span></p>
-                    <p><strong>Current Balance:</strong> <img src="./meme-wolf-coin.png" alt="Coin" class="coin-icon-tiny"><span id="profile-balance">0</span></p>
+                    <p><strong>Current Balance:</strong>
+                        <!-- Use new coin image URL -->
+                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-tiny">
+                        <span id="profile-balance">0</span>
+                    </p>
                     <p><strong>TON Wallet:</strong></p>
                     <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
                     <button id="save-wallet-button">Save Wallet</button>
                     <p id="wallet-status"></p>
                 </div>
-                 <button id="sync-data-button">Force Sync Data</button> <!-- For debugging -->
+                 <button id="sync-data-button">Force Sync Data</button>
             </div>
         </main>
 
-        <!-- Navigation -->
+        <!-- Navigation (Updated for 3 tabs) -->
         <nav class="bottom-nav">
             <button class="nav-button active" data-page="game-page">
-                <img src="game-icon.png" alt="Game"> <!-- Add appropriate icons -->
+                <img src="game-icon.png" alt="Game"> <!-- Use your icon -->
                 <span>Game</span>
             </button>
-            <button class="nav-button" data-page="shop-click-page">
-                 <img src="click-upgrade-icon.png" alt="Click">
-                <span>Click</span>
-            </button>
-             <button class="nav-button" data-page="shop-passive-page">
-                 <img src="passive-upgrade-icon.png" alt="Passive">
-                <span>Income</span>
+            <button class="nav-button" data-page="boosts-page">
+                 <img src="boost-icon.png" alt="Boosts"> <!-- Use a boost/rocket icon -->
+                <span>Boosts</span>
             </button>
             <button class="nav-button" data-page="profile-page">
-                 <img src="profile-icon.png" alt="Profile">
+                 <img src="profile-icon.png" alt="Profile"> <!-- Use your icon -->
                 <span>Profile</span>
             </button>
         </nav>
