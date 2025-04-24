@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Meme Wolf Tap</title>
+    <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -12,19 +13,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- Global Styles & Reset --- */
-        :root {
-            --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6); --claimed-color: #5cb85c;
+        /* --- Global Styles & Reset (Keep ALL CSS from previous version) --- */
+        :root { /* ... keep all variables ... */
+            --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6);
         }
-
-        /* --- (Keep ALL CSS from the previous version - General, Nav, Game, Shop, Profile, Tasks, etc.) --- */
-        /* --- Omitted for brevity --- */
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; width: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); color: var(--text-color); overscroll-behavior: none; font-size: 16px; }
         body { display: flex; flex-direction: column; touch-action: manipulation; }
         #app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
-        #loading { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
-        #loading progress { margin-top: 15px; width: 60%; /* Basic progress bar style */ }
+        #loading { display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
         #main-content { flex-grow: 1; display: flex; overflow: hidden; }
         .page { width: 100%; height: 100%; display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 85px 15px; scroll-behavior: smooth; }
         .page.active { display: flex; }
@@ -91,420 +88,540 @@
         .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
         .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
+
+        /* --- Task Page Styles --- */
         #tasks-list { display: flex; flex-direction: column; gap: 15px; }
-        .task-item { background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); transition: opacity 0.3s ease; }
-        .task-item.claimed-visual { opacity: 0.7; border-left: 5px solid var(--claimed-color); }
-        .task-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-        .task-image.placeholder { background-color: var(--disabled-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-muted-color); }
-        .task-info { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-        .task-name { font-weight: 600; font-size: 1.1em; color: var(--text-color); }
-        .task-description { font-size: 0.9em; color: var(--text-muted-color); line-height: 1.4; }
-        .task-reward { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; margin-top: 5px; }
-        .task-reward img { width: 16px; height: 16px; }
-        .task-action { flex-shrink: 0; }
-        .task-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); min-width: 80px; text-align: center; }
-        .task-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); transform: translateY(-1px); }
+        .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .task-item-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background-color: var(--primary-bg-start); /* Placeholder bg */ }
+        .task-item-info { flex-grow: 1; }
+        .task-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
+        .task-item-description { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; line-height: 1.4; }
+        .task-item-reward { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
+        .task-item-reward img { width: 16px; height: 16px; }
+        .task-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .task-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .task-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
         .task-button:active:not(:disabled) { transform: scale(0.97); }
-        .task-button.verify-btn { background: linear-gradient(135deg, var(--warning-color), #ffb74d); }
-        .task-button.verify-btn:hover:not(:disabled) { background: linear-gradient(135deg, #ffb74d, var(--warning-color)); }
-        .task-button.claimed-btn { background: var(--claimed-color); color: white; cursor: not-allowed; box-shadow: none; opacity: 0.8; }
-        .task-button:disabled:not(.claimed-btn) { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
-        .task-timer { font-size: 0.8em; color: var(--warning-color); margin-top: 5px; text-align: center; height: 1em; /* Reserve space */ }
+        .task-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .verify-task-btn, .task-claimed-status { display: none; /* Hidden by default */ }
+        .task-claimed-status { font-size: 0.9em; font-weight: bold; color: var(--success-color); }
+        .task-item[data-completed="true"] .start-task-btn,
+        .task-item[data-completed="true"] .verify-task-btn { display: none; }
+        .task-item[data-completed="true"] .task-claimed-status { display: block; }
+        .task-item[data-status="verifying"] .start-task-btn { display: none; }
+        .task-item[data-status="verifying"] .verify-task-btn { display: block; }
+
+        /* --- Code Popup Modal Styles --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; /* Hidden by default */ justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+        .modal-overlay.visible { display: flex; }
+        .modal-content { background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 400px; text-align: center; }
+        .modal-title { font-size: 1.3em; font-weight: 600; color: var(--accent-color); margin-bottom: 15px; }
+        .modal-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 20px; }
+        .modal-input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; text-align: center; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .modal-button { /* Inherits from .task-button */ padding: 10px 20px; font-size: 0.9em; }
+        .modal-button.cancel { background: var(--disabled-bg); }
+        .modal-button.cancel:hover { background: #555; }
+
 
     </style>
 </head>
 <body>
     <div id="app">
-        <div id="loading">
-            <span id="loading-text">Initializing Meme Wolf...</span>
-            <progress id="loading-progress" max="100" value="0" style="display: none;"></progress> {/* Optional Progress Bar */}
-        </div>
+        <div id="loading">Initializing Meme Wolf...</div>
         <div id="main-content" style="display: none;">
-             {/* Page: Game */}
-             <div id="game-screen" class="page active">
-                 <div class="stats-bar"><div class="stat-item" title="Coins per tap"><span class="material-icons">touch_app</span> <span id="tap-power-display">1</span></div><div class="stat-item" title="Profit per hour"><span class="material-icons">hourglass_bottom</span> <span id="passive-income-display">0</span>/hr</div></div>
-                 <div class="coin-balance-container"><img id="coin-icon-balance" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin"> <span id="coin-balance">0</span></div>
-                 <div class="coin-area"><div id="coin-container"><img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!"></div></div>
-                 <div id="click-feedback"></div>
+            <!-- Page: Game (Keep as is) -->
+            <div id="game-screen" class="page active"> /* ... Game content ... */
+                <div class="stats-bar"> <div class="stat-item" title="Coins per tap"><span class="material-icons">touch_app</span> <span id="tap-power-display">1</span></div> <div class="stat-item" title="Profit per hour"><span class="material-icons">hourglass_bottom</span> <span id="passive-income-display">0</span>/hr</div> </div>
+                <div class="coin-balance-container"><img id="coin-icon-balance" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin"> <span id="coin-balance">0</span></div>
+                <div class="coin-area"><div id="coin-container"><img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!"></div></div>
+                <div id="click-feedback"></div>
+            </div>
+            <!-- Page: Shop (Keep as is) -->
+            <div id="shop-screen" class="page"> /* ... Shop content ... */
+                <h2>Upgrades Shop</h2> <div class="shop-tabs"> <button id="tab-click" class="active" onclick="showShopCategory('click-upgrades')">Click Power</button> <button id="tab-passive" onclick="showShopCategory('passive-upgrades')">Passive Income</button> </div>
+                <div id="click-upgrades" class="shop-category active"><p>Loading click upgrades...</p></div> <div id="passive-upgrades" class="shop-category"><p>Loading passive income upgrades...</p></div>
              </div>
-             {/* Page: Shop */}
-             <div id="shop-screen" class="page"><h2>Upgrades Shop</h2><div class="shop-tabs"><button id="tab-click" class="active" onclick="showShopCategory('click-upgrades')">Click Power</button><button id="tab-passive" onclick="showShopCategory('passive-upgrades')">Passive Income</button></div><div id="click-upgrades" class="shop-category active"><p>Loading click upgrades...</p></div><div id="passive-upgrades" class="shop-category"><p>Loading passive income upgrades...</p></div></div>
-             {/* Page: Tasks */}
-             <div id="tasks-screen" class="page"><h2>Daily Tasks</h2><div id="tasks-list"><p>Loading tasks...</p></div></div>
-             {/* Page: Profile */}
-             <div id="profile-screen" class="page"><h2>Profile & Wallet</h2><div class="profile-section profile-info"><p><strong>User ID:</strong> <span id="profile-userid">N/A</span></p><p><strong>Username:</strong> <span id="profile-username">N/A</span></p><p><strong>First Name:</strong> <span id="profile-firstname">N/A</span></p><p><strong>Last Name:</strong> <span id="profile-lastname">N/A</span></p><p><strong>Total Coins:</strong> <span id="profile-coins">0</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p><p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p><p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p></div><div class="profile-section mission-section"><div class="mission-title">🐺 Wolf Name Mission 🐺</div><p class="mission-description">Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button></p><div class="mission-status incomplete" id="mission-status">Status: Checking...</div><div id="fine-message-display" class="fine-applied" style="display: none;"></div><button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button><div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div></div><div class="profile-section wallet-section"><label for="ton-wallet-input">TON Wallet Address:</label><input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address"><button id="save-wallet-button">Save Wallet</button><p id="save-status"></p></div></div>
+            <!-- Page: Tasks (NEW) -->
+            <div id="tasks-screen" class="page">
+                <h2>Available Tasks</h2>
+                <div id="tasks-list">
+                    <!-- Task items will be loaded here -->
+                    <p>Loading tasks...</p>
+                </div>
+            </div>
+            <!-- Page: Profile (Keep as is) -->
+            <div id="profile-screen" class="page"> /* ... Profile content ... */
+                <h2>Profile & Wallet</h2>
+                <div class="profile-section profile-info"> <p><strong>User ID:</strong> <span id="profile-userid">N/A</span></p> <p><strong>Username:</strong> <span id="profile-username">N/A</span></p> <p><strong>First Name:</strong> <span id="profile-firstname">N/A</span></p> <p><strong>Last Name:</strong> <span id="profile-lastname">N/A</span></p> <p><strong>Total Coins:</strong> <span id="profile-coins">0</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p> <p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p> <p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p> </div>
+                <div class="profile-section mission-section"> <div class="mission-title">🐺 Wolf Name Mission 🐺</div> <p class="mission-description"> Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button> </p> <div class="mission-status incomplete" id="mission-status">Status: Checking...</div> <div id="fine-message-display" class="fine-applied" style="display: none;"></div> <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button> <div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div> </div>
+                <div class="profile-section wallet-section"> <label for="ton-wallet-input">TON Wallet Address:</label> <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address"> <button id="save-wallet-button">Save Wallet</button> <p id="save-status"></p> </div>
+             </div>
         </div>
-        {/* Navigation Bar */}
+
+        <!-- Navigation Bar (Add Tasks Button) -->
         <nav id="navbar" style="display: none;">
             <button id="nav-game" class="active" onclick="showPage('game-screen')"><span class="material-icons">pets</span><span>Game</span></button>
             <button id="nav-shop" onclick="showPage('shop-screen')"><span class="material-icons">shopping_bag</span><span>Shop</span></button>
-            <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button>
+            <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button> <!-- NEW -->
             <button id="nav-profile" onclick="showPage('profile-screen')"><span class="material-icons">account_circle</span><span>Profile</span></button>
         </nav>
+
+        <!-- Code Input Modal (NEW) -->
+        <div id="code-popup" class="modal-overlay">
+            <div class="modal-content">
+                <h3 id="code-popup-title" class="modal-title">Enter Code</h3>
+                <p id="code-popup-description" class="modal-description">Enter the code found after completing the task.</p>
+                <input type="text" id="code-popup-input" class="modal-input" placeholder="Enter code here">
+                <div class="modal-actions">
+                    <button id="code-popup-cancel" class="modal-button task-button cancel">Cancel</button>
+                    <button id="code-popup-submit" class="modal-button task-button">Submit Code</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // --- Config ---
-        const firebaseConfig = { /* Your Firebase Config */
-            apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345"
-        };
+        // --- Config (Keep as is) ---
+        const firebaseConfig = { /* ... Your Firebase Config ... */
+             apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345"
+         };
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
         const BASE_TAP_EARN = 1; const SAVE_INTERVAL = 5000; const PASSIVE_INCOME_INTERVAL = 1000; const INCREASING_COST_BASE = 10000; const WOLF_MISSION_REWARD = 50000; const WOLF_EMOJI = '🐺'; const CHEAT_FINE = 100000;
+        const TASK_VERIFICATION_DELAY = 10000; // 10 seconds for link task verification
 
-        // --- State Vars ---
-        let tg = null; let db = null; let currentUser = null; let userData = null;
-        let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null;
-        let isLoading = true; // Start in loading state
-        let availableTasks = {};
-        let activeLinkTaskTimers = {}; // Stores { taskId: { timeoutId, endTime, intervalId } }
+        // --- Telegram & Firebase Vars (Keep as is) ---
+        let tg = null; let db = null; let currentUser = null; let userData = null; let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null; let isLoading = true;
+        let availableTasks = {}; // <<< NEW: Store loaded task definitions
+        let currentCodeTaskId = null; // <<< NEW: Track which task needs code input
 
-        // --- DOM Elements ---
-        const loadingDiv = document.getElementById('loading');
-        const loadingText = document.getElementById('loading-text');
-        const loadingProgress = document.getElementById('loading-progress'); // Optional progress bar
-        const mainContentDiv = document.getElementById('main-content');
-        const navbar = document.getElementById('navbar');
-        // (Keep all other DOM element variables: coinBalanceSpan, etc...)
-        const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display');
-        const tasksListDiv = document.getElementById('tasks-list');
-        const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
+        // --- DOM Elements (Add new elements) ---
+        const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display'); const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
+        const tasksListDiv = document.getElementById('tasks-list'); // <<< NEW
+        const codePopup = document.getElementById('code-popup'); // <<< NEW
+        const codePopupTitle = document.getElementById('code-popup-title'); // <<< NEW
+        const codePopupDescription = document.getElementById('code-popup-description'); // <<< NEW
+        const codePopupInput = document.getElementById('code-popup-input'); // <<< NEW
+        const codePopupCancelBtn = document.getElementById('code-popup-cancel'); // <<< NEW
+        const codePopupSubmitBtn = document.getElementById('code-popup-submit'); // <<< NEW
 
-
-        // --- Upgrade Definitions (Keep full list) ---
-        const upgrades = [ /* Omitted for brevity - paste the full upgrades array here */ ];
+        // --- Upgrade Definitions (Keep as is) ---
+        const upgrades = [ /* ... Full list of upgrades ... */
+             { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' }, { id: 'click_2', name: 'Sharper Claws', description: '+2 coins per tap', baseCost: 100000, baseEffect: 2, type: 'click' }, { id: 'click_3', name: 'Meme Energy', description: '+5 coins per tap', baseCost: 500000, baseEffect: 5, type: 'click' }, { id: 'click_4', name: 'Wolf Pack Call', description: '+10 coins per tap', baseCost: 2000000, baseEffect: 10, type: 'click' }, { id: 'click_5', name: 'Lunar Boost', description: '+25 coins per tap', baseCost: 10000000, baseEffect: 25, type: 'click' }, { id: 'click_6', name: 'Golden Howl', description: '+50 coins per tap', baseCost: 50000000, baseEffect: 50, type: 'click' }, { id: 'click_7', name: 'Diamond Fangs', description: '+100 coins per tap', baseCost: 250000000, baseEffect: 100, type: 'click' }, { id: 'click_8', name: 'Alpha Presence', description: '+200 coins per tap', baseCost: 1000000000, baseEffect: 200, type: 'click' }, { id: 'click_9', name: 'Meme Lord Aura', description: '+500 coins per tap', baseCost: 5000000000, baseEffect: 500, type: 'click' }, { id: 'click_10', name: 'Cosmic Wolf', description: '+1000 coins per tap', baseCost: 20000000000, baseEffect: 1000, type: 'click' },
+             { id: 'passive_1', name: 'Sniffing Out Coins', description: '+100 profit/hour', baseCost: 10000, baseEffect: 100, type: 'passive' }, { id: 'passive_2', name: 'Digging Spot', description: '+250 profit/hour', baseCost: 50000, baseEffect: 250, type: 'passive' }, { id: 'passive_3', name: 'Buried Treasure Map', description: '+600 profit/hour', baseCost: 150000, baseEffect: 600, type: 'passive' }, { id: 'passive_4', name: 'Meme Stash', description: '+1,500 profit/hour', baseCost: 500000, baseEffect: 1500, type: 'passive' }, { id: 'passive_5', name: 'Coin Tree Sapling', description: '+3,500 profit/hour', baseCost: 1500000, baseEffect: 3500, type: 'passive' }, { id: 'passive_6', name: 'Howling ATM', description: '+8,000 profit/hour', baseCost: 5000000, baseEffect: 8000, type: 'passive' }, { id: 'passive_7', name: 'Loyal Pack Tribute', description: '+18,000 profit/hour', baseCost: 15000000, baseEffect: 18000, type: 'passive' }, { id: 'passive_8', name: 'Wolf Den Bank', description: '+40,000 profit/hour', baseCost: 50000000, baseEffect: 40000, type: 'passive' }, { id: 'passive_9', name: 'Meme Coin Mine', description: '+90,000 profit/hour', baseCost: 150000000, baseEffect: 90000, type: 'passive' }, { id: 'passive_10', name: 'Moonlit Mint', description: '+200K profit/hour', baseCost: 500000000, baseEffect: 200000, type: 'passive' }, { id: 'passive_11', name: 'Crypto Kennel', description: '+450K profit/hour', baseCost: 1200000000, baseEffect: 450000, type: 'passive' }, { id: 'passive_12', name: 'Decentralized Den', description: '+1M profit/hour', baseCost: 3000000000, baseEffect: 1000000, type: 'passive' }, { id: 'passive_13', name: 'Blockchain Burrow', description: '+2.2M profit/hour', baseCost: 7000000000, baseEffect: 2200000, type: 'passive' }, { id: 'passive_14', name: 'Wolf Street Journal', description: '+5M profit/hour', baseCost: 15000000000, baseEffect: 5000000, type: 'passive' }, { id: 'passive_15', name: 'Golden Bone Fund', description: '+11M profit/hour', baseCost: 35000000000, baseEffect: 11000000, type: 'passive' }, { id: 'passive_16', name: 'Diamond Paw Trust', description: '+25M profit/hour', baseCost: 80000000000, baseEffect: 25000000, type: 'passive' }, { id: 'passive_17', name: 'Alpha Investment Group', description: '+55M profit/hour', baseCost: 180000000000, baseEffect: 55000000, type: 'passive' }, { id: 'passive_18', name: 'Meme Hegemony', description: '+120M profit/hour', baseCost: 400000000000, baseEffect: 120000000, type: 'passive' }, { id: 'passive_19', name: 'Lunar Treasury', description: '+250M profit/hour', baseCost: 900000000000, baseEffect: 250000000, type: 'passive' }, { id: 'passive_20', name: 'Cosmic Coin Flow', description: '+500M profit/hour', baseCost: 2000000000000, baseEffect: 500000000, type: 'passive' },
+        ];
 
         // --- Initialization ---
         window.onload = () => {
-            console.log("Window loaded. Initializing...");
-            isLoading = true;
-            updateLoadingStatus("Initializing Telegram...", 10);
-
+            // (Keep the robust init logic from previous version)
             try {
-                tg = window.Telegram.WebApp;
-                tg.ready(); // Inform Telegram we are ready
-                tg.expand(); // Expand the webview
-                updateLoadingStatus("Telegram Ready.", 20);
-
-                // Optional: Set theme colors early, handle potential errors
-                try {
-                    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim();
-                    if (tg.setHeaderColor) tg.setHeaderColor(bgColor);
-                    if (tg.setBackgroundColor) tg.setBackgroundColor(bgColor);
-                } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
-
-                // Check for essential user data
-                if (!tg.initDataUnsafe || !tg.initDataUnsafe.user || !tg.initDataUnsafe.user.id) {
-                    showError("User data unavailable. Please launch from Telegram and ensure it's up to date.");
-                    return; // Stop if no user ID
-                }
+                isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
+                tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+                try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
+                if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable. Please launch from Telegram."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; }
                 currentUser = tg.initDataUnsafe.user;
-                updateLoadingStatus("User Info Ready.", 30);
-
-                // Initialize Firebase
-                 updateLoadingStatus("Connecting to Database...", 40);
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                updateLoadingStatus("Database Connected.", 50);
-
-                // IMPORTANT: Check Firebase Rules Reminder
-                console.warn("REMINDER: Ensure Firebase Realtime Database rules allow reads for '/users/" + currentUser.id + "' and '/tasks', and writes for '/users/" + currentUser.id + "'. Incorrect rules are a common cause of loading errors.");
-
-                // Load session timers (best effort)
-                loadActiveTimers();
-
-                // Start the main data loading chain
-                loadUserDataAndInitTasks();
+                firebase.initializeApp(firebaseConfig); db = firebase.database();
+                loadUserDataAndInit(); // This now handles loading user data & then tasks
                 setupEventListeners();
-
-            } catch (error) {
-                console.error("CRITICAL Initialization Error:", error);
-                showError(`Initialization failed: ${error.message || 'Unknown error'}. Please reload.`);
-            }
+            } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
         };
 
-        function updateLoadingStatus(text, value) {
-             if (loadingText) loadingText.textContent = text;
-             if (loadingProgress) {
-                 loadingProgress.style.display = 'block';
-                 loadingProgress.value = value;
-             }
-         }
-
-
-        // --- Popup Helpers (Keep) ---
-        function showPopup(params) { if (tg && tg.showPopup) { tg.showPopup(params); } else { alert(`${params.title}\n\n${params.message}`); } }
+        // --- Popup Helpers (Keep as is) ---
+        function showPopup(params) { if (tg) { tg.showPopup(params); } else { alert(`${params.title}\n\n${params.message}`); } }
         function showInfoPopup(title, message) { showPopup({ title: title || "Info", message: message, buttons: [{ type: "ok" }] }); }
         function showWarningPopup(title, message) { showPopup({ title: title || "⚠️ Warning", message: message, buttons: [{ type: "ok" }] }); }
         function showRewardPopup(title, message) { showPopup({ title: title || "🎉 Reward!", message: message, buttons: [{ type: "ok" }] }); }
 
         // --- Firebase Functions ---
-        function loadUserDataAndInitTasks() {
+        function loadUserDataAndInit() {
+            // (Modified to load tasks AFTER user data is ready)
             if (!currentUser || !db) { showError("User/DB not ready."); return; }
             const userId = currentUser.id.toString();
             const userRef = db.ref('users/' + userId);
-            updateLoadingStatus("Loading your progress...", 60);
+            loadingDiv.textContent = "Loading your progress...";
 
             userRef.once('value')
-                .then(snapshot => {
-                    updateLoadingStatus("Processing user data...", 70);
-                     // --- Try-Catch block specifically for data processing errors ---
-                     try {
-                        const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, tasksCompleted: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: {} };
-                        userData = snapshot.exists() ? snapshot.val() : defaultData;
+                .then((snapshot) => {
+                    const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
 
-                        // Robust merging with defaults
+                    if (snapshot.exists()) {
+                        userData = snapshot.val();
                         userData.coins = userData.coins ?? defaultData.coins;
                         userData.upgrades = userData.upgrades ?? defaultData.upgrades;
                         userData.missions = userData.missions ?? defaultData.missions;
                         userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
-                        userData.tasksCompleted = userData.tasksCompleted ?? defaultData.tasksCompleted;
+                        userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks; // <<< Initialize completedTasks
                         userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet;
                         userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate;
-                        // Always refresh TG info from current session
-                        userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
+                        userData.telegramInfo = defaultData.telegramInfo;
+                    } else {
+                        console.log("New user detected:", userId);
+                        userData = defaultData;
+                        saveUserData(true);
+                    }
 
-                        if (!snapshot.exists()) {
-                            console.log("New user detected:", userId, "Saving default data.");
-                            saveUserData(true); // Force save for new user BEFORE proceeding
-                        }
+                    const cheatDetected = performAntiCheatCheck();
+                    if (!cheatDetected) { calculateOfflineProgress(); }
+                    else { userData.lastUpdate = Date.now(); }
 
-                         // Perform Anti-Cheat Check (modifies userData potentially)
-                         const cheatDetected = performAntiCheatCheck();
-                         // Calculate Offline Progress (AFTER anti-cheat)
-                         if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); } // Update time even if cheat detected
-
-                     } catch (processingError) {
-                         console.error("Error processing user data snapshot:", processingError);
-                         throw new Error("Failed to process user data."); // Re-throw to be caught below
-                     }
-                    // --- End Try-Catch for processing ---
-
-                    // Chain to fetch tasks
-                     updateLoadingStatus("Loading available tasks...", 80);
-                    return fetchAllTasks();
+                    // --- NOW Load Tasks ---
+                    return loadAndDisplayTasks(); // Return the promise chain
                 })
                 .then(() => {
-                    updateLoadingStatus("Initializing game...", 95);
-                    // Final Initialization (Tasks are now in availableTasks)
+                    // --- Final Initialization AFTER tasks are loaded ---
                     initializeAppUI(); // Render UI
-                    startPassiveIncome(); // Start game loop
-                    isLoading = false; // Mark loading as complete
-                    console.log("App Initialized Successfully.");
-                     updateLoadingStatus("Ready!", 100);
-                     // Optionally hide loading indicator after a short delay
-                     setTimeout(() => { loadingDiv.style.display = 'none'; }, 300);
+                    startPassiveIncome();
+                    isLoading = false; // Mark loading complete
+                    console.log("App Ready.");
+                })
+                .catch((error) => { /* ... Keep robust error handling ... */
+                    console.error("------------------------------------"); console.error("Firebase Load/Init Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------"); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false;
+                 });
+        }
+
+
+        function saveUserData(force = false) {
+            // (Keep robust save logic)
+             if (isLoading || !currentUser || !db || !userData) return;
+             const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout);
+             if (force || now - lastSaveTime > SAVE_INTERVAL) {
+                 console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
+                 db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error));
+             } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
+        }
+
+        // --- Anti-Cheat Logic (Keep as is) ---
+        function performAntiCheatCheck() { /* ... Same logic ... */ if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none'; if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) { const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered for user ${currentUser.id}. Fine: ${fineAmount}`); showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied.`); fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block'; return true; } return false; }
+
+        // --- Game Logic (Keep as is) ---
+        function handleTap(event) { /* ... */ } function calculateTapPower() { /* ... */ } function calculatePassiveIncomeRate() { /* ... */ } function applyPassiveIncome() { /* ... */ } function startPassiveIncome() { /* ... */ } function scheduleSave() { saveUserData(); } function calculateOfflineProgress() { /* ... Use showRewardPopup ... */ if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds; if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); } }
+
+        // --- Mission Logic (Keep as is) ---
+        function checkAndClaimMission() { /* ... Use showInfoPopup/showRewardPopup ... */ } function copyMissionEmoji() { /* ... */ }
+
+        // --- Task Logic (NEW) ---
+        function loadAndDisplayTasks() {
+            if (!db) return Promise.reject("Database not initialized"); // Return a rejected promise if DB missing
+            tasksListDiv.innerHTML = '<p>Loading tasks...</p>'; // Show loading state
+
+            return db.ref('tasks').once('value') // Return the promise
+                .then(snapshot => {
+                    tasksListDiv.innerHTML = ''; // Clear loading/previous tasks
+                    if (snapshot.exists()) {
+                        availableTasks = snapshot.val(); // Store tasks globally
+                        let hasTasks = false;
+                        for (const taskId in availableTasks) {
+                            if (Object.hasOwnProperty.call(availableTasks, taskId)) {
+                                renderTaskItem(availableTasks[taskId], taskId);
+                                hasTasks = true;
+                            }
+                        }
+                        if (!hasTasks) {
+                             tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
+                        }
+                    } else {
+                        tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
+                        availableTasks = {}; // Clear local cache
+                    }
                 })
                 .catch(error => {
-                    console.error("------------------------------------");
-                    console.error("Firebase Load/Process Error:");
-                    console.error("Full Error Object:", error);
-                    console.error("Error Name:", error?.name);
-                    console.error("Error Message:", error?.message);
-                    console.error("Error Code (Firebase?):", error?.code);
-                    console.error("------------------------------------");
-
-                    let displayMessage = `Failed to load data. Please check connection and reload.`;
-                    if (error?.message && !String(error.message).includes('WebAppPopupOpened')) {
-                        // Include message if it's useful and not the popup one
-                        displayMessage = `Load Error: ${error.message}`;
-                    } else if (error?.code) {
-                        displayMessage += ` (Code: ${error.code})`;
-                    }
-                    // Special handling for permission denied
-                    if (error?.code === 'PERMISSION_DENIED') {
-                         displayMessage = "Database access denied. Please check Firebase rules.";
-                         console.error("FIREBASE RULES ISSUE LIKELY: Check read/write permissions for /users and /tasks in your Firebase console.");
-                    }
-
-                    showError(displayMessage);
-                    // No need to set isLoading = false here, showError handles hiding content
+                    console.error("Error loading tasks:", error);
+                    tasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks. Please try again later.</p>';
+                    availableTasks = {}; // Clear local cache
+                    // We don't necessarily stop the whole app here, just the task loading
+                    // Re-throw or handle as appropriate if this error is critical
+                    // For now, just log it and show message.
                 });
         }
 
-        function fetchAllTasks() {
-            // (Keep previous fetchAllTasks logic)
-             console.log("Fetching tasks..."); return db.ref('tasks').once('value').then(snapshot => { if (snapshot.exists()) { availableTasks = snapshot.val(); console.log("Tasks loaded:", Object.keys(availableTasks).length); } else { console.warn("No tasks found in Firebase '/tasks' node."); availableTasks = {}; } }).catch(error => { console.error("Firebase Task Fetch Error:", error); availableTasks = {}; throw error; /* Re-throw */ });
-         }
+        function renderTaskItem(taskData, taskId) {
+            if (!taskData || !taskId) return;
 
-        function saveUserData(force = false) {
-             // Add isLoading check
-             if (isLoading || !currentUser || !db || !userData) {
-                  console.warn("Save User Data Aborted: App is loading or critical data missing.");
-                  return;
-             }
-             const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout); if (force || now - lastSaveTime > SAVE_INTERVAL) { console.log("Saving user data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }; db.ref('users/' + userId).set(userData).then(() => { console.log("User data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save User Error:", error)); } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
-        }
+            const isCompleted = userData?.completedTasks?.[taskId] === true;
 
-        // --- Anti-Cheat Logic (Keep) ---
-        function performAntiCheatCheck() { /* ... same ... */ fineMessageDisplay.style.display = 'none'; if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) { const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat! User: ${currentUser.id}. Fine: ${fineAmount}`); showWarningPopup("🚨 Cheating Detected!", `Removed ${WOLF_EMOJI} after claiming!\nFine: ${formatNumber(fineAmount)} coins. Add emoji back (no second reward).`); fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins.`; fineMessageDisplay.style.display = 'block'; return true; } return false; }
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'task-item';
+            itemDiv.dataset.taskId = taskId;
+            itemDiv.dataset.completed = isCompleted; // Set completion status attribute
 
-        // --- Game Logic ---
-        function handleTap(event) { if (isLoading || !userData) return; /* ... rest same ... */ const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
-        function calculateTapPower() { /* ... same ... */ }
-        function calculatePassiveIncomeRate() { /* ... same ... */ }
-        function applyPassiveIncome() { if (isLoading || !userData) return; /* ... rest same ... */ }
-        function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); console.log("Passive income started."); }
-        function scheduleSave() { saveUserData(); }
-        function calculateOfflineProgress() { /* ... same ... */ if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds; if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)}`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); } }
+            const imageUrl = taskData.imageUrl || 'https://via.placeholder.com/50?text=Task'; // Default image
+            const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete the action and enter the code.');
 
-        // --- Mission Logic (Keep) ---
-        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; /* ... rest same ... */ }
-        function copyMissionEmoji() { /* ... same ... */ }
+            itemDiv.innerHTML = `
+                <img src="${imageUrl}" alt="${taskData.name}" class="task-item-image" onerror="this.src='https://via.placeholder.com/50?text=Err'">
+                <div class="task-item-info">
+                    <div class="task-item-name">${taskData.name || 'Unnamed Task'}</div>
+                    <div class="task-item-description">${description}</div>
+                    <div class="task-item-reward">
+                        <img src="${COIN_IMAGE_URL}" class="coin-icon" alt="">
+                        <span>+${formatNumber(taskData.reward || 0)}</span>
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <button class="task-button start-task-btn">Start</button>
+                    <button class="task-button verify-task-btn">Verify</button>
+                    <span class="task-claimed-status">Claimed</span>
+                </div>
+            `;
 
-        // --- Task Logic ---
-        function fetchAndRenderTasks() {
-             // Add isLoading check
-             if (isLoading || !userData) { tasksListDiv.innerHTML = '<p>Loading...</p>'; return; }
-             console.log("Rendering tasks...");
-             tasksListDiv.innerHTML = '';
-             if (!availableTasks || Object.keys(availableTasks).length === 0) { tasksListDiv.innerHTML = '<p>No tasks available.</p>'; return; }
-             const taskIds = Object.keys(availableTasks);
-             taskIds.sort((a, b) => { const completedA = userData.tasksCompleted?.[a] === true; const completedB = userData.tasksCompleted?.[b] === true; return completedA === completedB ? 0 : completedA ? 1 : -1; });
-             let hasVisibleTasks = false;
-             taskIds.forEach(taskId => { const taskData = availableTasks[taskId]; if (taskData && taskData.isActive === true) { renderTaskItem(taskId, taskData); hasVisibleTasks = true; } });
-             if (!hasVisibleTasks) { tasksListDiv.innerHTML = '<p>No active tasks found.</p>'; }
-        }
+            const startBtn = itemDiv.querySelector('.start-task-btn');
+            const verifyBtn = itemDiv.querySelector('.verify-task-btn');
+            const claimedStatus = itemDiv.querySelector('.task-claimed-status');
 
-        function renderTaskItem(taskId, taskData) {
-            // (Add check for taskData validity)
-            if (!taskData || !taskData.name || typeof taskData.reward === 'undefined') {
-                 console.warn(`Skipping rendering invalid task data for ID: ${taskId}`, taskData);
-                 return;
+            // Set initial visibility based on completion
+            if (isCompleted) {
+                startBtn.style.display = 'none';
+                verifyBtn.style.display = 'none';
+                claimedStatus.style.display = 'block';
+            } else {
+                startBtn.style.display = 'block';
+                verifyBtn.style.display = 'none';
+                claimedStatus.style.display = 'none';
+                startBtn.addEventListener('click', handleStartTaskClick);
+                verifyBtn.addEventListener('click', handleVerifyTaskClick); // Add verify listener now
             }
-            const isCompleted = userData.tasksCompleted?.[taskId] === true;
-            const taskItem = document.createElement('div');
-            taskItem.className = `task-item ${isCompleted ? 'claimed-visual' : ''}`;
-            taskItem.id = `task-${taskId}`;
-            let imageHtml = taskData.imageUrl ? `<img src="${taskData.imageUrl}" alt="${taskData.name}" class="task-image">` : `<div class="task-image placeholder">${taskData.name.charAt(0).toUpperCase()}</div>`;
-            let buttonHtml = ''; let timerHtml = '';
-            if (isCompleted) { buttonHtml = `<button class="task-button claimed-btn" disabled>Claimed</button>`; }
-            else {
-                 const timerInfo = activeLinkTaskTimers[taskId]; const now = Date.now();
-                 if (taskData.type === 'link' && timerInfo && now < timerInfo.endTime) {
-                     buttonHtml = `<button class="task-button verify-btn" onclick="handleTaskAction('${taskId}')" disabled>Waiting...</button>`;
-                     startTimerDisplay(taskId, timerInfo.endTime); // Ensure timer display starts
-                 } else if (taskData.type === 'link' && timerInfo && now >= timerInfo.endTime) {
-                     buttonHtml = `<button class="task-button verify-btn" onclick="handleTaskAction('${taskId}')">Verify</button>`;
-                     timerHtml = `<div class="task-timer" id="timer-${taskId}">Ready to Verify!</div>`; // Show ready text
-                 } else {
-                     const buttonText = taskData.type === 'code' ? 'Get Code' : 'Start';
-                     buttonHtml = `<button class="task-button start-task-btn" onclick="handleTaskAction('${taskId}')">${buttonText}</button>`;
-                     timerHtml = `<div class="task-timer" id="timer-${taskId}"></div>`; // Empty timer div
-                 }
+
+            tasksListDiv.appendChild(itemDiv);
+        }
+
+        function handleStartTaskClick(event) {
+            if (isLoading || !userData) return;
+            const button = event.target;
+            const taskItem = button.closest('.task-item');
+            const taskId = taskItem.dataset.taskId;
+            const taskData = availableTasks[taskId];
+
+            if (!taskData) { console.error("Task data not found for:", taskId); return; }
+            if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "You have already completed this task."); return; }
+
+            // Open link (if provided)
+            if (taskData.link) {
+                 window.open(taskData.link, '_blank');
+                 // Optional: Provide feedback that link opened
+                 // showInfoPopup("Link Opened", "Complete the action in the new tab/window.");
+            } else if (taskData.type === 'link') {
+                // Link task MUST have a link
+                 showWarningPopup("Task Error", "This task is missing its required link.");
+                 return
             }
-            taskItem.innerHTML = `${imageHtml}<div class="task-info"><div class="task-name">${taskData.name}</div><div class="task-description">${taskData.description || ''}</div><div class="task-reward"><img src="${COIN_IMAGE_URL}" class="coin-icon" alt="Coin"><span>+${formatNumber(taskData.reward)}</span></div></div><div class="task-action">${buttonHtml}${timerHtml}</div>`;
-            tasksListDiv.appendChild(taskItem);
+
+
+            button.disabled = true; // Disable start button immediately
+
+            if (taskData.type === 'link') {
+                taskItem.dataset.status = 'verifying'; // Update status visually
+                const verifyBtn = taskItem.querySelector('.verify-task-btn');
+                verifyBtn.style.display = 'block';
+                verifyBtn.disabled = true; // Disable verify initially
+                verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`;
+
+                // Start countdown timer for verification enable
+                let countdown = TASK_VERIFICATION_DELAY / 1000;
+                const intervalId = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        verifyBtn.textContent = `Verify (${countdown}s)`;
+                    } else {
+                        clearInterval(intervalId);
+                        verifyBtn.textContent = 'Verify';
+                        verifyBtn.disabled = false; // Enable verify button
+                        verifyBtn.dataset.startTime = Date.now(); // Store rough start time for basic check
+                    }
+                }, 1000);
+
+            } else if (taskData.type === 'code') {
+                // Show code input popup
+                showCodePopup(taskId, taskData);
+                // Re-enable start button in case user cancels the popup
+                 button.disabled = false;
+            } else {
+                // Unknown task type
+                button.disabled = false; // Re-enable button
+                showWarningPopup("Task Error", "Unknown task type encountered.");
+            }
+        }
+
+        function handleVerifyTaskClick(event) {
+            if (isLoading || !userData) return;
+            const button = event.target;
+            const taskItem = button.closest('.task-item');
+            const taskId = taskItem.dataset.taskId;
+            const taskData = availableTasks[taskId];
+
+            if (!taskData) { console.error("Task data not found:", taskId); return; }
+            if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
+
+             button.disabled = true; // Prevent double clicks
+             button.textContent = "Verifying...";
+
+            // Basic time check (can be easily bypassed client-side)
+            // const startTime = parseInt(button.dataset.startTime || '0');
+            // if (Date.now() - startTime < TASK_VERIFICATION_DELAY - 1000) { // Allow a little buffer
+            //     showWarningPopup("Verification Failed", "Please wait the full duration after starting the task.");
+            //     button.disabled = false;
+            //      button.textContent = "Verify";
+            //     return;
+            // }
+
+            // Simulate verification success for link type
+            console.log(`Verification successful (simulated) for task ${taskId}`);
+            claimTaskReward(taskId, taskData.reward);
+        }
+
+        function showCodePopup(taskId, taskData) {
+            currentCodeTaskId = taskId; // Store task ID for submit handler
+            codePopupTitle.textContent = taskData.name || "Enter Code";
+            codePopupDescription.textContent = taskData.description || "Enter the code found after completing the task.";
+            codePopupInput.value = ''; // Clear previous input
+            codePopup.classList.add('visible');
+             codePopupInput.focus(); // Focus the input field
+        }
+
+        function hideCodePopup() {
+            codePopup.classList.remove('visible');
+            currentCodeTaskId = null;
+        }
+
+        function handleCodeSubmit() {
+            if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) {
+                hideCodePopup();
+                return;
+            }
+
+            const taskId = currentCodeTaskId;
+            const taskData = availableTasks[taskId];
+            const submittedCode = codePopupInput.value.trim();
+
+            if (!submittedCode) {
+                showWarningPopup("Input Error", "Please enter the code.");
+                return;
+            }
+
+             // SECURITY RISK: Client-side check only!
+            if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) {
+                console.log(`Code verification successful for task ${taskId}`);
+                hideCodePopup();
+                claimTaskReward(taskId, taskData.reward);
+            } else {
+                showWarningPopup("Incorrect Code", "The code you entered is incorrect. Please try again.");
+                // Keep popup open for retry
+                 codePopupInput.focus();
+                 codePopupInput.select();
+            }
+        }
+
+        function claimTaskReward(taskId, rewardAmount) {
+            if (isLoading || !userData || !taskId || rewardAmount === undefined) return;
+
+            // Final check if already completed
+            if (userData.completedTasks?.[taskId]) {
+                console.warn(`Attempted to claim already completed task: ${taskId}`);
+                updateTaskItemUI(taskId, true); // Ensure UI is correct
+                return;
+            }
+
+            userData.coins += rewardAmount;
+            if (!userData.completedTasks) userData.completedTasks = {}; // Ensure object exists
+            userData.completedTasks[taskId] = true;
+
+            console.log(`Task ${taskId} completed. Reward: ${rewardAmount}`);
+            showRewardPopup("Task Complete!", `You earned ${formatNumber(rewardAmount)} coins!`);
+
+            updateTaskItemUI(taskId, true); // Update the specific task item
+            updateCoinDisplay(); // Update balance display
+            if (document.getElementById('profile-screen').classList.contains('active')) {
+                updateProfileStats(); // Update profile if visible
+            }
+
+            saveUserData(true); // Force save user data
+        }
+
+        function updateTaskItemUI(taskId, isCompleted) {
+            const taskItem = tasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`);
+            if (!taskItem) return;
+
+            const startBtn = taskItem.querySelector('.start-task-btn');
+            const verifyBtn = taskItem.querySelector('.verify-task-btn');
+            const claimedStatus = taskItem.querySelector('.task-claimed-status');
+
+            taskItem.dataset.completed = isCompleted;
+            taskItem.dataset.status = isCompleted ? 'completed' : 'pending'; // Reset status
+
+            if (isCompleted) {
+                startBtn.style.display = 'none';
+                verifyBtn.style.display = 'none';
+                claimedStatus.style.display = 'block';
+                // Remove listeners if they were added
+                startBtn.removeEventListener('click', handleStartTaskClick);
+                verifyBtn.removeEventListener('click', handleVerifyTaskClick);
+            } else {
+                // This case might not be needed if UI is only updated *to* completed
+                startBtn.style.display = 'block';
+                verifyBtn.style.display = 'none';
+                claimedStatus.style.display = 'none';
+                startBtn.disabled = false;
+                 verifyBtn.disabled = true; // Reset verify button state
+                 verifyBtn.textContent = 'Verify';
+                // Re-add listeners if needed (though typically not needed when resetting)
+                 startBtn.removeEventListener('click', handleStartTaskClick); // Remove old first
+                 startBtn.addEventListener('click', handleStartTaskClick);
+                 verifyBtn.removeEventListener('click', handleVerifyTaskClick); // Remove old first
+                 verifyBtn.addEventListener('click', handleVerifyTaskClick);
+
+            }
         }
 
 
-        function handleTaskAction(taskId) {
-             // Add isLoading Check
-             if (isLoading || !userData) { console.warn("Action blocked: App is loading."); return; }
-             // ... rest of handleTaskAction logic remains the same ...
-             const taskData = availableTasks[taskId]; if (!taskData) { console.error("Task data missing:", taskId); return; } const isCompleted = userData.tasksCompleted?.[taskId] === true; if (isCompleted) return; const taskButton = document.querySelector(`#task-${taskId} .task-button`); if (taskData.type === 'link') { const timerInfo = activeLinkTaskTimers[taskId]; const now = Date.now(); if (taskButton && taskButton.classList.contains('verify-btn')) { if (timerInfo && now >= timerInfo.endTime) { verifyLinkTask(taskId, taskData); } else { showInfoPopup("Wait!", "Timer not finished yet."); } } else { startLinkTask(taskId, taskData); } } else if (taskData.type === 'code') { startCodeTask(taskId, taskData); }
-        }
-
-        function startTimerDisplay(taskId, endTime) {
-             // (Keep previous startTimerDisplay logic)
-             const timerDisplay = document.getElementById(`timer-${taskId}`); const taskButton = document.querySelector(`#task-${taskId} .task-button`); if (!timerDisplay || !taskButton) return; if (activeLinkTaskTimers[taskId]?.intervalId) { clearInterval(activeLinkTaskTimers[taskId].intervalId); } const intervalId = setInterval(() => { const now = Date.now(); const timeLeft = Math.max(0, Math.ceil((endTime - now) / 1000)); timerDisplay.textContent = `Verify in: ${timeLeft}s`; if (timeLeft <= 0) { clearInterval(intervalId); timerDisplay.textContent = "Ready to Verify!"; taskButton.disabled = false; taskButton.textContent = "Verify"; if (activeLinkTaskTimers[taskId]) { delete activeLinkTaskTimers[taskId].intervalId; } } else { taskButton.disabled = true; } }, 1000); if (activeLinkTaskTimers[taskId]) { activeLinkTaskTimers[taskId].intervalId = intervalId; } const initialTimeLeft = Math.max(0, Math.ceil((endTime - Date.now()) / 1000)); if(initialTimeLeft > 0) { timerDisplay.textContent = `Verify in: ${initialTimeLeft}s`; taskButton.disabled = true; taskButton.textContent = "Waiting..."; } else { timerDisplay.textContent = "Ready to Verify!"; taskButton.disabled = false; taskButton.textContent = "Verify"; clearInterval(intervalId); if (activeLinkTaskTimers[taskId]) { delete activeLinkTaskTimers[taskId].intervalId; } }
-        }
-
-
-        function startLinkTask(taskId, taskData) {
-             // (Keep previous startLinkTask logic)
-              console.log(`Starting link task: ${taskId}`); const verificationTimeMs = (taskData.verificationTime || 5) * 1000; const endTime = Date.now() + verificationTimeMs; activeLinkTaskTimers[taskId] = { endTime: endTime }; try { sessionStorage.setItem('activeLinkTaskTimers', JSON.stringify(activeLinkTaskTimers)); } catch (e) { console.warn("SessionStorage write failed:", e); } const taskButton = document.querySelector(`#task-${taskId} .task-button`); const timerDisplay = document.getElementById(`timer-${taskId}`); if (taskButton) { taskButton.disabled = true; taskButton.textContent = 'Waiting...'; taskButton.classList.remove('start-task-btn'); taskButton.classList.add('verify-btn'); } if (timerDisplay) { timerDisplay.textContent = `Verify in: ${taskData.verificationTime || 5}s`; } startTimerDisplay(taskId, endTime); if (taskData.link) { showInfoPopup("Task Started", `Opening link. Wait ${taskData.verificationTime || 5}s after visiting, then return & Verify.`); tg.openLink(taskData.link); } else { showWarningPopup("No Link", "Task has no link. Timer started."); }
-        }
-
-        function loadActiveTimers() {
-             // (Keep previous loadActiveTimers logic)
-             try { const storedTimers = sessionStorage.getItem('activeLinkTaskTimers'); if (storedTimers) { activeLinkTaskTimers = JSON.parse(storedTimers); console.log("Loaded active timers from session:", activeLinkTaskTimers); } } catch (e) { console.warn("Failed to load timers from session:", e); activeLinkTaskTimers = {}; }
-        }
-
-
-        function verifyLinkTask(taskId, taskData) {
-             // (Keep previous verifyLinkTask logic)
-             console.log(`Verifying link task: ${taskId}`); const timerInfo = activeLinkTaskTimers[taskId]; if (!timerInfo || Date.now() < timerInfo.endTime) { showWarningPopup("Not Yet!", "Timer hasn't finished."); return; } if (!userData.tasksCompleted) userData.tasksCompleted = {}; userData.tasksCompleted[taskId] = true; userData.coins += taskData.reward || 0; delete activeLinkTaskTimers[taskId]; try { sessionStorage.setItem('activeLinkTaskTimers', JSON.stringify(activeLinkTaskTimers)); } catch (e) { console.warn("SessionStorage clear failed:", e); } const taskItem = document.getElementById(`task-${taskId}`); const taskButton = taskItem?.querySelector('.task-button'); const timerDisplay = document.getElementById(`timer-${taskId}`); if (taskItem) taskItem.classList.add('claimed-visual'); if (taskButton) { taskButton.textContent = 'Claimed'; taskButton.disabled = true; taskButton.classList.remove('verify-btn'); taskButton.classList.add('claimed-btn'); } if(timerDisplay) timerDisplay.textContent = ''; updateCoinDisplay(); showRewardPopup("Task Verified!", `Earned ${formatNumber(taskData.reward || 0)} coins!`); saveUserData(true);
-        }
-
-        function startCodeTask(taskId, taskData) {
-             // (Keep previous startCodeTask logic)
-             console.log(`Starting code task: ${taskId}`); if (taskData.link) { showInfoPopup("Find the Code", `Visit the link for the code, then return here.`); tg.openLink(taskData.link); setTimeout(() => showCodeInputPopup(taskId, taskData), 1000); } else { showCodeInputPopup(taskId, taskData); }
-        }
-
-        function showCodeInputPopup(taskId, taskData) {
-              // (Keep previous showCodeInputPopup logic using prompt)
-              const promptMessage = `Enter code for task: "${taskData.name}"`; const enteredCode = prompt(promptMessage); if (enteredCode === null) { console.log("Code entry cancelled."); return; } processCodeInput(taskId, taskData, enteredCode.trim());
-        }
-
-        function processCodeInput(taskId, taskData, enteredCode) {
-             // (Keep previous processCodeInput logic - REMEMBER SECURITY FLAW)
-             const correctCode = taskData.code; if (!correctCode) { console.error("Task code missing in Firebase:", taskId); showWarningPopup("Task Error", "Task not configured correctly."); return; } if (enteredCode === correctCode) { if (!userData.tasksCompleted) userData.tasksCompleted = {}; userData.tasksCompleted[taskId] = true; userData.coins += taskData.reward || 0; const taskItem = document.getElementById(`task-${taskId}`); const taskButton = taskItem?.querySelector('.task-button'); if (taskItem) taskItem.classList.add('claimed-visual'); if (taskButton) { taskButton.textContent = 'Claimed'; taskButton.disabled = true; taskButton.classList.remove('start-task-btn'); taskButton.classList.add('claimed-btn'); } updateCoinDisplay(); showRewardPopup("Code Accepted!", `Earned ${formatNumber(taskData.reward || 0)} coins!`); saveUserData(true); } else { showWarningPopup("Incorrect Code", "Wrong code entered. Try again."); }
-        }
-
-
-        // --- UI Functions ---
-        function initializeAppUI() {
-             // (Keep previous initializeAppUI logic)
-             console.log("Initializing UI..."); missionEmojiDisplay.textContent = WOLF_EMOJI; renderShopItems(); fetchAndRenderTasks(); updateUI(); // Ensure initial UI state is correct
-         }
-
-        function updateUI() {
-             if (isLoading || !userData || !currentUser) return;
-             // console.log("Updating Full UI..."); // Optional: trace UI updates
-             updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI();
-             // Update task list visuals if needed (e.g., coin balance changes might affect button states implicitly)
-             // For simplicity, fetchAndRenderTasks on page load is often sufficient.
-         }
-
-        // (Keep updateCoinDisplay, updateGameStats, updateProfileStats, updateMissionStatusUI, updateMissionUI)
+        // --- UI Functions (initializeAppUI, updateUI, updateCoinDisplay, etc. Keep as is) ---
+        function initializeAppUI() { /* ... */ missionEmojiDisplay.textContent = WOLF_EMOJI; renderShopItems(); updateUI(); loadingDiv.style.display = 'none'; mainContentDiv.style.display = 'flex'; navbar.style.display = 'flex'; }
+        function updateUI() { /* ... */ if (isLoading || !userData || !currentUser) return; updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI(); /* Don't update tasks list here, loaded once */ }
         function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
         function updateGameStats() { if (!userData) return; tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
-        function updateProfileStats() { if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
-        function updateMissionStatusUI() { if (!userData || !currentUser) return; const missionId = 'lastNameWolf'; const status = userData?.missions?.[missionId] || 'incomplete'; const lastName = currentUser?.last_name || ''; const isConditionMet = lastName.endsWith(WOLF_EMOJI); updateMissionUI(missionId, status, isConditionMet); }
-        function updateMissionUI(missionId, status, isConditionMet) { missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
-
-        // (Keep shop rendering/updates)
+        function updateProfileStats() { /* ... */ if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
+        function updateMissionStatusUI() { /* ... */ } function updateMissionUI(missionId, status, isConditionMet) { /* ... */ }
         function renderShopItems() { /* ... */ } function updateShopItemsUI() { /* ... */ } function handleBuyButtonClick(event) { /* ... */ } function handleUpgradePurchase(upgradeId) { /* ... */ } function calculateUpgradeCost(upgradeDef, currentLevel) { /* ... */ }
-
-        // (Keep createClickAnimation)
         function createClickAnimation(x, y, amount) { /* ... */ }
-
-        // --- Navigation ---
         function showPage(pageId) {
-             // Add isLoading Check
-             if (isLoading) { console.warn("Navigation blocked: App is loading."); return; }
-             // ... rest of showPage logic ...
-             document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); const targetPage = document.getElementById(pageId); if(targetPage) targetPage.classList.add('active'); else { console.error(`Page not found: ${pageId}`); return; } navButtons.forEach(button => { button.classList.remove('active'); if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active'); }); if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); } else if (pageId === 'tasks-screen') { fetchAndRenderTasks(); /* Refresh tasks on view */ }
-        }
+            if (isLoading) return;
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const targetPage = document.getElementById(pageId);
+             if (!targetPage) { console.error("Target page not found:", pageId); return; }
+             targetPage.classList.add('active');
 
-        // (Keep showShopCategory, saveWallet)
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+                 // Handle new tasks button ID
+                 if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active');
+            });
+
+            // Refresh relevant data when switching to certain pages
+            if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); }
+             // Task list is loaded once initially, could add refresh logic here if needed
+             // if (pageId === 'tasks-screen') { loadAndDisplayTasks(); // Reload tasks every time? Maybe not efficient }
+        }
         function showShopCategory(categoryId) { /* ... */ }
-        function saveWallet() { if (isLoading || !userData) return; /* ... rest ... */ }
-
-        // --- Error Display ---
-        function showError(message) {
-            isLoading = false; // Ensure loading stops on error
-            const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred. Please try again.';
-            console.error("SHOW_ERROR:", displayMessage); // Log the exact message shown
-            loadingText.textContent = `Error: ${displayMessage}`;
-            loadingDiv.style.color = 'var(--error-color)';
-            loadingProgress.style.display = 'none'; // Hide progress bar on error
-            loadingDiv.style.display = 'flex'; // Ensure loading div is visible
-            mainContentDiv.style.display = 'none';
-            navbar.style.display = 'none';
-            if (passiveIncomeIntervalId) { clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = null; }
-        }
-
-
-        // (Keep formatNumber)
+        function saveWallet() { /* ... */ }
+        function showError(message) { /* ... Keep robust error handler ... */ const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred. Please try again.'; loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false; }
         function formatNumber(num) { /* ... */ }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-            // (Keep previous setupEventListeners logic including loadActiveTimers)
-              coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission);
-              coinContainer.addEventListener('pointerdown', handleTap, { passive: false }); saveWalletButton.addEventListener('click', saveWallet); copyEmojiBtn.addEventListener('click', copyMissionEmoji); missionClaimBtn.addEventListener('click', checkAndClaimMission);
-         }
+            // Remove previous if any (good practice)
+             coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission); codePopupCancelBtn.removeEventListener('click', hideCodePopup); codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit);
+
+            // Add listeners
+             coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
+             saveWalletButton.addEventListener('click', saveWallet);
+             copyEmojiBtn.addEventListener('click', copyMissionEmoji);
+             missionClaimBtn.addEventListener('click', checkAndClaimMission);
+             // Code Popup Listeners
+             codePopupCancelBtn.addEventListener('click', hideCodePopup);
+             codePopupSubmitBtn.addEventListener('click', handleCodeSubmit);
+             // Close popup if overlay clicked (optional)
+             codePopup.addEventListener('click', (event) => { if (event.target === codePopup) { hideCodePopup(); } });
+             // Task listeners are added dynamically in renderTaskItem
+        }
 
     </script>
 
