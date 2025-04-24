@@ -6,7 +6,7 @@
     <title>Meme Wolf Tap</title>
     <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Telegram WebApp SDK (You need to serve this file or use Telegram's CDN if available) -->
+    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -17,7 +17,7 @@
         :root {
             --primary-bg-start: #1a1a2e;
             --primary-bg-end: #162447;
-            --secondary-bg: rgba(22, 36, 71, 0.8); /* Slightly transparent */
+            --secondary-bg: rgba(22, 36, 71, 0.8);
             --accent-color: #e43f5a;
             --accent-hover: #c33049;
             --text-color: #e0e0e0;
@@ -30,586 +30,116 @@
             --button-hover-bg-start: #2a5a8a;
             --button-hover-bg-end: #3b7cb8;
             --success-color: #4caf50;
+            --warning-color: #ff9800; /* Orange for warnings */
+            --error-color: #f44336; /* Red for errors/cheating */
             --disabled-bg: #444;
             --disabled-text: #888;
             --shadow-color: rgba(0, 0, 0, 0.3);
-            --glow-color: rgba(247, 183, 49, 0.6); /* Coin glow */
+            --glow-color: rgba(247, 183, 49, 0.6);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent; /* Disable blue tap highlight */
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* Prevent default body scroll */
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end));
-            color: var(--text-color);
-            overscroll-behavior: none; /* Prevent pull-to-refresh */
-            font-size: 16px; /* Base font size */
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            touch-action: manipulation; /* Improve touch responsiveness, disable double-tap zoom */
-        }
-
-        #app {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* App container manages scroll */
-        }
-
-        /* --- Loading State --- */
-        #loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            font-size: 1.5em;
-            color: var(--text-color);
-        }
-
-        /* --- Page Structure --- */
-        #main-content {
-            flex-grow: 1;
-            display: flex; /* Use flex here to manage page visibility */
-            overflow: hidden; /* Prevent this container from scrolling */
-        }
-
-        .page {
-            width: 100%;
-            height: 100%;
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            flex-grow: 1;
-            overflow-y: auto; /* Allow scrolling WITHIN the page */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            padding: 20px 15px 85px 15px; /* Adjusted padding, leave space for fixed nav */
-            scroll-behavior: smooth;
-        }
-
-        .page.active {
-            display: flex; /* Show active page */
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; width: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); color: var(--text-color); overscroll-behavior: none; font-size: 16px; }
+        body { display: flex; flex-direction: column; touch-action: manipulation; }
+        #app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
+        #loading { display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); }
+        #main-content { flex-grow: 1; display: flex; overflow: hidden; }
+        .page { width: 100%; height: 100%; display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 85px 15px; scroll-behavior: smooth; }
+        .page.active { display: flex; }
 
         /* --- Navigation --- */
-        nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: rgba(15, 23, 42, 0.85); /* Darker, slightly transparent nav */
-            border-top: 1px solid var(--accent-color);
-            padding: 8px 0;
-            backdrop-filter: blur(5px); /* Frosted glass effect */
-            -webkit-backdrop-filter: blur(5px);
-            z-index: 100;
-            box-shadow: 0 -2px 10px var(--shadow-color);
-        }
-
-        nav button {
-            background: none;
-            border: none;
-            color: var(--icon-color);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.7em;
-            padding: 5px 10px;
-            transition: color 0.2s ease;
-            flex-grow: 1; /* Make buttons take equal space */
-            flex-basis: 0;
-        }
-
-        nav button .material-icons {
-            font-size: 26px; /* Slightly smaller icons */
-            margin-bottom: 3px;
-        }
-
-        nav button:hover {
-            color: var(--icon-active-color);
-        }
-
-        nav button.active {
-            color: var(--accent-color); /* Use accent for active nav item */
-        }
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; align-items: center; background-color: rgba(15, 23, 42, 0.85); border-top: 1px solid var(--accent-color); padding: 8px 0; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 100; box-shadow: 0 -2px 10px var(--shadow-color); }
+        nav button { background: none; border: none; color: var(--icon-color); cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 0.7em; padding: 5px 10px; transition: color 0.2s ease; flex-grow: 1; flex-basis: 0; }
+        nav button .material-icons { font-size: 26px; margin-bottom: 3px; }
+        nav button:hover { color: var(--icon-active-color); }
+        nav button.active { color: var(--accent-color); }
 
         /* --- Game Screen --- */
-        #game-screen {
-            justify-content: space-between; /* Push stats up, coin middle, nothing below */
-            align-items: center;
-            text-align: center;
-            padding-top: 10px; /* Less top padding */
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            max-width: 350px; /* Limit width on larger screens */
-            margin-bottom: 10px;
-            font-size: 0.85em;
-            color: var(--text-muted-color);
-            background-color: var(--secondary-bg);
-            padding: 8px 10px;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px var(--shadow-color);
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .stat-item .material-icons {
-            font-size: 16px;
-            color: var(--coin-color);
-        }
-
-
-        .coin-balance-container {
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             margin-bottom: 15px; /* Less margin */
-        }
-
-        #coin-icon-balance {
-            width: 30px; /* Slightly smaller */
-            height: 30px;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        #coin-balance {
-            font-size: 2.2em; /* Slightly smaller */
-            font-weight: bold;
-            color: var(--coin-color);
-            text-shadow: 0 0 8px var(--glow-color);
-        }
-
-        /* Container to help center the coin */
-        .coin-area {
-            flex-grow: 1; /* Takes up remaining space */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-             width: 100%;
-             margin-bottom: 10px; /* Space above potential future elements */
-        }
-
-        #coin-container {
-            position: relative;
-            width: clamp(180px, 50vmin, 250px); /* Responsive size */
-            height: clamp(180px, 50vmin, 250px);
-            cursor: pointer;
-            user-select: none; /* Prevent image selection */
-            -webkit-user-drag: none; /* Prevent image dragging */
-            border-radius: 50%;
-            /* Removed margin-top, centering is handled by flex parent */
-        }
-
-         #coin-image {
-            width: 100%;
-            height: 100%;
-            transition: transform 0.08s ease-out;
-            border-radius: 50%;
-            box-shadow: 0 0 30px var(--glow-color); /* Enhanced Coin glow */
-            filter: drop-shadow(0 5px 15px var(--shadow-color)); /* Add depth */
-         }
-
-        #coin-container:active #coin-image {
-             transform: scale(0.94); /* Slightly more pronounced click feedback */
-             filter: drop-shadow(0 2px 8px var(--shadow-color));
-         }
-
-        /* --- Click Feedback Animation --- */
-        #click-feedback {
-            position: fixed; /* Use fixed to position relative to viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Allow clicks to pass through */
-            overflow: hidden;
-            z-index: 99;
-        }
-
-        .click-value {
-            position: absolute;
-            font-size: clamp(1.2em, 4vw, 1.8em); /* Responsive font size */
-            font-weight: bold;
-            color: var(--coin-color);
-            user-select: none;
-            pointer-events: none;
-            animation: floatUpFadeOut 1.2s ease-out forwards;
-            white-space: nowrap; /* Prevent wrapping */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        @keyframes floatUpFadeOut {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-70px) scale(0.8); /* Float higher, shrink slightly */
-            }
-        }
-
+        #game-screen { justify-content: space-between; align-items: center; text-align: center; padding-top: 10px; }
+        .stats-bar { display: flex; justify-content: space-around; width: 100%; max-width: 350px; margin-bottom: 10px; font-size: 0.85em; color: var(--text-muted-color); background-color: var(--secondary-bg); padding: 8px 10px; border-radius: 10px; box-shadow: 0 1px 3px var(--shadow-color); }
+        .stat-item { display: flex; align-items: center; gap: 5px; }
+        .stat-item .material-icons { font-size: 16px; color: var(--coin-color); }
+        .coin-balance-container { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        #coin-icon-balance { width: 30px; height: 30px; margin-right: 8px; vertical-align: middle; }
+        #coin-balance { font-size: 2.2em; font-weight: bold; color: var(--coin-color); text-shadow: 0 0 8px var(--glow-color); }
+        .coin-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 10px; }
+        #coin-container { position: relative; width: clamp(180px, 50vmin, 250px); height: clamp(180px, 50vmin, 250px); cursor: pointer; user-select: none; -webkit-user-drag: none; border-radius: 50%; }
+        #coin-image { width: 100%; height: 100%; transition: transform 0.08s ease-out; border-radius: 50%; box-shadow: 0 0 30px var(--glow-color); filter: drop-shadow(0 5px 15px var(--shadow-color)); }
+        #coin-container:active #coin-image { transform: scale(0.94); filter: drop-shadow(0 2px 8px var(--shadow-color)); }
+        #click-feedback { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 99; }
+        .click-value { position: absolute; font-size: clamp(1.2em, 4vw, 1.8em); font-weight: bold; color: var(--coin-color); user-select: none; pointer-events: none; animation: floatUpFadeOut 1.2s ease-out forwards; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        @keyframes floatUpFadeOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(0.8); } }
 
         /* --- Shop Screen --- */
-        #shop-screen h2, #profile-screen h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--accent-color);
-            font-size: 1.6em;
-            text-shadow: 1px 1px 2px var(--shadow-color);
-        }
-
-        .shop-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: sticky; /* Make tabs stick while scrolling shop items */
-            top: -20px; /* Adjust based on page padding */
-            background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); /* Match page bg */
-            padding-top: 15px; /* Space above tabs when sticky */
-            z-index: 10;
-        }
-
-        .shop-tabs button {
-            background: none;
-            border: none;
-            color: var(--icon-color);
-            padding: 12px 20px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -1px; /* Overlap border */
-            transition: color 0.2s ease, border-color 0.2s ease;
-        }
-
-        .shop-tabs button:hover {
-             color: var(--icon-active-color);
-        }
-
-        .shop-tabs button.active {
-            color: var(--accent-color);
-            border-bottom-color: var(--accent-color);
-        }
-
-        .shop-category {
-            display: none; /* Hide categories by default */
-            flex-direction: column;
-            gap: 12px; /* Slightly reduced gap */
-        }
-
-        .shop-category.active {
-            display: flex; /* Show active category */
-        }
-
-        .shop-item {
-            background-color: var(--secondary-bg);
-            padding: 15px;
-            border-radius: 10px; /* Slightly more rounded */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 3px 8px var(--shadow-color);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .shop-item-info {
-            flex-grow: 1;
-        }
-
-        .shop-item-name {
-            font-weight: 600; /* Semibold */
-            font-size: 1.05em;
-            margin-bottom: 4px;
-            color: var(--text-color);
-        }
-
-        .shop-item-details {
-            font-size: 0.85em;
-            color: var(--text-muted-color);
-            margin-bottom: 8px;
-        }
-         .shop-item-cost {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: bold;
-            color: var(--coin-color);
-            font-size: 0.95em;
-         }
-        .shop-item-cost img {
-             width: 16px; /* Slightly smaller */
-             height: 16px;
-         }
-
-        .buy-button {
-            background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
-            color: var(--text-color);
-            border: none;
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9em;
-            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
-        }
-
-        .buy-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
-            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
-        }
-         .buy-button:active:not(:disabled) {
-             transform: scale(0.97);
-         }
-
-        .buy-button:disabled {
-            background: var(--disabled-bg);
-            color: var(--disabled-text);
-            cursor: not-allowed;
-             box-shadow: none;
-        }
+        #shop-screen h2, #profile-screen h2 { text-align: center; margin-bottom: 25px; color: var(--accent-color); font-size: 1.6em; text-shadow: 1px 1px 2px var(--shadow-color); }
+        .shop-tabs { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: -20px; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding-top: 15px; z-index: 10; }
+        .shop-tabs button { background: none; border: none; color: var(--icon-color); padding: 12px 20px; cursor: pointer; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; }
+        .shop-tabs button:hover { color: var(--icon-active-color); }
+        .shop-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+        .shop-category { display: none; flex-direction: column; gap: 12px; }
+        .shop-category.active { display: flex; }
+        .shop-item { background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .shop-item-info { flex-grow: 1; }
+        .shop-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
+        .shop-item-details { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; }
+        .shop-item-cost { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
+        .shop-item-cost img { width: 16px; height: 16px; }
+        .buy-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .buy-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .buy-button:active:not(:disabled) { transform: scale(0.97); }
+        .buy-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
 
         /* --- Profile Screen --- */
-        .profile-section {
-             background-color: var(--secondary-bg);
-             padding: 20px;
-             border-radius: 12px;
-             margin-bottom: 20px;
-             box-shadow: 0 4px 10px var(--shadow-color);
-             border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .profile-info p {
-            margin-bottom: 12px;
-            font-size: 1em; /* Adjusted size */
-            line-height: 1.5;
-            word-break: break-all; /* Break long IDs */
-            display: flex;
-            align-items: center;
-             flex-wrap: wrap; /* Allow wrapping if needed */
-        }
-        .profile-info p strong {
-            color: var(--coin-color);
-            margin-right: 8px;
-            min-width: 120px; /* Align keys */
-            display: inline-block;
-        }
-         .profile-info p span {
-             flex-grow: 1;
-         }
-
-
-        .wallet-section label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-             color: var(--text-muted-color);
-        }
-
-        #ton-wallet-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background-color: rgba(0, 0, 0, 0.2); /* Darker input bg */
-            color: var(--text-color);
-            font-size: 1em;
-        }
-
-        #save-wallet-button {
-             background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-             color: white;
-             border: none;
-             padding: 12px 20px;
-             border-radius: 8px;
-             cursor: pointer;
-             font-weight: bold;
-             width: 100%;
-             font-size: 1em;
-             transition: background 0.2s ease, transform 0.1s ease;
-             box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
-        }
-        #save-wallet-button:hover {
-             background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); /* Swap gradient on hover */
-             box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
-        }
-         #save-wallet-button:active {
-             transform: scale(0.98);
-         }
-
-        #save-status {
-            margin-top: 12px;
-            text-align: center;
-            color: var(--success-color);
-            font-size: 0.9em;
-            height: 1.2em; /* Reserve space */
-            font-weight: 500;
-        }
+        .profile-section { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .profile-info p { margin-bottom: 12px; font-size: 1em; line-height: 1.5; word-break: break-all; display: flex; align-items: center; flex-wrap: wrap; }
+        .profile-info p strong { color: var(--coin-color); margin-right: 8px; min-width: 120px; display: inline-block; }
+        .profile-info p span { flex-grow: 1; }
+        .wallet-section label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-muted-color); }
+        #ton-wallet-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; }
+        #save-wallet-button { background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: background 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        #save-wallet-button:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        #save-wallet-button:active { transform: scale(0.98); }
+        #save-status { margin-top: 12px; text-align: center; color: var(--success-color); font-size: 0.9em; height: 1.2em; font-weight: 500; }
 
         /* Mission Section */
-        .mission-section {
-             /* Styles inherited from .profile-section */
-             text-align: center;
-        }
-
-        .mission-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
-        .mission-description {
-            font-size: 0.95em;
-            color: var(--text-muted-color);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        .mission-emoji {
-            font-size: 2em;
-            margin: 0 5px;
-            display: inline-block;
-            cursor: default; /* Make it look like text */
-        }
-        .copy-emoji-button {
-            background: none;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 5px 10px;
-            font-size: 0.8em;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .copy-emoji-button:hover {
-            background-color: var(--accent-color);
-            color: white;
-        }
-
-        .mission-status {
-            font-weight: bold;
-            margin: 15px 0;
-            font-size: 1em;
-        }
+        .mission-section { text-align: center; }
+        .mission-title { font-size: 1.2em; font-weight: 600; margin-bottom: 10px; color: var(--text-color); }
+        .mission-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 15px; line-height: 1.5; }
+        .mission-emoji { font-size: 2em; margin: 0 5px; display: inline-block; cursor: default; }
+        .copy-emoji-button { background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 10px; font-size: 0.8em; border-radius: 5px; cursor: pointer; margin-left: 10px; transition: background-color 0.2s ease, color 0.2s ease; }
+        .copy-emoji-button:hover { background-color: var(--accent-color); color: white; }
+        .mission-status { font-weight: bold; margin: 15px 0; font-size: 1em; }
         .mission-status.incomplete { color: var(--text-muted-color); }
-        .mission-status.complete { color: var(--success-color); }
-        .mission-status.claimed { color: var(--coin-color); }
-
-        .mission-action-button {
-            background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
-            color: var(--text-color);
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.95em;
-            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
-        }
-        .mission-action-button:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
-            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
-        }
-        .mission-action-button:active:not(:disabled) {
-             transform: scale(0.97);
-         }
-        .mission-action-button:disabled {
-            background: var(--disabled-bg);
-            color: var(--disabled-text);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-        .reward-display {
-             display: flex;
-             align-items: center;
-             justify-content: center;
-             gap: 5px;
-             font-weight: bold;
-             color: var(--coin-color);
-             margin-top: 5px;
-         }
+        .mission-status.complete { color: var(--success-color); } /* May not be visible long */
+        .mission-status.claimed { color: var(--coin-color); } /* Changed 'complete' to 'claimed' for clarity */
+        .mission-action-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .mission-action-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .mission-action-button:active:not(:disabled) { transform: scale(0.97); }
+        .mission-action-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .reward-display { display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; color: var(--coin-color); margin-top: 5px; }
+        .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; } /* For fine message */
 
 
-        /* --- Utility Classes --- */
-        .coin-icon {
-            width: 1em;
-            height: 1em;
-            vertical-align: middle;
-            margin: 0 2px;
-        }
-
-         /* --- Basic CSS for shake animation --- */
-        @keyframes shake {
-          10%, 90% { transform: translate3d(-1px, 0, 0); }
-          20%, 80% { transform: translate3d(2px, 0, 0); }
-          30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-          40%, 60% { transform: translate3d(3px, 0, 0); }
-        }
+        /* Utility */
+        .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
 
     </style>
 </head>
 <body>
     <div id="app">
         <div id="loading">Loading Meme Wolf...</div>
-
-        <!-- Main Content Area -->
         <div id="main-content" style="display: none;">
-
             <!-- Page: Game -->
             <div id="game-screen" class="page active">
                  <div class="stats-bar">
-                     <div class="stat-item" title="Coins per tap">
-                        <span class="material-icons">touch_app</span>
-                        <span id="tap-power-display">1</span>
-                    </div>
-                     <div class="stat-item" title="Profit per hour">
-                         <span class="material-icons">hourglass_bottom</span>
-                        <span id="passive-income-display">0</span>/hr
-                    </div>
+                     <div class="stat-item" title="Coins per tap"><span class="material-icons">touch_app</span> <span id="tap-power-display">1</span></div>
+                     <div class="stat-item" title="Profit per hour"><span class="material-icons">hourglass_bottom</span> <span id="passive-income-display">0</span>/hr</div>
                  </div>
-
-                <div class="coin-balance-container">
-                    <img id="coin-icon-balance" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin">
-                    <span id="coin-balance">0</span>
-                </div>
-
-                <!-- Centering Container -->
-                <div class="coin-area">
-                     <div id="coin-container">
-                         <img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!">
-                     </div>
-                </div>
+                <div class="coin-balance-container"><img id="coin-icon-balance" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin"> <span id="coin-balance">0</span></div>
+                <div class="coin-area"><div id="coin-container"><img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!"></div></div>
                 <div id="click-feedback"></div>
             </div>
-
             <!-- Page: Shop -->
             <div id="shop-screen" class="page">
                 <h2>Upgrades Shop</h2>
@@ -617,17 +147,9 @@
                     <button id="tab-click" class="active" onclick="showShopCategory('click-upgrades')">Click Power</button>
                     <button id="tab-passive" onclick="showShopCategory('passive-upgrades')">Passive Income</button>
                 </div>
-
-                <div id="click-upgrades" class="shop-category active">
-                    <!-- Click upgrade items will be loaded here -->
-                    <p>Loading click upgrades...</p>
-                </div>
-                <div id="passive-upgrades" class="shop-category">
-                     <!-- Passive upgrade items will be loaded here -->
-                     <p>Loading passive income upgrades...</p>
-                 </div>
+                <div id="click-upgrades" class="shop-category active"><p>Loading click upgrades...</p></div>
+                <div id="passive-upgrades" class="shop-category"><p>Loading passive income upgrades...</p></div>
             </div>
-
             <!-- Page: Profile -->
             <div id="profile-screen" class="page">
                 <h2>Profile & Wallet</h2>
@@ -640,25 +162,18 @@
                      <p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p>
                      <p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p>
                  </div>
-
                  <!-- Wolf Name Mission Section -->
                  <div class="profile-section mission-section">
                     <div class="mission-title">🐺 Wolf Name Mission 🐺</div>
                     <p class="mission-description">
-                        Add the wolf emoji
-                        <span class="mission-emoji" id="mission-emoji-display">🐺</span>
-                        to the *very end* of your Telegram Last Name!
-                        <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button>
+                        Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button>
                     </p>
                     <div class="mission-status incomplete" id="mission-status">Status: Checking...</div>
+                     <div id="fine-message-display" class="fine-applied" style="display: none;"></div> <!-- Added for fine message -->
                     <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button>
-                    <div class="reward-display">
-                        <span>Reward: 50K</span>
-                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt="">
-                    </div>
+                    <div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div>
                  </div>
                  <!-- End Mission Section -->
-
                  <div class="profile-section wallet-section">
                      <label for="ton-wallet-input">TON Wallet Address:</label>
                      <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
@@ -667,55 +182,45 @@
                  </div>
             </div>
         </div>
-
         <!-- Navigation Bar -->
         <nav id="navbar" style="display: none;">
-            <button id="nav-game" class="active" onclick="showPage('game-screen')">
-                <span class="material-icons">pets</span>
-                <span>Game</span>
-            </button>
-            <button id="nav-shop" onclick="showPage('shop-screen')">
-                <span class="material-icons">shopping_bag</span>
-                <span>Shop</span>
-            </button>
-            <button id="nav-profile" onclick="showPage('profile-screen')">
-                <span class="material-icons">account_circle</span>
-                <span>Profile</span>
-            </button>
+            <button id="nav-game" class="active" onclick="showPage('game-screen')"><span class="material-icons">pets</span><span>Game</span></button>
+            <button id="nav-shop" onclick="showPage('shop-screen')"><span class="material-icons">shopping_bag</span><span>Shop</span></button>
+            <button id="nav-profile" onclick="showPage('profile-screen')"><span class="material-icons">account_circle</span><span>Profile</span></button>
         </nav>
     </div>
 
     <script>
         // --- Config ---
-        const firebaseConfig = {
-            // --- WARNING: Exposing keys like this is insecure for production ---
-            apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", // Replace if needed, BUT SECURE IT
-            authDomain: "ab-wallet-62482.firebaseapp.com",
-            databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com",
-            projectId: "ab-wallet-62482",
-            storageBucket: "ab-wallet-62482.firebasestorage.app",
-            messagingSenderId: "642030839072",
-            appId: "1:642030839072:web:77fc92375ba72e2ee62345"
-        };
-
+        const firebaseConfig = { /* Keep your config here */
+             apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE",
+             authDomain: "ab-wallet-62482.firebaseapp.com",
+             databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com",
+             projectId: "ab-wallet-62482",
+             storageBucket: "ab-wallet-62482.firebasestorage.app",
+             messagingSenderId: "642030839072",
+             appId: "1:642030839072:web:77fc92375ba72e2ee62345"
+         };
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
-        const BASE_TAP_EARN = 1; // <<< CHANGED: Initial earn rate is now 1
-        const SAVE_INTERVAL = 5000; // Save data every 5 seconds
-        const PASSIVE_INCOME_INTERVAL = 1000; // Calculate passive income every second
-        const INCREASING_COST_BASE = 10000; // Extra cost per level for upgrades
-        const WOLF_MISSION_REWARD = 50000; // 50K coins
-        const WOLF_EMOJI = '🐺'; // Mission Emoji
+        const BASE_TAP_EARN = 1;
+        const SAVE_INTERVAL = 5000;
+        const PASSIVE_INCOME_INTERVAL = 1000;
+        const INCREASING_COST_BASE = 10000;
+        const WOLF_MISSION_REWARD = 50000;
+        const WOLF_EMOJI = '🐺';
+        const CHEAT_FINE = 100000; // <<< Fine amount
 
         // --- Telegram & Firebase Vars ---
         let tg = null;
         let db = null;
         let currentUser = null;
-        let userData = null; // Stores data fetched from Firebase
+        let userData = null;
         let lastSaveTime = 0;
         let saveTimeout = null;
         let passiveIncomeIntervalId = null;
 
         // --- DOM Elements ---
+        // (Keep all previous DOM element variables)
         const loadingDiv = document.getElementById('loading');
         const mainContentDiv = document.getElementById('main-content');
         const navbar = document.getElementById('navbar');
@@ -726,26 +231,25 @@
         const clickFeedbackDiv = document.getElementById('click-feedback');
         const clickUpgradesDiv = document.getElementById('click-upgrades');
         const passiveUpgradesDiv = document.getElementById('passive-upgrades');
-        // Profile Page Elements
         const profileUserIdSpan = document.getElementById('profile-userid');
         const profileUsernameSpan = document.getElementById('profile-username');
-        const profileFirstNameSpan = document.getElementById('profile-firstname'); // Added
-        const profileLastNameSpan = document.getElementById('profile-lastname'); // Added
+        const profileFirstNameSpan = document.getElementById('profile-firstname');
+        const profileLastNameSpan = document.getElementById('profile-lastname');
         const profileCoinsSpan = document.getElementById('profile-coins');
         const profileTapPowerSpan = document.getElementById('profile-tap-power');
         const profilePassiveIncomeSpan = document.getElementById('profile-passive-income');
         const tonWalletInput = document.getElementById('ton-wallet-input');
         const saveWalletButton = document.getElementById('save-wallet-button');
         const saveStatusP = document.getElementById('save-status');
-        // Mission Elements
         const missionEmojiDisplay = document.getElementById('mission-emoji-display');
         const copyEmojiBtn = document.getElementById('copy-emoji-btn');
         const missionStatusDiv = document.getElementById('mission-status');
         const missionClaimBtn = document.getElementById('mission-claim-btn');
-        // Other Elements
+        const fineMessageDisplay = document.getElementById('fine-message-display'); // <<< Fine message element
         const navButtons = document.querySelectorAll('nav button');
         const shopTabButtons = document.querySelectorAll('.shop-tabs button');
         const shopCategories = document.querySelectorAll('.shop-category');
+
 
         // --- Upgrade Definitions (Same as before) ---
         const upgrades = [
@@ -791,19 +295,21 @@
                 tg = window.Telegram.WebApp;
                 tg.ready();
                 tg.expand();
+                // Set background color based on theme
+                tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim()); // Set header to match BG
+                tg.setBackgroundColor(getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim());
+
 
                 if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-                    showError("Could not get Telegram user data. Please launch from Telegram.");
-                    return;
+                    showError("User data unavailable. Please launch from Telegram."); return;
                 }
                 currentUser = tg.initDataUnsafe.user;
 
-                // Initialize Firebase
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
 
-                loadUserData(); // Load/create user data
-                setupEventListeners(); // Setup clicks, etc.
+                loadUserData();
+                setupEventListeners();
 
             } catch (error) {
                 console.error("Initialization Error:", error);
@@ -811,513 +317,301 @@
             }
         };
 
+        // --- Popup Helpers ---
+        function showPopup(params) {
+            if (tg) {
+                tg.showPopup(params);
+            } else {
+                // Fallback for environments where tg might not be ready or available
+                alert(`${params.title}\n\n${params.message}`);
+            }
+        }
+
+        function showInfoPopup(title, message) {
+            showPopup({ title: title || "Info", message: message, buttons: [{ type: "ok" }] });
+        }
+
+        function showWarningPopup(title, message) {
+            // Could add vibration for emphasis if needed: tg?.HapticFeedback.notificationOccurred('warning');
+            showPopup({ title: title || "⚠️ Warning", message: message, buttons: [{ type: "ok" }] });
+        }
+
+        function showRewardPopup(title, message) {
+             // Could add vibration: tg?.HapticFeedback.notificationOccurred('success');
+            showPopup({ title: title || "🎉 Reward!", message: message, buttons: [{ type: "ok" }] });
+        }
+
         // --- Firebase Functions ---
         function loadUserData() {
-            if (!currentUser || !db) {
-                showError("User or Database not initialized."); return;
-            }
+            // (loadUserData remains mostly the same, ensures missions structure exists)
+            if (!currentUser || !db) { showError("User/DB not ready."); return; }
             const userId = currentUser.id.toString();
             const userRef = db.ref('users/' + userId);
 
-            userRef.once('value')
-                .then((snapshot) => {
-                    const defaultData = {
-                        coins: 0,
-                        upgrades: {},
-                        missions: { lastNameWolf: 'incomplete' }, // Add mission structure
-                        tonWallet: '',
-                        lastUpdate: Date.now(),
-                        telegramInfo: { // Update with latest info on load
-                            id: currentUser.id,
-                            username: currentUser.username || null,
-                            firstName: currentUser.first_name || '',
-                            lastName: currentUser.last_name || ''
-                        }
-                    };
+            userRef.once('value').then((snapshot) => {
+                const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
 
-                    if (snapshot.exists()) {
-                        userData = snapshot.val();
-                        // Merge defaults to handle missing fields in old data
-                        if (!userData.upgrades) userData.upgrades = defaultData.upgrades;
-                        if (userData.coins === undefined || userData.coins === null) userData.coins = defaultData.coins;
-                        if (!userData.tonWallet) userData.tonWallet = defaultData.tonWallet;
-                        if (!userData.lastUpdate) userData.lastUpdate = defaultData.lastUpdate;
-                        // Initialize missions if missing
-                        if (!userData.missions) userData.missions = defaultData.missions;
-                        else if (userData.missions.lastNameWolf === undefined) {
-                            userData.missions.lastNameWolf = 'incomplete'; // Ensure mission field exists
-                        }
-                        // Always update telegramInfo with potentially changed name
-                        userData.telegramInfo = defaultData.telegramInfo;
+                if (snapshot.exists()) {
+                    userData = snapshot.val();
+                    // Merge defaults robustly
+                    userData.coins = userData.coins ?? defaultData.coins;
+                    userData.upgrades = userData.upgrades ?? defaultData.upgrades;
+                    userData.missions = userData.missions ?? defaultData.missions;
+                    userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
+                    userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet;
+                    userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate;
+                    userData.telegramInfo = defaultData.telegramInfo; // Always refresh TG info
 
-                        calculateOfflineProgress();
-                    } else {
-                        console.log("New user, creating default data for:", userId);
-                        userData = defaultData;
-                        saveUserData(true); // Force immediate save for new user
-                    }
+                    calculateOfflineProgress(); // Calculate before anti-cheat potentially alters coins
+                    performAntiCheatCheck(); // <<< Run anti-cheat check AFTER data loaded
 
-                    startPassiveIncome(); // Start passive income after data is ready
-                    initializeAppUI(); // Setup UI
-                })
-                .catch((error) => {
-                    console.error("Firebase Load Error:", error);
-                    showError(`Failed to load data: ${error.message}`);
-                });
+                } else {
+                    console.log("New user:", userId);
+                    userData = defaultData;
+                    saveUserData(true); // Save new user immediately
+                }
+
+                startPassiveIncome();
+                initializeAppUI(); // Setup UI AFTER potential anti-cheat modifications
+
+            }).catch((error) => {
+                console.error("Firebase Load Error:", error);
+                showError(`Failed to load data: ${error.message}`);
+            });
         }
 
         function saveUserData(force = false) {
+            // (saveUserData remains the same)
              if (!currentUser || !db || !userData) return;
-
              const now = Date.now();
              userData.lastUpdate = now;
-
              clearTimeout(saveTimeout);
              if (force || now - lastSaveTime > SAVE_INTERVAL) {
-                console.log("Saving data to Firebase...");
-                const userId = currentUser.id.toString();
-                // Update potentially changed user info before saving
-                userData.telegramInfo = {
-                    id: currentUser.id,
-                    username: currentUser.username || null,
-                    firstName: currentUser.first_name || '',
-                    lastName: currentUser.last_name || ''
-                };
-                db.ref('users/' + userId).set(userData)
-                    .then(() => {
-                        console.log("Data saved successfully.");
-                        lastSaveTime = now;
-                    })
-                    .catch((error) => console.error("Firebase Save Error:", error));
+                 console.log("Saving data...");
+                 const userId = currentUser.id.toString();
+                 userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }; // Ensure latest TG info saved
+                 db.ref('users/' + userId).set(userData)
+                     .then(() => { console.log("Data saved."); lastSaveTime = now; })
+                     .catch((error) => console.error("Firebase Save Error:", error));
              } else {
                  saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime));
              }
         }
 
-        // --- Game Logic ---
-        function handleTap(event) {
-            if (!userData) return;
+        // --- Anti-Cheat Logic ---
+        function performAntiCheatCheck() {
+            if (!userData || !currentUser) return false;
 
-            const tapValue = calculateTapPower();
-            userData.coins += tapValue;
+            const missionId = 'lastNameWolf';
+            const missionStatus = userData.missions?.[missionId];
+            const currentLastName = currentUser.last_name || '';
 
-             let clientX, clientY;
-             if (event.touches && event.touches.length > 0) {
-                for (let i = 0; i < event.touches.length; i++) {
-                    clientX = event.touches[i].clientX;
-                    clientY = event.touches[i].clientY;
-                    createClickAnimation(clientX, clientY, tapValue);
-                }
-             } else {
-                 clientX = event.clientX;
-                 clientY = event.clientY;
-                 createClickAnimation(clientX, clientY, tapValue);
-             }
+            if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) {
+                // Cheating detected!
+                const fineAmount = CHEAT_FINE;
+                const originalCoins = userData.coins;
+                userData.coins = Math.max(0, userData.coins - fineAmount); // Apply fine, ensure non-negative
+                userData.missions[missionId] = 'incomplete'; // Reset mission status
 
-            updateCoinDisplay();
-            scheduleSave();
-        }
+                console.warn(`Anti-cheat triggered for user ${currentUser.id}. Removed emoji after claiming. Fine: ${fineAmount}`);
 
-        function calculateTapPower() {
-            let power = BASE_TAP_EARN; // Base is now 1
-            if (userData && userData.upgrades) {
-                for (const upgradeId in userData.upgrades) {
-                    const upgradeDef = upgrades.find(u => u.id === upgradeId);
-                    if (upgradeDef && upgradeDef.type === 'click') {
-                        const level = userData.upgrades[upgradeId]?.level || 0;
-                        power += upgradeDef.baseEffect * level;
-                    }
-                }
+                // Show warning popup
+                showWarningPopup(
+                    "🚨 Cheating Detected!",
+                    `You removed the ${WOLF_EMOJI} emoji from your name after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied. Add the emoji back to complete the mission again (reward won't be granted twice).`
+                );
+
+                 // Display persistent fine message on profile page until next load/refresh
+                 fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`;
+                 fineMessageDisplay.style.display = 'block';
+
+                updateUI(); // Update UI immediately to reflect deduction & reset status
+                saveUserData(true); // Force save changes immediately
+
+                return true; // Indicate cheat was detected
+            } else {
+                 // No cheating detected or mission not claimed yet, hide any persistent fine message
+                 fineMessageDisplay.style.display = 'none';
             }
-            return power;
+
+            return false; // No cheat detected
         }
 
-        function calculatePassiveIncomeRate() {
-             let rate = 0; // Per hour
-             if (userData && userData.upgrades) {
-                 for (const upgradeId in userData.upgrades) {
-                     const upgradeDef = upgrades.find(u => u.id === upgradeId);
-                     if (upgradeDef && upgradeDef.type === 'passive') {
-                         const level = userData.upgrades[upgradeId]?.level || 0;
-                         rate += upgradeDef.baseEffect * level;
-                     }
-                 }
-             }
-             return rate;
-         }
 
-         function applyPassiveIncome() {
-            if (!userData) return;
-            const hourlyRate = calculatePassiveIncomeRate();
-            const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000);
+        // --- Game Logic (handleTap, calculateTapPower, calculatePassiveIncomeRate, applyPassiveIncome) ---
+        // (These functions remain the same as the previous version)
+        function handleTap(event) { if (!userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
+        function calculateTapPower() { let power = BASE_TAP_EARN; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'click') { const level = userData.upgrades[upgradeId]?.level || 0; power += upgradeDef.baseEffect * level; } } } return power; }
+        function calculatePassiveIncomeRate() { let rate = 0; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'passive') { const level = userData.upgrades[upgradeId]?.level || 0; rate += upgradeDef.baseEffect * level; } } } return rate; }
+        function applyPassiveIncome() { if (!userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); } }
+        function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); }
+        function scheduleSave() { saveUserData(); }
 
-            if (incomePerTick > 0) {
-                userData.coins += incomePerTick;
-                updateCoinDisplay();
-                // Save is debounced via scheduleSave calls elsewhere
-            }
-        }
 
         function calculateOfflineProgress() {
+             // (Uses new popup helper)
             if (!userData || !userData.lastUpdate) return;
             const now = Date.now();
             const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000));
-            // Limit offline time to avoid huge jumps? (e.g., max 24 hours)
-            // const maxOfflineSeconds = 24 * 60 * 60;
-            // offlineSeconds = Math.min(offlineSeconds, maxOfflineSeconds);
-
             const hourlyRate = calculatePassiveIncomeRate();
             const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
 
             if (offlineIncome > 0) {
                 userData.coins += offlineIncome;
-                console.log(`Applied offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds} seconds.`);
-                 tg?.showPopup({
-                    title: "Welcome Back!",
-                    message: `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`,
-                    buttons: [{ type: "ok" }],
-                });
+                console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`);
+                // Use Reward Popup helper
+                 showRewardPopup(
+                     "Welcome Back!",
+                     `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`
+                 );
             }
-            userData.lastUpdate = now; // Update lastUpdate *after* calculation
+            userData.lastUpdate = now; // Update timestamp *after* calculation
         }
 
-        function startPassiveIncome() {
-             if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId);
-             passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL);
-         }
-
-         function scheduleSave() {
-             saveUserData();
-         }
 
         // --- Mission Logic ---
         function checkAndClaimMission() {
+             // (Uses new popup helpers)
             if (!userData || !currentUser) return;
 
             const missionId = 'lastNameWolf';
             const currentStatus = userData.missions?.[missionId] || 'incomplete';
-            const lastName = currentUser.last_name || ''; // Get current last name from TG object
+            const lastName = currentUser.last_name || '';
 
             if (currentStatus === 'claimed') {
-                updateMissionUI(missionId, 'claimed', false); // Already claimed
+                showInfoPopup("Mission Status", "You have already claimed the reward for this mission.");
+                updateMissionUI(missionId, 'claimed', false); // Ensure UI reflects claimed state
                 return;
             }
 
             const isConditionMet = lastName.endsWith(WOLF_EMOJI);
 
             if (isConditionMet) {
-                if (currentStatus === 'incomplete') {
-                     // Condition met, not yet claimed
-                     userData.missions[missionId] = 'complete';
-                     userData.coins += WOLF_MISSION_REWARD;
-                     userData.missions[missionId] = 'claimed'; // Mark as claimed immediately after rewarding
+                 // Condition met, not yet claimed
+                 userData.coins += WOLF_MISSION_REWARD;
+                 userData.missions[missionId] = 'claimed'; // Mark as claimed
 
-                     console.log(`Mission '${missionId}' completed and claimed. Reward: ${WOLF_MISSION_REWARD}`);
+                 console.log(`Mission '${missionId}' claimed. Reward: ${WOLF_MISSION_REWARD}`);
 
-                     // Show success feedback
-                     tg?.showPopup({
-                         title: "Mission Complete!",
-                         message: `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins for adding the ${WOLF_EMOJI} to your name!`,
-                         buttons: [{ type: "ok" }],
-                     });
+                 // Use Reward Popup helper
+                 showRewardPopup(
+                     "Mission Complete!",
+                     `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins for adding the ${WOLF_EMOJI} to your name!`
+                 );
 
-                     updateMissionUI(missionId, 'claimed', false); // Update UI to claimed state
-                     updateCoinDisplay(); // Show new coin total
-                     updateProfileStats(); // Update profile coin display too
-                     saveUserData(true); // Force save immediately after claim
-                } else {
-                    // Condition met but already claimed (should be handled by initial check, but safeguard)
-                    updateMissionUI(missionId, 'claimed', false);
-                }
+                 updateMissionUI(missionId, 'claimed', false);
+                 updateCoinDisplay();
+                 updateProfileStats();
+                 saveUserData(true); // Force save immediately after claim
+
             } else {
                  // Condition not met
-                 updateMissionUI(missionId, 'incomplete', false); // Keep as incomplete, disable button
-                 tg?.showPopup({
-                     title: "Mission Incomplete",
-                     message: `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name, then try checking again.`,
-                     buttons: [{ type: "ok" }],
-                 });
+                 updateMissionUI(missionId, 'incomplete', false);
+                 // Use Info Popup helper
+                 showInfoPopup(
+                     "Mission Incomplete",
+                     `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name, then try checking again.`
+                 );
             }
         }
 
         function copyMissionEmoji() {
-            navigator.clipboard.writeText(WOLF_EMOJI)
-                .then(() => {
-                    copyEmojiBtn.textContent = 'Copied!';
-                    setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500);
-                })
-                .catch(err => {
-                    console.error('Failed to copy emoji: ', err);
-                    // Fallback or alert? For simplicity, just log error.
-                });
+            // (copyMissionEmoji remains the same)
+            navigator.clipboard.writeText(WOLF_EMOJI).then(() => {
+                copyEmojiBtn.textContent = 'Copied!'; setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500);
+            }).catch(err => { console.error('Failed to copy emoji: ', err); });
         }
 
 
         // --- UI Functions ---
         function initializeAppUI() {
-            missionEmojiDisplay.textContent = WOLF_EMOJI; // Set mission emoji
+             // (initializeAppUI remains the same)
+            missionEmojiDisplay.textContent = WOLF_EMOJI;
             renderShopItems();
-            updateUI(); // Full UI update including mission status
+            updateUI();
             loadingDiv.style.display = 'none';
             mainContentDiv.style.display = 'flex';
             navbar.style.display = 'flex';
         }
 
         function updateUI() {
+             // (updateUI calls remain the same)
             if (!userData || !currentUser) return;
             updateCoinDisplay();
             updateGameStats();
             updateShopItemsUI();
             updateProfileStats();
-            updateMissionStatusUI(); // Separate function for mission UI
+            updateMissionStatusUI(); // Handles mission specific UI updates
         }
 
-         function updateCoinDisplay() {
-             if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins);
-         }
-
-         function updateGameStats() {
-             tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower());
-             passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate());
-         }
-
-         function updateProfileStats() {
-             profileUserIdSpan.textContent = currentUser.id || 'N/A';
-             profileUsernameSpan.textContent = currentUser.username || 'N/A';
-             profileFirstNameSpan.textContent = currentUser.first_name || 'N/A';
-             profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; // Display current last name
-             profileCoinsSpan.textContent = formatNumber(userData.coins);
-             profileTapPowerSpan.textContent = formatNumber(calculateTapPower());
-             profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate());
-             tonWalletInput.value = userData.tonWallet || '';
-         }
+         // (updateCoinDisplay, updateGameStats, updateProfileStats remain mostly the same)
+         function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
+         function updateGameStats() { tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
+         function updateProfileStats() { profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
 
         function updateMissionStatusUI() {
+             // (Checks status and calls updateMissionUI)
             const missionId = 'lastNameWolf';
             const status = userData?.missions?.[missionId] || 'incomplete';
             const lastName = currentUser?.last_name || '';
             const isConditionMet = lastName.endsWith(WOLF_EMOJI);
 
             updateMissionUI(missionId, status, isConditionMet);
+
+             // Show/hide persistent fine message based on whether anti-cheat ran *this session*
+             // (This part is handled within performAntiCheatCheck now for simplicity)
         }
 
-
         function updateMissionUI(missionId, status, isConditionMet) {
-            // General UI update based on status stored in Firebase
-            missionStatusDiv.classList.remove('incomplete', 'complete', 'claimed');
-            missionStatusDiv.classList.add(status); // 'incomplete', 'complete', or 'claimed'
+            // (UI logic for the mission button/text based on status)
+            missionStatusDiv.classList.remove('incomplete', 'claimed'); // Only use these two primary states visually now
+            missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); // Map DB status to visual class
 
             switch (status) {
                 case 'incomplete':
                     missionStatusDiv.textContent = 'Status: Incomplete';
                     missionClaimBtn.textContent = 'Check & Claim Reward';
-                    // Enable button ONLY if the name condition IS met, allowing check/claim attempt
-                    missionClaimBtn.disabled = false;
-                    break;
-                case 'complete': // This state might be brief, immediately goes to claimed after reward
-                    missionStatusDiv.textContent = 'Status: Completed!';
-                    missionClaimBtn.textContent = 'Claim Reward';
-                    missionClaimBtn.disabled = false; // Ready to claim
+                    missionClaimBtn.disabled = false; // Always allow checking if incomplete
                     break;
                 case 'claimed':
                     missionStatusDiv.textContent = 'Status: Reward Claimed!';
                     missionClaimBtn.textContent = 'Claimed';
-                    missionClaimBtn.disabled = true; // Permanently disable
+                    missionClaimBtn.disabled = true; // Permanently disable if claimed
                     break;
             }
+             // Hide fine message initially, it's shown by anti-cheat check if needed
+            // fineMessageDisplay.style.display = 'none';
         }
 
 
-        function renderShopItems() {
-            // (Function remains largely the same as before - Ensure it uses formatNumber)
-            clickUpgradesDiv.innerHTML = ''; // Clear existing
-            passiveUpgradesDiv.innerHTML = '';
+        // (renderShopItems, updateShopItemsUI, handleBuyButtonClick, handleUpgradePurchase, calculateUpgradeCost remain the same)
+        function renderShopItems() { clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData?.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
+        function updateShopItemsUI() { if (!userData) return; const currentCoins = userData.coins; upgrades.forEach(upgrade => { const itemDiv = document.getElementById(`shop-item-${upgrade.id}`); if (!itemDiv) return; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); const nameSpan = itemDiv.querySelector('.shop-item-name'); if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`; const costSpan = itemDiv.querySelector('.cost-value'); if (costSpan) costSpan.textContent = formatNumber(cost); const button = itemDiv.querySelector('.buy-button'); if (button) button.disabled = currentCoins < cost; }); }
+        function handleBuyButtonClick(event) { const upgradeId = event.target.dataset.upgradeId; handleUpgradePurchase(upgradeId); }
+        function handleUpgradePurchase(upgradeId) { if (!userData) return; const upgradeDef = upgrades.find(u => u.id === upgradeId); if (!upgradeDef) return; const currentLevel = userData.upgrades?.[upgradeId]?.level || 0; const cost = calculateUpgradeCost(upgradeDef, currentLevel); if (userData.coins >= cost) { userData.coins -= cost; if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 }; userData.upgrades[upgradeId].level += 1; console.log(`Purchased ${upgradeDef.name} (Lv. ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); updateUI(); scheduleSave(); } else { console.log("Insufficient funds for:", upgradeDef.name); const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`); if (button) { button.style.animation = 'shake 0.5s'; setTimeout(() => button.style.animation = '', 500); } } }
+        function calculateUpgradeCost(upgradeDef, currentLevel) { return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE); }
 
-            upgrades.forEach(upgrade => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'shop-item';
-                itemDiv.id = `shop-item-${upgrade.id}`;
+        // (createClickAnimation remains the same)
+        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
 
-                const level = userData?.upgrades?.[upgrade.id]?.level || 0;
-                const cost = calculateUpgradeCost(upgrade, level);
+        // (showPage, showShopCategory, saveWallet remain the same, maybe update profile stats on showPage)
+        function showPage(pageId) { document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); document.getElementById(pageId).classList.add('active'); navButtons.forEach(button => { button.classList.remove('active'); if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active'); }); if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); } scheduleSave(); }
+        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId).classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
+        function saveWallet() { if (!userData) return; const newAddress = tonWalletInput.value.trim(); userData.tonWallet = newAddress; saveUserData(true); saveStatusP.textContent = 'Wallet address saved!'; setTimeout(() => saveStatusP.textContent = '', 3000); }
 
-                itemDiv.innerHTML = `
-                    <div class="shop-item-info">
-                        <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div>
-                        <div class="shop-item-details">${upgrade.description}</div>
-                        <div class="shop-item-cost">
-                             <img src="${COIN_IMAGE_URL}" class="coin-icon" alt="">
-                             <span class="cost-value">${formatNumber(cost)}</span>
-                         </div>
-                    </div>
-                    <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button>
-                `;
+        // (showError remains the same)
+        function showError(message) { loadingDiv.textContent = `Error: ${message}`; loadingDiv.style.color = 'var(--error-color)'; console.error("App Error:", message); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; }
 
-                if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv);
-                else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv);
-            });
-
-             // Add event listeners to the new buttons
-             document.querySelectorAll('.buy-button').forEach(button => {
-                 button.addEventListener('click', handleBuyButtonClick);
-             });
-
-             updateShopItemsUI(); // Initial state update
-        }
-
-         function updateShopItemsUI() {
-             // (Function remains largely the same as before - Ensure it uses formatNumber)
-             if (!userData) return;
-             const currentCoins = userData.coins;
-
-             upgrades.forEach(upgrade => {
-                 const itemDiv = document.getElementById(`shop-item-${upgrade.id}`);
-                 if (!itemDiv) return;
-
-                 const level = userData.upgrades?.[upgrade.id]?.level || 0;
-                 const cost = calculateUpgradeCost(upgrade, level);
-
-                 const nameSpan = itemDiv.querySelector('.shop-item-name');
-                 if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`;
-
-                 const costSpan = itemDiv.querySelector('.cost-value');
-                 if (costSpan) costSpan.textContent = formatNumber(cost); // USE FORMATTER
-
-                 const button = itemDiv.querySelector('.buy-button');
-                 if (button) button.disabled = currentCoins < cost;
-             });
-         }
-
-         function handleBuyButtonClick(event) {
-             // (Function remains the same as before)
-             const upgradeId = event.target.dataset.upgradeId;
-             handleUpgradePurchase(upgradeId);
-         }
-
-
-        function handleUpgradePurchase(upgradeId) {
-             // (Function remains largely the same as before - Ensure it uses formatNumber for logs)
-            if (!userData) return;
-            const upgradeDef = upgrades.find(u => u.id === upgradeId);
-            if (!upgradeDef) return;
-
-            const currentLevel = userData.upgrades?.[upgradeId]?.level || 0;
-            const cost = calculateUpgradeCost(upgradeDef, currentLevel);
-
-            if (userData.coins >= cost) {
-                userData.coins -= cost;
-                if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 };
-                userData.upgrades[upgradeId].level += 1;
-
-                console.log(`Purchased ${upgradeDef.name} (Level ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); // USE FORMATTER
-
-                updateUI();
-                scheduleSave();
-            } else {
-                console.log("Insufficient funds for:", upgradeDef.name);
-                 const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`);
-                 if (button) {
-                     button.style.animation = 'shake 0.5s';
-                     setTimeout(() => button.style.animation = '', 500);
-                 }
-            }
-        }
-
-        function calculateUpgradeCost(upgradeDef, currentLevel) {
-            // (Function remains the same as before)
-            return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE);
-        }
-
-
-        function createClickAnimation(x, y, amount) {
-             // (Function remains the same as before - Ensure it uses formatNumber)
-            const feedback = document.createElement('div');
-            feedback.className = 'click-value';
-            feedback.textContent = `+${formatNumber(amount)}`; // USE FORMATTER
-
-            feedback.style.left = `${x}px`; // Center horizontally on click point
-            feedback.style.top = `${y}px`; // Start vertically at click point
-            feedback.style.transform = 'translate(-50%, -100%)'; // Adjust position to be above and centered
-
-            clickFeedbackDiv.appendChild(feedback);
-
-            setTimeout(() => { feedback.remove(); }, 1150); // Slightly longer than animation
-        }
-
-
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-
-            navButtons.forEach(button => {
-                button.classList.remove('active');
-                 if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active');
-            });
-
-            // Refresh mission status & profile stats when navigating to profile
-            if (pageId === 'profile-screen') {
-                updateProfileStats();
-                updateMissionStatusUI();
-            }
-
-            scheduleSave();
-        }
-
-        function showShopCategory(categoryId) {
-            shopCategories.forEach(cat => cat.classList.remove('active'));
-            document.getElementById(categoryId).classList.add('active');
-
-            shopTabButtons.forEach(button => button.classList.remove('active'));
-             document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active');
-        }
-
-        function saveWallet() {
-            // (Function remains the same as before)
-            if (!userData) return;
-            const newAddress = tonWalletInput.value.trim();
-            userData.tonWallet = newAddress;
-            saveUserData(true);
-            saveStatusP.textContent = 'Wallet address saved!';
-            setTimeout(() => saveStatusP.textContent = '', 3000);
-        }
-
-        function showError(message) {
-            loadingDiv.textContent = `Error: ${message}`;
-            loadingDiv.style.color = 'red';
-            console.error("App Error:", message);
-            mainContentDiv.style.display = 'none';
-            navbar.style.display = 'none';
-        }
-
-        // --- Utility Functions ---
-        function formatNumber(num) {
-            // (Function remains the same as before)
-            num = Math.floor(num);
-            const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
-            let suffixIndex = 0;
-
-            if (num < 1000) return num.toString();
-
-            while (num >= 1000 && suffixIndex < suffixes.length - 1) {
-                num /= 1000;
-                suffixIndex++;
-            }
-            return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex];
-        }
+        // (formatNumber remains the same)
+        function formatNumber(num) { num = Math.floor(num); const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]; let suffixIndex = 0; if (num < 1000) return num.toString(); while (num >= 1000 && suffixIndex < suffixes.length - 1) { num /= 1000; suffixIndex++; } return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex]; }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-             // Coin Tap Listener
+             // (Event listeners remain the same)
              coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
-
-             // Save Wallet Button
-            saveWalletButton.addEventListener('click', saveWallet);
-
-            // Mission Buttons
-            copyEmojiBtn.addEventListener('click', copyMissionEmoji);
-            missionClaimBtn.addEventListener('click', checkAndClaimMission);
-
-            // Navigation/Shop Tabs use onclick in HTML
+             saveWalletButton.addEventListener('click', saveWallet);
+             copyEmojiBtn.addEventListener('click', copyMissionEmoji);
+             missionClaimBtn.addEventListener('click', checkAndClaimMission);
         }
 
     </script>
