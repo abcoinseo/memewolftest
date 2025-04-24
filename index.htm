@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Meme Wolf Tapper</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+    <div id="loading-screen">
+        Loading Meme Wolf... <span class="spinner"></span>
+    </div>
+
+    <div id="app-container" style="display: none;">
+
+        <!-- Header Info -->
+        <header class="app-header">
+            <div class="user-info-short">
+                <span id="username-display">Player</span> | <span id="user-id-display"></span>
+            </div>
+            <div class="balance-container">
+                <img src="./meme-wolf-coin.png" alt="Coin" class="coin-icon-small">
+                <span id="coin-balance">0</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content">
+            <!-- Game Page -->
+            <div id="game-page" class="page active-page">
+                <div class="stats-display">
+                    <span>Earn/Tap: <span id="earn-per-tap">0.1</span></span>
+                    <span>Earn/Hour: <span id="earn-per-hour">0</span></span>
+                </div>
+                <div class="clicker-area">
+                    <button id="clicker-button" class="clicker-button">
+                        <img src="./meme-wolf-coin.png" alt="Tap Me" id="clicker-image">
+                    </button>
+                    <div id="click-feedback-container"></div> <!-- For +1 animations -->
+                </div>
+                 <div class="progress-info">
+                    <!-- Optional: Add energy bar or other mechanics here -->
+                 </div>
+            </div>
+
+            <!-- Shop Click Upgrades Page -->
+            <div id="shop-click-page" class="page">
+                <h2>Click Upgrades</h2>
+                <div id="click-upgrades-list" class="shop-list">
+                    <!-- Upgrade items will be loaded here by JS -->
+                    <p>Loading upgrades...</p>
+                </div>
+            </div>
+
+            <!-- Shop Passive Income Page -->
+            <div id="shop-passive-page" class="page">
+                <h2>Passive Income Upgrades</h2>
+                 <p>Total Passive Income: <span id="total-passive-income-display">0</span> / hour</p>
+                <div id="passive-upgrades-list" class="shop-list">
+                    <!-- Upgrade items will be loaded here by JS -->
+                     <p>Loading upgrades...</p>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div id="profile-page" class="page">
+                <h2>Profile</h2>
+                <div class="profile-info">
+                    <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
+                    <p><strong>Telegram ID:</strong> <span id="profile-userid">N/A</span></p>
+                    <p><strong>Current Balance:</strong> <img src="./meme-wolf-coin.png" alt="Coin" class="coin-icon-tiny"><span id="profile-balance">0</span></p>
+                    <p><strong>TON Wallet:</strong></p>
+                    <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
+                    <button id="save-wallet-button">Save Wallet</button>
+                    <p id="wallet-status"></p>
+                </div>
+                 <button id="sync-data-button">Force Sync Data</button> <!-- For debugging -->
+            </div>
+        </main>
+
+        <!-- Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-button active" data-page="game-page">
+                <img src="game-icon.png" alt="Game"> <!-- Add appropriate icons -->
+                <span>Game</span>
+            </button>
+            <button class="nav-button" data-page="shop-click-page">
+                 <img src="click-upgrade-icon.png" alt="Click">
+                <span>Click</span>
+            </button>
+             <button class="nav-button" data-page="shop-passive-page">
+                 <img src="passive-upgrade-icon.png" alt="Passive">
+                <span>Income</span>
+            </button>
+            <button class="nav-button" data-page="profile-page">
+                 <img src="profile-icon.png" alt="Profile">
+                <span>Profile</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
