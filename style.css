@@ -574,3 +574,230 @@ h2 {
         /* width: 100%; */
     }
 }
+// --- Constants (Add the coin URL) ---
+const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
+const INITIAL_COINS_PER_TAP = 0.1;
+// ... (rest of constants like upgrades, firebaseConfig)
+
+// --- Global Variables ---
+// ... (no changes needed here)
+
+// --- DOM Elements (Update shop list selectors) ---
+const loadingScreen = document.getElementById('loading-screen');
+// ... (other elements)
+const clickUpgradesList = document.getElementById('click-upgrades-list'); // Remains the same ID
+const passiveUpgradesList = document.getElementById('passive-upgrades-list'); // Remains the same ID
+// ... (other elements)
+const totalPassiveIncomeDisplay = document.getElementById('total-passive-income-display');
+
+// --- Initialization ---
+// ... (initializeApp remains mostly the same)
+
+// --- Firebase Functions ---
+// ... (loadUserData, saveUserData remain the same)
+
+// --- Game Logic ---
+// ... (handleTap, calculatePassiveIncome, startPassiveIncome remain the same)
+
+// --- Shop Logic ---
+// ... (calculateItemCost remains the same)
+
+// RENDER FUNCTION (Modified to populate sections)
+// Renamed for clarity, but logic is similar to old renderShop
+function renderBoostsSection(type) {
+    const listElement = type === 'click' ? clickUpgradesList : passiveUpgradesList;
+    const upgrades = type === 'click' ? clickUpgrades : passiveUpgrades;
+    const levels = type === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
+
+    listElement.innerHTML = ''; // Clear previous items for this section
+
+    if (!upgrades || upgrades.length === 0) {
+        listElement.innerHTML = '<p>No upgrades available yet.</p>';
+        return;
+    }
+
+    upgrades.forEach(item => {
+        const currentLevel = levels[item.id] || 0;
+        const cost = calculateItemCost(item, currentLevel);
+
+        const itemDiv = document.createElement('div');
+        itemDiv.classList.add('shop-item');
+
+        const canAfford = userData.coins >= cost;
+
+        // Use COIN_IMAGE_URL constant here
+        itemDiv.innerHTML = `
+            <div class="shop-item-info">
+                <span class="shop-item-name">${item.name}</span>
+                <p class="shop-item-desc">${item.description}</p>
+                <span class="shop-item-level">Level: ${currentLevel}</span>
+            </div>
+            <button class="buy-button" data-item-id="${item.id}" data-item-type="${type}" ${canAfford ? '' : 'disabled'}>
+                <span class="shop-item-cost">
+                    <img src="${COIN_IMAGE_URL}" alt="Coin" class="coin-icon-tiny">
+                    ${formatNumber(cost)}
+                </span>
+            </button>
+        `;
+
+        listElement.appendChild(itemDiv);
+
+        // Add event listener directly to the button
+        const buyButton = itemDiv.querySelector('.buy-button');
+        buyButton.addEventListener('click', () => buyUpgrade(item.id, type));
+    });
+}
+
+// NEW FUNCTION to render the entire boosts page
+function renderBoostsPage() {
+    if (!clickUpgradesList || !passiveUpgradesList) {
+        console.error("Boost list elements not found!");
+        return;
+    }
+    renderBoostsSection('click');
+    renderBoostsSection('passive');
+    updateShopButtonStates(); // Update buttons after rendering both sections
+}
+
+
+function buyUpgrade(itemId, type) {
+    const upgrades = type === 'click' ? clickUpgrades : passiveUpgrades;
+    const levels = type === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
+    const item = upgrades.find(i => i.id === itemId);
+
+    if (!item) {
+        console.error("Item not found:", itemId);
+        return;
+    }
+
+    const currentLevel = levels[itemId] || 0;
+    const cost = calculateItemCost(item, currentLevel);
+
+    if (userData.coins >= cost) {
+        userData.coins -= cost;
+        levels[itemId] = currentLevel + 1;
+
+        recalculateTotals(); // Recalculate tap/passive totals
+
+        // Update relevant UI parts
+        updateCoinDisplay();
+        updateStatsDisplay(); // Update header stats
+        renderBoostsSection(type); // Re-render only the affected section
+        updateShopButtonStates(); // Update all button states on the page
+
+        // Update total passive display if a passive item was bought
+        if (type === 'passive') {
+            totalPassiveIncomeDisplay.textContent = formatNumber(userData.passiveIncomePerHour);
+        }
+
+        saveUserData(true); // Force save immediately
+
+        console.log(`Bought ${item.name} (Level ${levels[itemId]}), Cost: ${formatNumber(cost)}`);
+        tg.HapticFeedback.notificationOccurred('success');
+
+    } else {
+        console.log("Not enough coins to buy", item.name);
+        tg.HapticFeedback.notificationOccurred('error');
+    }
+}
+
+// ... (recalculateTotals remains the same)
+
+
+// --- UI Update Functions ---
+function updateCoinDisplay() {
+    if (userData) {
+        const formattedCoins = formatNumber(userData.coins);
+        coinBalanceElement.textContent = formattedCoins;
+        if (profileBalance) profileBalance.textContent = formattedCoins;
+    }
+    // Update button states whenever balance changes
+     if (document.getElementById('boosts-page')?.classList.contains('active-page')) {
+       updateShopButtonStates(); // Only update shop buttons if the page is visible (optional optimization)
+     } else {
+        // If boosts page not active, maybe defer the update or update anyway if needed elsewhere
+     }
+}
+
+// ... (updateStatsDisplay, updateProfileDisplay remain the same)
+
+function updateShopButtonStates() {
+    // This function selects ALL buy buttons, which is correct for the single page
+    document.querySelectorAll('#boosts-page .buy-button').forEach(button => {
+        const itemId = button.dataset.itemId;
+        const itemType = button.dataset.itemType;
+        if (!itemId || !itemType || !userData) return; // Add check for userData
+
+        const upgrades = itemType === 'click' ? clickUpgrades : passiveUpgrades;
+        const levels = itemType === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
+        const item = upgrades.find(i => i.id === itemId);
+
+        if (item) {
+            const currentLevel = levels[itemId] || 0;
+            const cost = calculateItemCost(item, currentLevel);
+            button.disabled = userData.coins < cost;
+
+            // Update cost display on the button itself using COIN_IMAGE_URL
+            const costSpan = button.querySelector('.shop-item-cost');
+             if (costSpan) {
+                 costSpan.innerHTML = `<img src="${COIN_IMAGE_URL}" alt="Coin" class="coin-icon-tiny"> ${formatNumber(cost)}`;
+            }
+        }
+    });
+}
+
+
+function updateAllUI() {
+    recalculateTotals(); // Ensure stats are correct based on loaded levels
+    updateCoinDisplay();
+    updateStatsDisplay();
+    updateProfileDisplay();
+    renderBoostsPage(); // Render the combined boosts page
+    // updateShopButtonStates(); // renderBoostsPage calls this indirectly now
+}
+
+// ... (showPage needs to handle 'boosts-page')
+
+function showPage(pageId) {
+    pages.forEach(page => {
+        page.classList.toggle('active-page', page.id === pageId);
+    });
+    navButtons.forEach(button => {
+        button.classList.toggle('active', button.dataset.page === pageId);
+    });
+    // If showing boosts page, ensure buttons are correctly enabled/disabled
+    if (pageId === 'boosts-page') {
+        updateShopButtonStates();
+    }
+     // Scroll to top when changing page
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+        mainContent.scrollTop = 0;
+    }
+}
+
+
+// --- Number Formatting ---
+// ... (formatNumber remains the same)
+
+// --- Animations ---
+// ... (createClickFeedback remains the same)
+
+// --- Event Listeners Setup ---
+function setupEventListeners() {
+    // ... (clickerButton listener remains the same)
+
+    // Navigation (Ensure it handles 'boosts-page')
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            showPage(button.dataset.page); // This should work automatically
+        });
+    });
+
+    // ... (Profile listeners remain the same)
+    // ... (Sync button listener remains the same)
+}
+
+
+// --- App Start ---
+window.addEventListener('load', initializeApp);
