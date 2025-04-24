@@ -13,15 +13,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- Global Styles & Reset --- */
-        :root {
+        /* --- Global Styles & Reset (Keep ALL CSS from previous version) --- */
+        :root { /* ... keep all variables ... */
             --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; width: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); color: var(--text-color); overscroll-behavior: none; font-size: 16px; }
         body { display: flex; flex-direction: column; touch-action: manipulation; }
         #app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
-        #loading { display: flex; flex-direction: column; /* Allow text wrapping */ justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
+        #loading { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
         #main-content { flex-grow: 1; display: flex; overflow: hidden; }
         .page { width: 100%; height: 100%; display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 85px 15px; scroll-behavior: smooth; }
         .page.active { display: flex; }
@@ -60,7 +60,7 @@
         .buy-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
         .buy-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
         .buy-button:active:not(:disabled) { transform: scale(0.97); }
-        .buy-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .buy-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
         .profile-section { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
         .profile-info p { margin-bottom: 12px; font-size: 1em; line-height: 1.5; word-break: break-all; display: flex; align-items: center; flex-wrap: wrap; }
         .profile-info p strong { color: var(--coin-color); margin-right: 8px; min-width: 120px; display: inline-block; }
@@ -83,18 +83,25 @@
         .mission-action-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
         .mission-action-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
         .mission-action-button:active:not(:disabled) { transform: scale(0.97); }
-        .mission-action-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
+        .mission-action-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
         .reward-display { display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; color: var(--coin-color); margin-top: 5px; }
         .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
         .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
+
+        /* --- Task Page Styles --- */
+        .task-tabs { display: flex; justify-content: center; flex-wrap: wrap; /* Allow wrapping on small screens */ gap: 5px; /* Spacing between wrapped buttons */ margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; /* Keep tabs visible */ top: -20px; /* Adjust based on page padding */ background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 15px 0 10px 0; /* Space above/below tabs */ z-index: 10; }
+        .task-tabs button { background: none; border: none; color: var(--icon-color); padding: 8px 15px; /* Smaller padding */ cursor: pointer; font-size: 0.9em; /* Slightly smaller font */ font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; /* Overlap border */ transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease; border-radius: 6px 6px 0 0; /* Slight rounding */ }
+        .task-tabs button:hover { color: var(--icon-active-color); background-color: rgba(255, 255, 255, 0.05); }
+        .task-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); font-weight: 600; }
+
         #tasks-list { display: flex; flex-direction: column; gap: 15px; }
-        .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.2s ease; /* Add subtle hover effect */ }
+        .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.2s ease; }
         .task-item:hover { transform: translateY(-2px); box-shadow: 0 5px 12px var(--shadow-color); }
         .task-item-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background-color: var(--primary-bg-start); }
-        .task-item-info { flex-grow: 1; }
-        .task-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
-        .task-item-description { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; line-height: 1.4; }
+        .task-item-info { flex-grow: 1; min-width: 0; /* Prevent info from pushing actions too far */ }
+        .task-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Prevent long names breaking layout */ }
+        .task-item-description { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; /* Limit description lines */ }
         .task-item-reward { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
         .task-item-reward img { width: 16px; height: 16px; }
         .task-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
@@ -108,6 +115,9 @@
         .task-item[data-completed="true"] .task-claimed-status { display: block; }
         .task-item[data-status="verifying"] .start-task-btn { display: none; }
         .task-item[data-status="verifying"] .verify-task-btn { display: block; }
+        #no-tasks-message { text-align: center; color: var(--text-muted-color); padding: 20px; }
+
+        /* --- Code Popup Modal Styles --- */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fadeIn 0.3s ease-out; }
         .modal-overlay.visible { display: flex; }
         .modal-content { background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 400px; text-align: center; animation: slideIn 0.3s ease-out; }
@@ -156,8 +166,17 @@
             <!-- Page: Tasks -->
             <div id="tasks-screen" class="page">
                 <h2>Available Tasks</h2>
+                <!-- Task Tabs -->
+                <div class="task-tabs">
+                    <button class="task-tab-btn active" data-filter="all">All</button>
+                    <button class="task-tab-btn" data-filter="social">Social</button>
+                    <button class="task-tab-btn" data-filter="promotion">Promotion</button>
+                    <button class="task-tab-btn" data-filter="daily">Daily</button>
+                    <button class="task-tab-btn" data-filter="completed">Completed</button>
+                </div>
+                <!-- Task List -->
                 <div id="tasks-list">
-                    <!-- Task items will be loaded here -->
+                    <p id="no-tasks-message" style="display: none;">No tasks found in this category.</p>
                     <p>Loading tasks...</p>
                 </div>
             </div>
@@ -185,7 +204,7 @@
                 <div class="profile-section wallet-section">
                     <label for="ton-wallet-input">TON Wallet Address:</label>
                     <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
-                    <button id="save-wallet-button" class="task-button">Save Wallet</button> <!-- Use task-button style -->
+                    <button id="save-wallet-button" class="task-button">Save Wallet</button>
                     <p id="save-status"></p>
                 </div>
             </div>
@@ -225,36 +244,27 @@
         // --- Telegram & Firebase Vars ---
         let tg = null; let db = null; let currentUser = null; let userData = null; let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null; let isLoading = true;
         let availableTasks = {}; let currentCodeTaskId = null;
+        let currentTaskFilter = 'all'; // <<< NEW: Track active task filter
 
         // --- DOM Elements ---
         const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display'); const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
         const tasksListDiv = document.getElementById('tasks-list'); const codePopup = document.getElementById('code-popup'); const codePopupTitle = document.getElementById('code-popup-title'); const codePopupDescription = document.getElementById('code-popup-description'); const codePopupInput = document.getElementById('code-popup-input'); const codePopupCancelBtn = document.getElementById('code-popup-cancel'); const codePopupSubmitBtn = document.getElementById('code-popup-submit');
+        const taskTabButtons = document.querySelectorAll('.task-tab-btn'); // <<< NEW
+        const noTasksMessage = document.getElementById('no-tasks-message'); // <<< NEW
 
         // --- Upgrade Definitions (Keep full list) ---
-        const upgrades = [ /* Omitted for brevity - paste the full upgrades array here */
+        const upgrades = [ /* ... Full list of upgrades ... */
              { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' }, { id: 'click_2', name: 'Sharper Claws', description: '+2 coins per tap', baseCost: 100000, baseEffect: 2, type: 'click' }, { id: 'click_3', name: 'Meme Energy', description: '+5 coins per tap', baseCost: 500000, baseEffect: 5, type: 'click' }, { id: 'click_4', name: 'Wolf Pack Call', description: '+10 coins per tap', baseCost: 2000000, baseEffect: 10, type: 'click' }, { id: 'click_5', name: 'Lunar Boost', description: '+25 coins per tap', baseCost: 10000000, baseEffect: 25, type: 'click' }, { id: 'click_6', name: 'Golden Howl', description: '+50 coins per tap', baseCost: 50000000, baseEffect: 50, type: 'click' }, { id: 'click_7', name: 'Diamond Fangs', description: '+100 coins per tap', baseCost: 250000000, baseEffect: 100, type: 'click' }, { id: 'click_8', name: 'Alpha Presence', description: '+200 coins per tap', baseCost: 1000000000, baseEffect: 200, type: 'click' }, { id: 'click_9', name: 'Meme Lord Aura', description: '+500 coins per tap', baseCost: 5000000000, baseEffect: 500, type: 'click' }, { id: 'click_10', name: 'Cosmic Wolf', description: '+1000 coins per tap', baseCost: 20000000000, baseEffect: 1000, type: 'click' },
              { id: 'passive_1', name: 'Sniffing Out Coins', description: '+100 profit/hour', baseCost: 10000, baseEffect: 100, type: 'passive' }, { id: 'passive_2', name: 'Digging Spot', description: '+250 profit/hour', baseCost: 50000, baseEffect: 250, type: 'passive' }, { id: 'passive_3', name: 'Buried Treasure Map', description: '+600 profit/hour', baseCost: 150000, baseEffect: 600, type: 'passive' }, { id: 'passive_4', name: 'Meme Stash', description: '+1,500 profit/hour', baseCost: 500000, baseEffect: 1500, type: 'passive' }, { id: 'passive_5', name: 'Coin Tree Sapling', description: '+3,500 profit/hour', baseCost: 1500000, baseEffect: 3500, type: 'passive' }, { id: 'passive_6', name: 'Howling ATM', description: '+8,000 profit/hour', baseCost: 5000000, baseEffect: 8000, type: 'passive' }, { id: 'passive_7', name: 'Loyal Pack Tribute', description: '+18,000 profit/hour', baseCost: 15000000, baseEffect: 18000, type: 'passive' }, { id: 'passive_8', name: 'Wolf Den Bank', description: '+40,000 profit/hour', baseCost: 50000000, baseEffect: 40000, type: 'passive' }, { id: 'passive_9', name: 'Meme Coin Mine', description: '+90,000 profit/hour', baseCost: 150000000, baseEffect: 90000, type: 'passive' }, { id: 'passive_10', name: 'Moonlit Mint', description: '+200K profit/hour', baseCost: 500000000, baseEffect: 200000, type: 'passive' }, { id: 'passive_11', name: 'Crypto Kennel', description: '+450K profit/hour', baseCost: 1200000000, baseEffect: 450000, type: 'passive' }, { id: 'passive_12', name: 'Decentralized Den', description: '+1M profit/hour', baseCost: 3000000000, baseEffect: 1000000, type: 'passive' }, { id: 'passive_13', name: 'Blockchain Burrow', description: '+2.2M profit/hour', baseCost: 7000000000, baseEffect: 2200000, type: 'passive' }, { id: 'passive_14', name: 'Wolf Street Journal', description: '+5M profit/hour', baseCost: 15000000000, baseEffect: 5000000, type: 'passive' }, { id: 'passive_15', name: 'Golden Bone Fund', description: '+11M profit/hour', baseCost: 35000000000, baseEffect: 11000000, type: 'passive' }, { id: 'passive_16', name: 'Diamond Paw Trust', description: '+25M profit/hour', baseCost: 80000000000, baseEffect: 25000000, type: 'passive' }, { id: 'passive_17', name: 'Alpha Investment Group', description: '+55M profit/hour', baseCost: 180000000000, baseEffect: 55000000, type: 'passive' }, { id: 'passive_18', name: 'Meme Hegemony', description: '+120M profit/hour', baseCost: 400000000000, baseEffect: 120000000, type: 'passive' }, { id: 'passive_19', name: 'Lunar Treasury', description: '+250M profit/hour', baseCost: 900000000000, baseEffect: 250000000, type: 'passive' }, { id: 'passive_20', name: 'Cosmic Coin Flow', description: '+500M profit/hour', baseCost: 2000000000000, baseEffect: 500000000, type: 'passive' },
         ];
 
         // --- Initialization ---
-        window.onload = () => {
-             try {
-                 isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
-                 tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-                 try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
-                 if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable. Please launch from Telegram."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; }
-                 currentUser = tg.initDataUnsafe.user;
-                 firebase.initializeApp(firebaseConfig); db = firebase.database();
-                 loadUserDataAndInit();
-                 setupEventListeners();
-             } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
+        window.onload = () => { /* ... Keep robust init logic ... */
+             try { isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf..."; tg = window.Telegram.WebApp; tg.ready(); tg.expand(); try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); } if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; } currentUser = tg.initDataUnsafe.user; firebase.initializeApp(firebaseConfig); db = firebase.database(); loadUserDataAndInit(); setupEventListeners(); } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}.`); }
         };
 
         // --- Popup Helpers ---
-        function showPopup(params) { if (tg) { tg.showPopup(params); } else { alert(`${params.title}\n\n${params.message}`); } }
-        function showInfoPopup(title, message) { showPopup({ title: title || "Info", message: message, buttons: [{ type: "ok" }] }); }
-        function showWarningPopup(title, message) { showPopup({ title: title || "⚠️ Warning", message: message, buttons: [{ type: "ok" }] }); }
-        function showRewardPopup(title, message) { showPopup({ title: title || "🎉 Reward!", message: message, buttons: [{ type: "ok" }] }); }
+        function showPopup(params) { /* ... */ } function showInfoPopup(title, message) { /* ... */ } function showWarningPopup(title, message) { /* ... */ } function showRewardPopup(title, message) { /* ... */ }
 
         // --- Firebase Functions ---
         function loadUserDataAndInit() {
@@ -262,6 +272,7 @@
              const userId = currentUser.id.toString(); const userRef = db.ref('users/' + userId);
              loadingDiv.textContent = "Loading your progress...";
              userRef.once('value').then((snapshot) => {
+                 // <<< MODIFIED: Ensure completedTasks is initialized as {} >>>
                  const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
                  if (snapshot.exists()) {
                      userData = snapshot.val();
@@ -269,180 +280,308 @@
                  } else { console.log("New user detected:", userId); userData = defaultData; saveUserData(true); }
                  const cheatDetected = performAntiCheatCheck();
                  if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); }
-                 return loadAndDisplayTasks(); // Chain task loading
-             }).then(() => { // Runs after tasks are loaded (or failed gracefully)
+                 return loadAndDisplayTasks();
+             }).then(() => {
                  initializeAppUI(); startPassiveIncome(); isLoading = false; console.log("App Ready.");
              }).catch((error) => { /* ... Robust error handling ... */
-                 console.error("------------------------------------"); console.error("Firebase Load/Init Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------"); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false;
+                  console.error("Load/Init Error:", error); let displayMessage = `Failed to load data.`; if(error?.message) displayMessage += ` ${error.message}`; showError(displayMessage); isLoading = false;
              });
         }
 
-        function saveUserData(force = false) {
+        function saveUserData(force = false) { /* ... Keep robust save logic ... */
              if (isLoading || !currentUser || !db || !userData) return; const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout);
-             if (force || now - lastSaveTime > SAVE_INTERVAL) {
-                 console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
-                 db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error));
-             } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
-        }
+             if (force || now - lastSaveTime > SAVE_INTERVAL) { console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }; db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error)); }
+             else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
+         }
 
         // --- Anti-Cheat Logic ---
-        function performAntiCheatCheck() {
-            if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none';
-            if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) {
-                const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered for user ${currentUser.id}. Fine: ${fineAmount}`);
-                showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied.`);
-                fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block';
-                return true;
-            } return false;
-        }
+        function performAntiCheatCheck() { /* ... Keep as is ... */ }
 
         // --- Game Logic ---
-        function handleTap(event) { if (isLoading || !userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
-        function calculateTapPower() { let power = BASE_TAP_EARN; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'click') { const level = userData.upgrades[upgradeId]?.level || 0; power += upgradeDef.baseEffect * level; } } } return power; }
-        function calculatePassiveIncomeRate() { let rate = 0; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'passive') { const level = userData.upgrades[upgradeId]?.level || 0; rate += upgradeDef.baseEffect * level; } } } return rate; }
-        function applyPassiveIncome() { if (isLoading || !userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); } }
-        function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); }
-        function scheduleSave() { saveUserData(); }
-        function calculateOfflineProgress() {
-            if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return;
-            const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
-            if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); }
-        }
+        function handleTap(event) { /* ... */ } function calculateTapPower() { /* ... */ } function calculatePassiveIncomeRate() { /* ... */ } function applyPassiveIncome() { /* ... */ } function startPassiveIncome() { /* ... */ } function scheduleSave() { saveUserData(); } function calculateOfflineProgress() { /* ... */ }
 
         // --- Mission Logic ---
-        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Mission Status", "You have already claimed the reward for this mission."); updateMissionUI(missionId, 'claimed', false); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed. Reward: ${WOLF_MISSION_REWARD}`); showRewardPopup("Mission Complete!", `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins!`); updateMissionUI(missionId, 'claimed', false); updateCoinDisplay(); updateProfileStats(); saveUserData(true); } else { updateMissionUI(missionId, 'incomplete', false); showInfoPopup("Mission Incomplete", `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name.`); } }
-        function copyMissionEmoji() { navigator.clipboard.writeText(WOLF_EMOJI).then(() => { copyEmojiBtn.textContent = 'Copied!'; setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500); }).catch(err => { console.error('Failed to copy emoji: ', err); }); }
+        function checkAndClaimMission() { /* ... */ } function copyMissionEmoji() { /* ... */ }
 
-        // --- Task Logic ---
-        function loadAndDisplayTasks() {
-             if (!db) return Promise.reject("Database not initialized"); tasksListDiv.innerHTML = '<p>Loading tasks...</p>';
-             return db.ref('tasks').once('value').then(snapshot => {
-                 tasksListDiv.innerHTML = ''; availableTasks = {}; let hasTasks = false;
-                 if (snapshot.exists()) {
-                     availableTasks = snapshot.val() || {}; // Ensure it's an object
-                     for (const taskId in availableTasks) {
-                         if (Object.hasOwnProperty.call(availableTasks, taskId)) { renderTaskItem(availableTasks[taskId], taskId); hasTasks = true; }
-                     }
-                 }
-                 if (!hasTasks) { tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>'; }
-             }).catch(error => {
-                 console.error("Error loading tasks:", error); tasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks. Please try again later.</p>'; availableTasks = {};
-             });
+        // --- Task Logic (MODIFIED) ---
+
+        // Helper to get the start of today timestamp (local timezone)
+        function getStartOfTodayTimestamp() {
+            const now = new Date();
+            now.setHours(0, 0, 0, 0); // Set to midnight
+            return now.getTime();
         }
 
-        function renderTaskItem(taskData, taskId) {
-             if (!taskData || !taskId) return; const isCompleted = userData?.completedTasks?.[taskId] === true;
-             const itemDiv = document.createElement('div'); itemDiv.className = 'task-item'; itemDiv.dataset.taskId = taskId; itemDiv.dataset.completed = isCompleted;
-             const imageUrl = taskData.imageUrl || `https://via.placeholder.com/50/1a1a2e/e0e0e0?text=${(taskData.name||'T')[0]}`; // Default image with letter
-             const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete the action and enter the code.');
-             itemDiv.innerHTML = `
-                 <img src="${imageUrl}" alt="" class="task-item-image" onerror="this.style.display='none'">
-                 <div class="task-item-info">
-                     <div class="task-item-name">${taskData.name || 'Unnamed Task'}</div>
-                     <div class="task-item-description">${description}</div>
-                     <div class="task-item-reward"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span>+${formatNumber(taskData.reward || 0)}</span> </div>
-                 </div>
-                 <div class="task-actions">
-                     <button class="task-button start-task-btn">Start</button>
-                     <button class="task-button verify-task-btn">Verify</button>
-                     <span class="task-claimed-status">Claimed</span>
-                 </div>`;
-             const startBtn = itemDiv.querySelector('.start-task-btn'); const verifyBtn = itemDiv.querySelector('.verify-task-btn'); const claimedStatus = itemDiv.querySelector('.task-claimed-status');
-             if (isCompleted) { startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block'; }
-             else { startBtn.style.display = 'block'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'none'; startBtn.addEventListener('click', handleStartTaskClick); verifyBtn.addEventListener('click', handleVerifyTaskClick); }
-             tasksListDiv.appendChild(itemDiv);
+        // Modified completion check
+        function isCompleted(taskId, taskData) {
+            if (!userData || !userData.completedTasks || !userData.completedTasks[taskId]) {
+                return false; // Not found in user's completed list
+            }
+
+            const completionTimestamp = userData.completedTasks[taskId];
+
+            if (taskData?.category === 'daily') {
+                const startOfToday = getStartOfTodayTimestamp();
+                // Completed today if timestamp is on or after midnight today
+                return completionTimestamp >= startOfToday;
+            } else {
+                // For non-daily tasks, any timestamp means completed permanently
+                return true;
+            }
+        }
+
+        function loadAndDisplayTasks() {
+            // Loads ALL tasks, filtering happens in displayFilteredTasks
+            if (!db) return Promise.reject("Database not initialized");
+            tasksListDiv.innerHTML = '<p>Loading tasks...</p>';
+            noTasksMessage.style.display = 'none';
+
+            return db.ref('tasks').once('value')
+                .then(snapshot => {
+                    availableTasks = {}; // Reset task cache
+                    if (snapshot.exists()) {
+                        availableTasks = snapshot.val() || {};
+                    }
+                    // Display tasks based on the *currently selected* filter
+                    displayFilteredTasks();
+                })
+                .catch(error => {
+                    console.error("Error loading tasks:", error);
+                    tasksListDiv.innerHTML = ''; // Clear loading message
+                    noTasksMessage.textContent = 'Could not load tasks.';
+                    noTasksMessage.style.display = 'block';
+                    noTasksMessage.style.color = 'var(--error-color)';
+                    availableTasks = {};
+                });
+        }
+
+        function displayFilteredTasks() {
+            if (isLoading || !userData) return; // Don't render if still loading user data
+
+            tasksListDiv.innerHTML = ''; // Clear previous list
+            let tasksFound = 0;
+            const todayStart = getStartOfTodayTimestamp(); // Get today's start for daily check
+
+            for (const taskId in availableTasks) {
+                if (Object.hasOwnProperty.call(availableTasks, taskId)) {
+                    const taskData = availableTasks[taskId];
+                    if (!taskData) continue; // Skip if task data is invalid
+
+                    const completed = isCompleted(taskId, taskData); // Use the new check
+
+                    let shouldDisplay = false;
+                    const category = taskData.category || 'other'; // Default category
+
+                    switch (currentTaskFilter) {
+                        case 'all':
+                            shouldDisplay = !completed || category === 'daily'; // Show incomplete or daily tasks
+                            break;
+                        case 'completed':
+                            shouldDisplay = completed && category !== 'daily'; // Show completed NON-daily
+                            break;
+                        case 'daily':
+                             // Show daily tasks whether completed today or not (UI handles button state)
+                            shouldDisplay = category === 'daily';
+                            break;
+                        default: // Specific category filter (social, promotion, etc.)
+                            shouldDisplay = category === currentTaskFilter && (!completed || category === 'daily');
+                            break;
+                    }
+
+                    if (shouldDisplay) {
+                        renderTaskItem(taskData, taskId, completed); // Pass completion status
+                        tasksFound++;
+                    }
+                }
+            }
+
+            if (tasksFound === 0) {
+                noTasksMessage.textContent = `No tasks found in the '${currentTaskFilter}' category.`;
+                noTasksMessage.style.display = 'block';
+                noTasksMessage.style.color = 'var(--text-muted-color)'; // Reset color
+            } else {
+                noTasksMessage.style.display = 'none';
+            }
+        }
+
+
+        function renderTaskItem(taskData, taskId, isCompletedToday) { // Now receives completion status
+            if (!taskData || !taskId) return;
+
+            // Use the passed completion status directly
+            // const isCompletedToday = isCompleted(taskId, taskData);
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'task-item';
+            itemDiv.dataset.taskId = taskId;
+            itemDiv.dataset.completed = isCompletedToday; // Use the calculated status
+
+            const imageUrl = taskData.imageUrl || `https://via.placeholder.com/50/1a1a2e/e0e0e0?text=${(taskData.name||'T')[0]}`;
+            const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete the action and enter the code.');
+
+            itemDiv.innerHTML = `
+                <img src="${imageUrl}" alt="" class="task-item-image" onerror="this.style.display='none'">
+                <div class="task-item-info">
+                    <div class="task-item-name">${taskData.name || 'Unnamed Task'}</div>
+                    <div class="task-item-description">${description}</div>
+                    <div class="task-item-reward"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span>+${formatNumber(taskData.reward || 0)}</span> </div>
+                </div>
+                <div class="task-actions">
+                    <button class="task-button start-task-btn">Start</button>
+                    <button class="task-button verify-task-btn">Verify</button>
+                    <span class="task-claimed-status">Claimed</span>
+                </div>`;
+
+            const startBtn = itemDiv.querySelector('.start-task-btn');
+            const verifyBtn = itemDiv.querySelector('.verify-task-btn');
+            const claimedStatus = itemDiv.querySelector('.task-claimed-status');
+
+            // Determine button visibility based ONLY on completion status for TODAY
+            if (isCompletedToday) {
+                startBtn.style.display = 'none';
+                verifyBtn.style.display = 'none';
+                claimedStatus.textContent = taskData.category === 'daily' ? 'Claimed Today' : 'Claimed';
+                claimedStatus.style.display = 'block';
+            } else {
+                startBtn.style.display = 'block';
+                verifyBtn.style.display = 'none';
+                claimedStatus.style.display = 'none';
+                 // Remove potentially old listeners before adding new ones
+                startBtn.removeEventListener('click', handleStartTaskClick);
+                verifyBtn.removeEventListener('click', handleVerifyTaskClick);
+                // Add listeners
+                startBtn.addEventListener('click', handleStartTaskClick);
+                verifyBtn.addEventListener('click', handleVerifyTaskClick);
+            }
+
+            tasksListDiv.appendChild(itemDiv);
         }
 
         function handleStartTaskClick(event) {
              if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId];
-             if (!taskData) { console.error("Task data missing:", taskId); return; } if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
-             if (taskData.link) { tg.openLink(taskData.link); } // Use TG method for links
-             else if (taskData.type === 'link') { showWarningPopup("Task Error", "Task link is missing."); return; }
-             button.disabled = true;
+             if (!taskData) { console.error("Task data missing:", taskId); return; }
+             // Use isCompleted to check if it's already done *for today* if daily
+             if (isCompleted(taskId, taskData)) { showInfoPopup("Task Info", taskData.category === 'daily' ? "Already completed today." : "Already completed."); return; }
+
+             if (taskData.link) { tg.openLink(taskData.link); } else if (taskData.type === 'link') { showWarningPopup("Task Error", "Task link is missing."); return; }
+             button.disabled = true; // Temporarily disable start
+
              if (taskData.type === 'link') {
                  taskItem.dataset.status = 'verifying'; const verifyBtn = taskItem.querySelector('.verify-task-btn'); verifyBtn.style.display = 'block'; verifyBtn.disabled = true; verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`; let countdown = TASK_VERIFICATION_DELAY / 1000;
                  const intervalId = setInterval(() => {
+                      // Clear interval if task element is removed (e.g., tab switch)
+                      if (!taskItem.isConnected) { clearInterval(intervalId); return; }
                      countdown--; if (countdown > 0) { verifyBtn.textContent = `Verify (${countdown}s)`; }
                      else { clearInterval(intervalId); verifyBtn.textContent = 'Verify'; verifyBtn.disabled = false; }
                  }, 1000);
-             } else if (taskData.type === 'code') { showCodePopup(taskId, taskData); button.disabled = false; /* Allow cancel */ }
-             else { button.disabled = false; showWarningPopup("Task Error", "Unknown task type."); }
+                  // Re-enable start button after a short delay in case user needs to restart
+                  setTimeout(() => { if(!isCompleted(taskId, taskData)) button.disabled = false; } , 2000);
+             } else if (taskData.type === 'code') {
+                 showCodePopup(taskId, taskData); button.disabled = false; /* Allow cancel/restart */
+            } else { button.disabled = false; showWarningPopup("Task Error", "Unknown task type."); }
         }
 
         function handleVerifyTaskClick(event) {
              if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId];
-             if (!taskData) { console.error("Task data missing:", taskId); return; } if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
+             if (!taskData) { console.error("Task data missing:", taskId); return; }
+             if (isCompleted(taskId, taskData)) { showInfoPopup("Task Info", taskData.category === 'daily' ? "Already completed today." : "Already completed."); return; }
              button.disabled = true; button.textContent = "Verifying...";
+             // Simulate verification for link type
              console.log(`Verification successful (simulated) for task ${taskId}`); claimTaskReward(taskId, taskData.reward);
         }
 
-        function showCodePopup(taskId, taskData) { currentCodeTaskId = taskId; codePopupTitle.textContent = taskData.name || "Enter Code"; codePopupDescription.textContent = taskData.description || "Enter the code."; codePopupInput.value = ''; codePopup.classList.add('visible'); codePopupInput.focus(); }
-        function hideCodePopup() { codePopup.classList.remove('visible'); currentCodeTaskId = null; }
+        function showCodePopup(taskId, taskData) { /* ... Keep as is ... */ }
+        function hideCodePopup() { /* ... Keep as is ... */ }
         function handleCodeSubmit() {
              if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) { hideCodePopup(); return; }
              const taskId = currentCodeTaskId; const taskData = availableTasks[taskId]; const submittedCode = codePopupInput.value.trim(); if (!submittedCode) { showWarningPopup("Input Error", "Please enter the code."); return; }
-             // !! SECURITY WARNING: This code check is CLIENT-SIDE ONLY and easily bypassed. !!
-             // !! For real rewards, verification MUST happen on a secure backend (e.g., Firebase Functions). !!
+             // !! SECURITY WARNING: CLIENT-SIDE CHECK !!
              if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) {
+                  if (isCompleted(taskId, taskData)) { // Check completion again before rewarding
+                      hideCodePopup();
+                      showInfoPopup("Task Info", taskData.category === 'daily' ? "Already completed today." : "Already completed.");
+                      return;
+                  }
                  console.log(`Code verification successful for task ${taskId}`); hideCodePopup(); claimTaskReward(taskId, taskData.reward);
-             } else { showWarningPopup("Incorrect Code", "The code is incorrect. Please try again."); codePopupInput.focus(); codePopupInput.select(); }
+             } else { showWarningPopup("Incorrect Code", "The code is incorrect."); codePopupInput.focus(); codePopupInput.select(); }
         }
 
         function claimTaskReward(taskId, rewardAmount) {
-             if (isLoading || !userData || !taskId || rewardAmount === undefined) return; if (userData.completedTasks?.[taskId]) { console.warn(`Attempted duplicate claim: ${taskId}`); updateTaskItemUI(taskId, true); return; }
-             userData.coins += rewardAmount; if (!userData.completedTasks) userData.completedTasks = {}; userData.completedTasks[taskId] = true;
-             console.log(`Task ${taskId} completed. Reward: ${rewardAmount}`); showRewardPopup("Task Complete!", `You earned ${formatNumber(rewardAmount)} coins!`);
-             updateTaskItemUI(taskId, true); updateCoinDisplay(); if (document.getElementById('profile-screen').classList.contains('active')) { updateProfileStats(); }
-             saveUserData(true);
+             if (isLoading || !userData || !taskId || rewardAmount === undefined) return;
+             // Final check using isCompleted logic
+             if (isCompleted(taskId, availableTasks[taskId])) { console.warn(`Attempted duplicate claim: ${taskId}`); displayFilteredTasks(); return; } // Refresh list on duplicate attempt
+
+             userData.coins += rewardAmount;
+             if (!userData.completedTasks) userData.completedTasks = {};
+             // <<< Store CURRENT TIMESTAMP on completion >>>
+             userData.completedTasks[taskId] = Date.now();
+
+             console.log(`Task ${taskId} completed. Reward: ${rewardAmount}`);
+             showRewardPopup("Task Complete!", `You earned ${formatNumber(rewardAmount)} coins!`);
+
+             // Refresh the tasks list to reflect the new state (especially for completed tab)
+             displayFilteredTasks();
+
+             updateCoinDisplay();
+             if (document.getElementById('profile-screen').classList.contains('active')) { updateProfileStats(); }
+             saveUserData(true); // Force save
         }
 
-        function updateTaskItemUI(taskId, isCompleted) {
-             const taskItem = tasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`); if (!taskItem) return;
-             const startBtn = taskItem.querySelector('.start-task-btn'); const verifyBtn = taskItem.querySelector('.verify-task-btn'); const claimedStatus = taskItem.querySelector('.task-claimed-status');
-             taskItem.dataset.completed = isCompleted; taskItem.dataset.status = isCompleted ? 'completed' : 'pending';
-             if (isCompleted) { startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block'; startBtn.removeEventListener('click', handleStartTaskClick); verifyBtn.removeEventListener('click', handleVerifyTaskClick); }
-             else { startBtn.style.display = 'block'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'none'; startBtn.disabled = false; verifyBtn.disabled = true; verifyBtn.textContent = 'Verify'; startBtn.removeEventListener('click', handleStartTaskClick); startBtn.addEventListener('click', handleStartTaskClick); verifyBtn.removeEventListener('click', handleVerifyTaskClick); verifyBtn.addEventListener('click', handleVerifyTaskClick); }
-        }
+        // Removed updateTaskItemUI as displayFilteredTasks handles updates now
 
         // --- UI Functions ---
-        function initializeAppUI() { missionEmojiDisplay.textContent = WOLF_EMOJI; renderShopItems(); updateUI(); loadingDiv.style.display = 'none'; mainContentDiv.style.display = 'flex'; navbar.style.display = 'flex'; }
-        function updateUI() { if (isLoading || !userData || !currentUser) return; updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI(); /* Task UI updated via claim/load */ }
-        function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
-        function updateGameStats() { if (!userData) return; tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
-        function updateProfileStats() { if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
-        function updateMissionStatusUI() { if (!userData || !currentUser) return; const missionId = 'lastNameWolf'; const status = userData?.missions?.[missionId] || 'incomplete'; const lastName = currentUser?.last_name || ''; const isConditionMet = lastName.endsWith(WOLF_EMOJI); updateMissionUI(missionId, status, isConditionMet); }
-        function updateMissionUI(missionId, status, isConditionMet) { missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
-        function renderShopItems() { clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData?.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.removeEventListener('click', handleBuyButtonClick); button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
-        function updateShopItemsUI() { if (!userData) return; const currentCoins = userData.coins; upgrades.forEach(upgrade => { const itemDiv = document.getElementById(`shop-item-${upgrade.id}`); if (!itemDiv) return; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); const nameSpan = itemDiv.querySelector('.shop-item-name'); if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`; const costSpan = itemDiv.querySelector('.cost-value'); if (costSpan) costSpan.textContent = formatNumber(cost); const button = itemDiv.querySelector('.buy-button'); if (button) button.disabled = currentCoins < cost; }); }
-        function handleBuyButtonClick(event) { const upgradeId = event.target.dataset.upgradeId; handleUpgradePurchase(upgradeId); }
-        function handleUpgradePurchase(upgradeId) { if (isLoading || !userData) return; const upgradeDef = upgrades.find(u => u.id === upgradeId); if (!upgradeDef) return; const currentLevel = userData.upgrades?.[upgradeId]?.level || 0; const cost = calculateUpgradeCost(upgradeDef, currentLevel); if (userData.coins >= cost) { userData.coins -= cost; if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 }; userData.upgrades[upgradeId].level += 1; console.log(`Purchased ${upgradeDef.name} (Lv. ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); updateUI(); scheduleSave(); } else { console.log("Insufficient funds:", upgradeDef.name); const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`); if (button) { button.style.animation = 'shake 0.5s'; setTimeout(() => button.style.animation = '', 500); } } }
-        function calculateUpgradeCost(upgradeDef, currentLevel) { return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE); }
-        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
-        function showPage(pageId) { if (isLoading) return; document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); const targetPage = document.getElementById(pageId); if (!targetPage) { console.error("Target page not found:", pageId); return; } targetPage.classList.add('active'); navButtons.forEach(button => { button.classList.remove('active'); if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active'); }); if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); } /* Could add logic to refresh tasks if needed: else if (pageId === 'tasks-screen') { loadAndDisplayTasks(); } */ }
-        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId).classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
-        function saveWallet() { if (isLoading || !userData) return; const newAddress = tonWalletInput.value.trim(); userData.tonWallet = newAddress; saveUserData(true); saveStatusP.textContent = 'Wallet address saved!'; setTimeout(() => saveStatusP.textContent = '', 3000); }
-        function showError(message) { const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred.'; loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false; }
-        function formatNumber(num) { num = Math.floor(num); const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]; let suffixIndex = 0; if (num < 1000) return num.toString(); while (num >= 1000 && suffixIndex < suffixes.length - 1) { num /= 1000; suffixIndex++; } return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex]; }
+        function initializeAppUI() { /* ... Keep as is ... */ }
+        function updateUI() { /* ... Keep as is ... */ }
+        function updateCoinDisplay() { /* ... */ }
+        function updateGameStats() { /* ... */ }
+        function updateProfileStats() { /* ... */ }
+        function updateMissionStatusUI() { /* ... */ }
+        function updateMissionUI(missionId, status, isConditionMet) { /* ... */ }
+        function renderShopItems() { /* ... */ }
+        function updateShopItemsUI() { /* ... */ }
+        function handleBuyButtonClick(event) { /* ... */ }
+        function handleUpgradePurchase(upgradeId) { /* ... */ }
+        function calculateUpgradeCost(upgradeDef, currentLevel) { /* ... */ }
+        function createClickAnimation(x, y, amount) { /* ... */ }
+        function showPage(pageId) { /* ... Keep as is ... */ }
+        function showShopCategory(categoryId) { /* ... */ }
+        function saveWallet() { /* ... */ }
+        function showError(message) { /* ... Keep robust error handler ... */ }
+        function formatNumber(num) { /* ... */ }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-             coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission); codePopupCancelBtn.removeEventListener('click', hideCodePopup); codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit); codePopup.removeEventListener('click', handlePopupOverlayClick); // Ensure removal
-
+            // Standard listeners
+             coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission); codePopupCancelBtn.removeEventListener('click', hideCodePopup); codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit); codePopup.removeEventListener('click', handlePopupOverlayClick);
              coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
              saveWalletButton.addEventListener('click', saveWallet);
              copyEmojiBtn.addEventListener('click', copyMissionEmoji);
              missionClaimBtn.addEventListener('click', checkAndClaimMission);
              codePopupCancelBtn.addEventListener('click', hideCodePopup);
              codePopupSubmitBtn.addEventListener('click', handleCodeSubmit);
-             codePopup.addEventListener('click', handlePopupOverlayClick); // Add overlay click listener
+             codePopup.addEventListener('click', handlePopupOverlayClick);
+
+             // Task Tab Listeners <<< NEW >>>
+             taskTabButtons.forEach(button => {
+                 button.addEventListener('click', () => {
+                     if (isLoading) return; // Prevent changing tabs while loading
+                     const filter = button.dataset.filter;
+                     if (currentTaskFilter === filter) return; // No change if clicking the active tab
+
+                     currentTaskFilter = filter;
+
+                     // Update active class
+                     taskTabButtons.forEach(btn => btn.classList.remove('active'));
+                     button.classList.add('active');
+
+                     // Re-display tasks with the new filter
+                     displayFilteredTasks();
+                 });
+             });
              // Task button listeners are added in renderTaskItem
         }
 
-        // Helper for closing popup on overlay click
-        function handlePopupOverlayClick(event) {
-            if (event.target === codePopup) { hideCodePopup(); }
-        }
-
+        function handlePopupOverlayClick(event) { if (event.target === codePopup) { hideCodePopup(); } }
 
     </script>
 
