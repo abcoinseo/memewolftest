@@ -1,60 +1,56 @@
+/* --- Add or Modify these styles --- */
+
 /* Basic Reset & Font */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+    -webkit-tap-highlight-color: transparent;
 }
 
 :root {
     /* Define color variables for easy theme changes */
-    --background-color: #1a1a2e; /* Dark blue/purple */
-    --primary-color: #e94560;    /* Vibrant pink/red */
-    --secondary-color: #16213e;  /* Darker blue */
-    --accent-color: #0f3460;     /* Medium blue */
-    --text-color: #ffffff;       /* White text */
-    --text-muted-color: #a0a0a0; /* Grey text */
+    --background-color: #12121a; /* Slightly darker bg */
+    --primary-color: #ff8c00;    /* Vibrant Orange/Gold */
+    --secondary-color: #1e1e2f;  /* Darker blue/purple */
+    --accent-color: #2a2a3e;     /* Medium blue/purple */
+    --text-color: #e0e0e0;       /* Lighter White text */
+    --text-muted-color: #888dac; /* Greyish blue text */
     --success-color: #4caf50;
     --error-color: #f44336;
-    --coin-glow: #ffd700;        /* Gold-like glow */
+    --coin-glow: #ffd700;
+    --border-color: rgba(255, 255, 255, 0.1); /* Consistent border */
+    --header-height: 60px; /* Define header height */
+    --nav-height: 65px;   /* Define nav height */
 }
 
 body {
     background-color: var(--background-color);
     color: var(--text-color);
-    overflow: hidden; /* Prevent default body scroll */
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    height: 100vh; /* Ensure full viewport height */
-    overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
-}
-
-/* Loading Screen */
-#loading-screen {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     flex-direction: column;
     height: 100vh;
-    font-size: 1.2em;
-    color: var(--text-muted-color);
+    overscroll-behavior-y: contain;
 }
 
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top: 4px solid var(--primary-color);
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-top: 15px;
+/* Material Symbols Base Style */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24; /* Base size */
+  font-size: inherit; /* Inherit size from parent by default */
+  vertical-align: middle; /* Align icons better with text */
+  line-height: 1; /* Prevent extra spacing */
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+
+/* Loading Screen */
+#loading-screen { /* No change needed */ }
+.spinner { /* No change needed */ }
 
 
 /* App Container */
@@ -63,26 +59,42 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
-    max-width: 500px; /* Max width for larger screens */
-    margin: 0 auto;   /* Center on larger screens */
-    background-color: var(--secondary-color);
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: var(--secondary-color); /* Use secondary for main background */
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    position: relative; /* Needed for absolute positioning inside */
+    position: relative;
 }
 
 /* Header */
 .app-header {
-    background-color: var(--accent-color);
-    padding: 10px 15px;
+    background-color: var(--accent-color); /* Slightly different color */
+    padding: 0 15px; /* Adjust padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
+    height: var(--header-height);
+    position: sticky; /* Keep header visible */
+    top: 0;
+    z-index: 10;
 }
 
 .user-info-short {
-    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95em;
     color: var(--text-muted-color);
+    font-weight: 500;
+}
+
+.header-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
 }
 
 .balance-container {
@@ -90,63 +102,70 @@ body {
     align-items: center;
     font-size: 1.3em;
     font-weight: bold;
+    background-color: rgba(0,0,0,0.2);
+    padding: 5px 10px;
+    border-radius: 15px;
 }
 
-.coin-icon-small {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-.coin-icon-tiny {
-    width: 16px;
-    height: 16px;
-    margin-right: 4px;
-    vertical-align: middle;
-}
+.coin-icon-small { /* Keep existing */ }
+.coin-icon-tiny { /* Keep existing */ }
 
 
 /* Main Content Area */
 #main-content {
-    flex-grow: 1; /* Take remaining vertical space */
-    overflow-y: auto; /* Allow scrolling within content */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    position: relative; /* For page positioning */
-    padding: 15px;
+    flex-grow: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    padding: 20px 15px; /* Consistent padding */
+    /* Calculate height considering sticky header/footer */
+    /* height: calc(100vh - var(--header-height) - var(--nav-height)); */ /* Optional, might conflict with flex-grow */
 }
 
 /* Page Styling */
 .page {
-    display: none; /* Hide pages by default */
+    display: none;
     width: 100%;
     animation: fadeIn 0.3s ease-in-out;
 }
-
-.page.active-page {
-    display: block; /* Show the active page */
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.page.active-page { display: block; }
+@keyframes fadeIn { /* Keep existing */ }
 
 h2 {
     color: var(--primary-color);
-    margin-bottom: 20px;
+    margin-bottom: 25px; /* More space below title */
     text-align: center;
+    font-size: 1.8em; /* Larger page title */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.page-title-icon {
+    font-size: 1.1em; /* Adjust icon size relative to h2 */
+    font-variation-settings: 'wght' 500;
 }
 
 /* Game Page Specifics */
 .stats-display {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 20px;
-    font-size: 0.9em;
+    margin-bottom: 25px;
+    font-size: 0.95em;
     color: var(--text-muted-color);
     background-color: var(--accent-color);
-    padding: 8px;
-    border-radius: 8px;
+    padding: 10px 15px;
+    border-radius: 12px; /* More rounded */
+    gap: 15px; /* Space between stats */
+}
+.stats-display span { /* Style individual stat items */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.stats-icon {
+    font-size: 1.2em; /* Slightly larger icons */
+    color: var(--primary-color); /* Color icons */
 }
 
 .clicker-area {
@@ -154,145 +173,169 @@ h2 {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-top: 30px;
-    position: relative; /* For feedback positioning */
-    min-height: 250px; /* Ensure space for button */
+    margin: 40px 0; /* More vertical space */
+    position: relative;
+    min-height: 200px; /* Adjust as needed */
 }
 
-.clicker-button {
+.clicker-button { /* Keep existing */ }
+#clicker-image {
+    width: 180px; /* Make main coin larger */
+    height: 180px;
+    /* Keep other styles: border-radius, box-shadow, transitions */
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px var(--coin-glow));
+}
+.clicker-button:active #clicker-image { /* Keep existing */ }
+#click-feedback-container { /* Keep existing */ }
+.click-feedback { /* Keep existing */ }
+
+/* --- Boosts Page Tabs --- */
+.tabs-container {
+    margin-bottom: 20px;
+    overflow-x: auto; /* Allow scrolling if tabs overflow */
+     /* Hide scrollbar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.tabs-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.tabs {
+    display: flex;
+    justify-content: center; /* Center tabs */
+    border-bottom: 2px solid var(--accent-color);
+    white-space: nowrap; /* Prevent wrapping */
+    padding-bottom: 5px; /* Space for active indicator */
+}
+
+.tab-button {
     background: none;
     border: none;
+    color: var(--text-muted-color);
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: 500;
     cursor: pointer;
-    padding: 0;
-    transition: transform 0.1s ease-out;
-    position: relative; /* For potential pseudo-elements */
+    transition: color 0.3s ease, border-bottom-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative; /* For active indicator */
+    border-bottom: 3px solid transparent; /* Placeholder for active border */
+    margin-bottom: -2px; /* Align border with container border */
+}
+.tab-button .material-symbols-outlined {
+    font-size: 1.3em; /* Icon size in tab */
 }
 
-.clicker-button:active {
-    transform: scale(0.95);
+.tab-button:hover {
+    color: var(--text-color);
 }
 
-#clicker-image {
-    width: 150px; /* Adjust as needed */
-    height: 150px;
-    border-radius: 50%;
-    box-shadow: 0 0 25px var(--coin-glow), 0 0 10px rgba(0, 0, 0, 0.3);
-    transition: box-shadow 0.2s ease;
+.tab-button.active {
+    color: var(--primary-color);
+    font-weight: 600;
+     border-bottom-color: var(--primary-color);
 }
 
-.clicker-button:hover #clicker-image {
-     box-shadow: 0 0 35px var(--coin-glow), 0 0 15px rgba(0, 0, 0, 0.4);
+.tab-content {
+    display: none;
+    animation: fadeInContent 0.5s ease; /* Fade in content */
 }
 
-/* Click Feedback Animation (+1 flying text) */
-#click-feedback-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none; /* Allow clicks to pass through */
-    overflow: hidden; /* Contain animations */
+.tab-content.active {
+    display: block;
 }
 
-.click-feedback {
-    position: absolute;
-    font-size: 1.5em;
-    font-weight: bold;
-    color: var(--coin-glow);
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    animation: floatUp 1s ease-out forwards;
-    white-space: nowrap;
-    user-select: none; /* Prevent text selection */
+@keyframes fadeInContent {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes floatUp {
-    0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-80px) scale(0.8);
-    }
+.passive-income-info { /* Keep existing styles, adjust spacing if needed */
+    margin-bottom: 20px;
 }
 
-/* Shop Pages */
+
+/* --- Shop List (Boosts) --- */
 .shop-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px; /* Slightly tighter gap */
 }
 
 .shop-item {
     background-color: var(--accent-color);
-    padding: 15px;
+    padding: 12px 15px; /* Adjust padding */
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
 }
+.shop-item:hover { /* Keep existing hover */ }
 
-.shop-item-info {
-    flex-grow: 1;
-    margin-right: 10px;
-}
-
-.shop-item-name {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: var(--primary-color);
-}
-
-.shop-item-desc {
-    font-size: 0.9em;
-    color: var(--text-muted-color);
-    margin: 4px 0;
-}
-
-.shop-item-level {
-    font-size: 0.8em;
-    color: var(--text-color);
-    background-color: var(--secondary-color);
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-}
-
-.shop-item-cost {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-}
+.shop-item-info { /* Keep existing */ }
+.shop-item-name { /* Keep existing */ }
+.shop-item-desc { /* Keep existing */ }
+.shop-item-level { /* Keep existing */ }
 
 .buy-button {
     background-color: var(--primary-color);
-    color: var(--text-color);
+    color: #111; /* Dark text on bright button */
     border: none;
-    padding: 10px 18px;
+    padding: 8px 15px; /* Adjust padding */
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.2s ease, transform 0.1s ease;
     white-space: nowrap;
+    min-width: 110px;
+    text-align: center;
+    font-size: 0.9em;
 }
-
 .buy-button:hover {
-    background-color: #d83c54; /* Slightly darker red */
+    background-color: #ffac33; /* Lighter orange on hover */
+}
+.buy-button:active { /* Keep existing */ }
+.buy-button:disabled { /* Keep existing */ }
+.shop-item-cost { /* Keep existing */ }
+
+
+/* --- Profile Page --- */
+.profile-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.buy-button:active {
-    transform: scale(0.98);
+.profile-picture-large {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid var(--primary-color); /* Highlight border */
 }
 
-.buy-button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-    opacity: 0.7;
+#profile-fullname {
+    font-size: 1.5em;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
 }
 
-/* Profile Page */
+.profile-username-id {
+    font-size: 0.9em;
+    color: var(--text-muted-color);
+}
+
 .profile-info {
     background-color: var(--accent-color);
     padding: 20px;
@@ -300,56 +343,112 @@ h2 {
     margin-bottom: 20px;
 }
 
-.profile-info p {
-    margin-bottom: 12px;
-    line-height: 1.6;
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    justify-content: space-between; /* Space out label and value */
+    font-size: 1em;
 }
 
-.profile-info strong {
-    color: var(--primary-color);
+.info-label {
+    color: var(--text-muted-color);
+    font-weight: 500;
+     display: flex;
+     align-items: center;
+     gap: 6px;
 }
+.info-label .stats-icon, .info-label .coin-icon-tiny {
+    color: var(--primary-color); /* Color the icon */
+    font-size: 1.3em; /* Icon size */
+}
+
+.info-value {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
 
 #ton-wallet-input {
     width: 100%;
-    padding: 10px;
+    padding: 12px 15px;
     margin-top: 5px;
-    margin-bottom: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
     background-color: var(--secondary-color);
     color: var(--text-color);
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 0.95em;
 }
 
-#save-wallet-button, #sync-data-button {
-    background-color: var(--success-color);
-    color: white;
+/* General Profile Button Style */
+.profile-button {
+    background-color: var(--primary-color);
+    color: #111; /* Dark text */
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 20px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 5px;
-    transition: background-color 0.2s ease;
-}
-
-#save-wallet-button:hover, #sync-data-button:hover {
-    background-color: #3a913d;
-}
-
-#wallet-status {
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; /* Full width */
     margin-top: 10px;
-    font-size: 0.9em;
+    font-size: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.profile-button .material-symbols-outlined {
+    font-size: 1.2em;
 }
 
-/* Bottom Navigation */
+.profile-button:hover {
+    background-color: #ffac33;
+}
+.profile-button:active {
+    transform: scale(0.98);
+}
+
+/* Secondary button style (e.g., sync) */
+.profile-button.secondary {
+    background-color: var(--accent-color);
+    color: var(--text-muted-color);
+    border: 1px solid var(--border-color);
+}
+.profile-button.secondary:hover {
+     background-color: var(--secondary-color);
+     color: var(--text-color);
+}
+
+
+#wallet-status { /* Keep existing */ }
+
+/* Default Avatar Style */
+.default-avatar {
+    background-color: var(--primary-color); /* Or a neutral color */
+    color: var(--background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2em; /* Adjust size for header/profile */
+    /* Add other styles from .header-avatar or .profile-picture-large */
+}
+
+
+/* --- Bottom Navigation --- */
 .bottom-nav {
     display: flex;
     justify-content: space-around;
-    background-color: var(--accent-color);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--accent-color); /* Match header */
+    border-top: 1px solid var(--border-color);
     padding: 5px 0;
     width: 100%;
-    position: sticky; /* Make nav stick to bottom if content is short */
+    height: var(--nav-height); /* Fixed height */
+    position: sticky; /* Keep nav visible */
     bottom: 0;
+    z-index: 10;
 }
 
 .nav-button {
@@ -358,446 +457,48 @@ h2 {
     color: var(--text-muted-color);
     cursor: pointer;
     padding: 8px 5px;
-    font-size: 0.75em; /* Smaller text */
+    font-size: 0.8em; /* Slightly smaller text */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center; /* Center content vertically */
     transition: color 0.2s ease, transform 0.1s ease;
-    flex: 1; /* Make buttons share space */
-    max-width: 25%; /* Ensure they don't get too wide */
+    flex: 1;
+    max-width: 33.33%;
+    gap: 2px; /* Space between icon and text */
 }
-
-.nav-button img {
-    width: 24px; /* Icon size */
-    height: 24px;
-    margin-bottom: 3px;
-    opacity: 0.7; /* Muted icon */
-    transition: opacity 0.2s ease;
+.nav-button .material-symbols-outlined {
+    font-size: 28px; /* Icon size */
+    margin-bottom: 2px;
+     transition: color 0.2s ease;
+     font-variation-settings: 'FILL' 0, 'wght' 300; /* Lighter weight default */
 }
-
 
 .nav-button.active {
     color: var(--primary-color);
-    font-weight: bold;
+    font-weight: 600; /* Bold text for active */
+}
+.nav-button.active .material-symbols-outlined {
+     color: var(--primary-color);
+     font-variation-settings: 'FILL' 1, 'wght' 500; /* Filled, slightly bolder active icon */
 }
 
-.nav-button.active img {
-     opacity: 1; /* Highlight active icon */
-}
+.nav-button:active { /* Keep existing */ }
 
-
-.nav-button:active {
-    transform: scale(0.95);
-}
-
+/* PC Scrollbar Styling (Optional) */
+#main-content::-webkit-scrollbar { /* Keep existing */ }
+#main-content::-webkit-scrollbar-track { /* Keep existing */ }
+#main-content::-webkit-scrollbar-thumb { /* Keep existing */ }
 
 /* Responsive Adjustments */
 @media (max-width: 360px) {
-    .balance-container {
-        font-size: 1.1em;
-    }
-     #clicker-image {
-        width: 120px;
-        height: 120px;
-    }
-    .shop-item {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .buy-button {
-        margin-top: 10px;
-        width: 100%;
-        padding: 12px;
-    }
-     .nav-button {
-        font-size: 0.7em;
-    }
-    .nav-button img {
-        width: 20px;
-        height: 20px;
-    }
+    h2 { font-size: 1.6em; }
+    #clicker-image { width: 150px; height: 150px; }
+    .stats-display { font-size: 0.9em; padding: 8px 10px; }
+    .tab-button { padding: 10px 15px; font-size: 0.95em; }
+    .buy-button { min-width: 100px; padding: 8px 12px; }
+    .profile-picture-large { width: 80px; height: 80px; }
+    #profile-fullname { font-size: 1.3em; }
+    .nav-button { font-size: 0.75em; }
+    .nav-button .material-symbols-outlined { font-size: 24px; }
 }
-
-/* PC Scrollbar Styling (Optional) */
-#main-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-#main-content::-webkit-scrollbar-track {
-    background: var(--secondary-color);
-}
-
-#main-content::-webkit-scrollbar-thumb {
-    background-color: var(--accent-color);
-    border-radius: 10px;
-    border: 2px solid var(--secondary-color);
-}
-/* Add these styles (or modify existing ones) */
-
-/* ... (Keep existing styles from previous answer) ... */
-
-/* Boosts Page Specifics */
-#boosts-page section {
-    margin-bottom: 30px; /* Add space between sections */
-}
-
-#boosts-page h3 {
-    color: var(--primary-color);
-    font-size: 1.4em;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--accent-color);
-    text-align: center;
-}
-
-.passive-income-info {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 1em; /* Slightly larger */
-    color: var(--text-muted-color);
-    background-color: rgba(15, 52, 96, 0.7); /* Semi-transparent accent */
-    padding: 10px 15px;
-    border-radius: 8px;
-    display: flex; /* Align icon and text */
-    justify-content: center;
-    align-items: center;
-    gap: 6px; /* Space between icon and text */
-}
-
-/* Shop Item Styling Refinements (Optional) */
-.shop-item {
-    background-color: var(--accent-color);
-    padding: 15px;
-    border-radius: 12px; /* Slightly more rounded */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: background-color 0.2s ease; /* Subtle hover effect */
-}
-
-.shop-item:hover {
-     background-color: rgba(15, 52, 96, 0.9); /* Slightly lighter on hover */
-}
-
-
-.shop-item-name {
-    font-size: 1.15em; /* Slightly bigger name */
-    font-weight: bold;
-    color: var(--primary-color);
-    margin-bottom: 4px; /* Space below name */
-}
-
-.shop-item-desc {
-    font-size: 0.9em;
-    color: var(--text-muted-color);
-    margin: 4px 0 8px 0; /* Adjust spacing */
-}
-
-.shop-item-level {
-    font-size: 0.85em; /* Slightly bigger level text */
-    color: var(--text-color);
-    background-color: var(--secondary-color);
-    padding: 3px 8px;
-    border-radius: 5px;
-    display: inline-block;
-    font-weight: 500;
-}
-
-.buy-button {
-    /* Keep previous styles, ensure padding is comfortable */
-    padding: 10px 18px;
-    min-width: 100px; /* Ensure buttons have a decent minimum width */
-    text-align: center;
-}
-
-.shop-item-cost {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Center cost within button */
-    font-weight: bold;
-    gap: 4px; /* Space between icon and number */
-}
-
-
-/* Navigation Adjustments for 3 items */
-.bottom-nav {
-    /* flex: 1 on buttons should distribute space evenly */
-}
-
-.nav-button {
-    /* flex: 1 and max-width: 33.33% should work well */
-     max-width: 33.33%; /* Explicitly set for 3 items */
-}
-
-
-/* Ensure new coin image size is appropriate */
-.coin-icon-small {
-    width: 24px; /* Adjust if needed */
-    height: 24px;
-    object-fit: contain; /* Prevent stretching */
-}
-.coin-icon-tiny {
-    width: 16px; /* Adjust if needed */
-    height: 16px;
-     object-fit: contain;
-}
-#clicker-image {
-    width: 150px; /* Adjust if needed */
-    height: 150px;
-     object-fit: contain;
-     filter: drop-shadow(0 0 8px var(--coin-glow)); /* Add a subtle glow */
-}
-
-/* Clicker button active state refinement */
-.clicker-button:active #clicker-image {
-    transform: scale(0.95);
-    filter: drop-shadow(0 0 15px var(--coin-glow)); /* Enhance glow on click */
-}
-.clicker-button:active {
-     transform: none; /* Prevent double scaling if button itself scales */
-}
-
-
-/* Responsive adjustments might need tweaking */
-@media (max-width: 360px) {
-    #boosts-page h3 {
-        font-size: 1.2em;
-    }
-     .shop-item {
-        /* Consider keeping flex-direction: row on small screens if space allows */
-        /* flex-direction: column; */ /* Uncomment if items MUST stack */
-        /* align-items: stretch; */
-    }
-     .buy-button {
-        /* margin-top: 10px; */ /* Only if stacking */
-        /* width: 100%; */
-    }
-}
-// --- Constants (Add the coin URL) ---
-const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
-const INITIAL_COINS_PER_TAP = 0.1;
-// ... (rest of constants like upgrades, firebaseConfig)
-
-// --- Global Variables ---
-// ... (no changes needed here)
-
-// --- DOM Elements (Update shop list selectors) ---
-const loadingScreen = document.getElementById('loading-screen');
-// ... (other elements)
-const clickUpgradesList = document.getElementById('click-upgrades-list'); // Remains the same ID
-const passiveUpgradesList = document.getElementById('passive-upgrades-list'); // Remains the same ID
-// ... (other elements)
-const totalPassiveIncomeDisplay = document.getElementById('total-passive-income-display');
-
-// --- Initialization ---
-// ... (initializeApp remains mostly the same)
-
-// --- Firebase Functions ---
-// ... (loadUserData, saveUserData remain the same)
-
-// --- Game Logic ---
-// ... (handleTap, calculatePassiveIncome, startPassiveIncome remain the same)
-
-// --- Shop Logic ---
-// ... (calculateItemCost remains the same)
-
-// RENDER FUNCTION (Modified to populate sections)
-// Renamed for clarity, but logic is similar to old renderShop
-function renderBoostsSection(type) {
-    const listElement = type === 'click' ? clickUpgradesList : passiveUpgradesList;
-    const upgrades = type === 'click' ? clickUpgrades : passiveUpgrades;
-    const levels = type === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
-
-    listElement.innerHTML = ''; // Clear previous items for this section
-
-    if (!upgrades || upgrades.length === 0) {
-        listElement.innerHTML = '<p>No upgrades available yet.</p>';
-        return;
-    }
-
-    upgrades.forEach(item => {
-        const currentLevel = levels[item.id] || 0;
-        const cost = calculateItemCost(item, currentLevel);
-
-        const itemDiv = document.createElement('div');
-        itemDiv.classList.add('shop-item');
-
-        const canAfford = userData.coins >= cost;
-
-        // Use COIN_IMAGE_URL constant here
-        itemDiv.innerHTML = `
-            <div class="shop-item-info">
-                <span class="shop-item-name">${item.name}</span>
-                <p class="shop-item-desc">${item.description}</p>
-                <span class="shop-item-level">Level: ${currentLevel}</span>
-            </div>
-            <button class="buy-button" data-item-id="${item.id}" data-item-type="${type}" ${canAfford ? '' : 'disabled'}>
-                <span class="shop-item-cost">
-                    <img src="${COIN_IMAGE_URL}" alt="Coin" class="coin-icon-tiny">
-                    ${formatNumber(cost)}
-                </span>
-            </button>
-        `;
-
-        listElement.appendChild(itemDiv);
-
-        // Add event listener directly to the button
-        const buyButton = itemDiv.querySelector('.buy-button');
-        buyButton.addEventListener('click', () => buyUpgrade(item.id, type));
-    });
-}
-
-// NEW FUNCTION to render the entire boosts page
-function renderBoostsPage() {
-    if (!clickUpgradesList || !passiveUpgradesList) {
-        console.error("Boost list elements not found!");
-        return;
-    }
-    renderBoostsSection('click');
-    renderBoostsSection('passive');
-    updateShopButtonStates(); // Update buttons after rendering both sections
-}
-
-
-function buyUpgrade(itemId, type) {
-    const upgrades = type === 'click' ? clickUpgrades : passiveUpgrades;
-    const levels = type === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
-    const item = upgrades.find(i => i.id === itemId);
-
-    if (!item) {
-        console.error("Item not found:", itemId);
-        return;
-    }
-
-    const currentLevel = levels[itemId] || 0;
-    const cost = calculateItemCost(item, currentLevel);
-
-    if (userData.coins >= cost) {
-        userData.coins -= cost;
-        levels[itemId] = currentLevel + 1;
-
-        recalculateTotals(); // Recalculate tap/passive totals
-
-        // Update relevant UI parts
-        updateCoinDisplay();
-        updateStatsDisplay(); // Update header stats
-        renderBoostsSection(type); // Re-render only the affected section
-        updateShopButtonStates(); // Update all button states on the page
-
-        // Update total passive display if a passive item was bought
-        if (type === 'passive') {
-            totalPassiveIncomeDisplay.textContent = formatNumber(userData.passiveIncomePerHour);
-        }
-
-        saveUserData(true); // Force save immediately
-
-        console.log(`Bought ${item.name} (Level ${levels[itemId]}), Cost: ${formatNumber(cost)}`);
-        tg.HapticFeedback.notificationOccurred('success');
-
-    } else {
-        console.log("Not enough coins to buy", item.name);
-        tg.HapticFeedback.notificationOccurred('error');
-    }
-}
-
-// ... (recalculateTotals remains the same)
-
-
-// --- UI Update Functions ---
-function updateCoinDisplay() {
-    if (userData) {
-        const formattedCoins = formatNumber(userData.coins);
-        coinBalanceElement.textContent = formattedCoins;
-        if (profileBalance) profileBalance.textContent = formattedCoins;
-    }
-    // Update button states whenever balance changes
-     if (document.getElementById('boosts-page')?.classList.contains('active-page')) {
-       updateShopButtonStates(); // Only update shop buttons if the page is visible (optional optimization)
-     } else {
-        // If boosts page not active, maybe defer the update or update anyway if needed elsewhere
-     }
-}
-
-// ... (updateStatsDisplay, updateProfileDisplay remain the same)
-
-function updateShopButtonStates() {
-    // This function selects ALL buy buttons, which is correct for the single page
-    document.querySelectorAll('#boosts-page .buy-button').forEach(button => {
-        const itemId = button.dataset.itemId;
-        const itemType = button.dataset.itemType;
-        if (!itemId || !itemType || !userData) return; // Add check for userData
-
-        const upgrades = itemType === 'click' ? clickUpgrades : passiveUpgrades;
-        const levels = itemType === 'click' ? userData.clickUpgradeLevels : userData.passiveUpgradeLevels;
-        const item = upgrades.find(i => i.id === itemId);
-
-        if (item) {
-            const currentLevel = levels[itemId] || 0;
-            const cost = calculateItemCost(item, currentLevel);
-            button.disabled = userData.coins < cost;
-
-            // Update cost display on the button itself using COIN_IMAGE_URL
-            const costSpan = button.querySelector('.shop-item-cost');
-             if (costSpan) {
-                 costSpan.innerHTML = `<img src="${COIN_IMAGE_URL}" alt="Coin" class="coin-icon-tiny"> ${formatNumber(cost)}`;
-            }
-        }
-    });
-}
-
-
-function updateAllUI() {
-    recalculateTotals(); // Ensure stats are correct based on loaded levels
-    updateCoinDisplay();
-    updateStatsDisplay();
-    updateProfileDisplay();
-    renderBoostsPage(); // Render the combined boosts page
-    // updateShopButtonStates(); // renderBoostsPage calls this indirectly now
-}
-
-// ... (showPage needs to handle 'boosts-page')
-
-function showPage(pageId) {
-    pages.forEach(page => {
-        page.classList.toggle('active-page', page.id === pageId);
-    });
-    navButtons.forEach(button => {
-        button.classList.toggle('active', button.dataset.page === pageId);
-    });
-    // If showing boosts page, ensure buttons are correctly enabled/disabled
-    if (pageId === 'boosts-page') {
-        updateShopButtonStates();
-    }
-     // Scroll to top when changing page
-    const mainContent = document.getElementById('main-content');
-    if (mainContent) {
-        mainContent.scrollTop = 0;
-    }
-}
-
-
-// --- Number Formatting ---
-// ... (formatNumber remains the same)
-
-// --- Animations ---
-// ... (createClickFeedback remains the same)
-
-// --- Event Listeners Setup ---
-function setupEventListeners() {
-    // ... (clickerButton listener remains the same)
-
-    // Navigation (Ensure it handles 'boosts-page')
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            showPage(button.dataset.page); // This should work automatically
-        });
-    });
-
-    // ... (Profile listeners remain the same)
-    // ... (Sync button listener remains the same)
-}
-
-
-// --- App Start ---
-window.addEventListener('load', initializeApp);
