@@ -13,15 +13,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- Global Styles & Reset (Keep ALL CSS from previous version) --- */
-        :root { /* ... keep all variables ... */
+        /* --- Global Styles & Reset --- */
+        :root {
             --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100%; width: 100%; overflow: hidden; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); color: var(--text-color); overscroll-behavior: none; font-size: 16px; }
         body { display: flex; flex-direction: column; touch-action: manipulation; }
         #app { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; }
-        #loading { display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
+        #loading { display: flex; flex-direction: column; /* Allow text wrapping */ justify-content: center; align-items: center; height: 100%; font-size: 1.5em; color: var(--text-color); text-align: center; padding: 20px; }
         #main-content { flex-grow: 1; display: flex; overflow: hidden; }
         .page { width: 100%; height: 100%; display: none; flex-direction: column; flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 15px 85px 15px; scroll-behavior: smooth; }
         .page.active { display: flex; }
@@ -88,61 +88,72 @@
         .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
         .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
-
-        /* --- Task Page Styles --- */
         #tasks-list { display: flex; flex-direction: column; gap: 15px; }
-        .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .task-item-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background-color: var(--primary-bg-start); /* Placeholder bg */ }
+        .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.2s ease; /* Add subtle hover effect */ }
+        .task-item:hover { transform: translateY(-2px); box-shadow: 0 5px 12px var(--shadow-color); }
+        .task-item-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background-color: var(--primary-bg-start); }
         .task-item-info { flex-grow: 1; }
         .task-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
         .task-item-description { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; line-height: 1.4; }
         .task-item-reward { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
         .task-item-reward img { width: 16px; height: 16px; }
-        .task-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .task-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
         .task-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
         .task-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
         .task-button:active:not(:disabled) { transform: scale(0.97); }
-        .task-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; }
-        .verify-task-btn, .task-claimed-status { display: none; /* Hidden by default */ }
+        .task-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+        .verify-task-btn, .task-claimed-status { display: none; }
         .task-claimed-status { font-size: 0.9em; font-weight: bold; color: var(--success-color); }
-        .task-item[data-completed="true"] .start-task-btn,
-        .task-item[data-completed="true"] .verify-task-btn { display: none; }
+        .task-item[data-completed="true"] .start-task-btn, .task-item[data-completed="true"] .verify-task-btn { display: none; }
         .task-item[data-completed="true"] .task-claimed-status { display: block; }
         .task-item[data-status="verifying"] .start-task-btn { display: none; }
         .task-item[data-status="verifying"] .verify-task-btn { display: block; }
-
-        /* --- Code Popup Modal Styles --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; /* Hidden by default */ justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fadeIn 0.3s ease-out; }
         .modal-overlay.visible { display: flex; }
-        .modal-content { background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 400px; text-align: center; }
+        .modal-content { background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 400px; text-align: center; animation: slideIn 0.3s ease-out; }
         .modal-title { font-size: 1.3em; font-weight: 600; color: var(--accent-color); margin-bottom: 15px; }
         .modal-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 20px; }
         .modal-input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; text-align: center; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .modal-button { /* Inherits from .task-button */ padding: 10px 20px; font-size: 0.9em; }
+        .modal-button { padding: 10px 20px; font-size: 0.9em; } /* Use .task-button styles */
         .modal-button.cancel { background: var(--disabled-bg); }
         .modal-button.cancel:hover { background: #555; }
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     </style>
 </head>
 <body>
     <div id="app">
+        <!-- Loading Indicator -->
         <div id="loading">Initializing Meme Wolf...</div>
+
+        <!-- Main Content Area (Initially Hidden) -->
         <div id="main-content" style="display: none;">
-            <!-- Page: Game (Keep as is) -->
-            <div id="game-screen" class="page active"> /* ... Game content ... */
-                <div class="stats-bar"> <div class="stat-item" title="Coins per tap"><span class="material-icons">touch_app</span> <span id="tap-power-display">1</span></div> <div class="stat-item" title="Profit per hour"><span class="material-icons">hourglass_bottom</span> <span id="passive-income-display">0</span>/hr</div> </div>
+
+            <!-- Page: Game -->
+            <div id="game-screen" class="page active">
+                 <div class="stats-bar">
+                     <div class="stat-item" title="Coins per tap"><span class="material-icons">touch_app</span> <span id="tap-power-display">1</span></div>
+                     <div class="stat-item" title="Profit per hour"><span class="material-icons">hourglass_bottom</span> <span id="passive-income-display">0</span>/hr</div>
+                 </div>
                 <div class="coin-balance-container"><img id="coin-icon-balance" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin"> <span id="coin-balance">0</span></div>
                 <div class="coin-area"><div id="coin-container"><img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!"></div></div>
                 <div id="click-feedback"></div>
             </div>
-            <!-- Page: Shop (Keep as is) -->
-            <div id="shop-screen" class="page"> /* ... Shop content ... */
-                <h2>Upgrades Shop</h2> <div class="shop-tabs"> <button id="tab-click" class="active" onclick="showShopCategory('click-upgrades')">Click Power</button> <button id="tab-passive" onclick="showShopCategory('passive-upgrades')">Passive Income</button> </div>
-                <div id="click-upgrades" class="shop-category active"><p>Loading click upgrades...</p></div> <div id="passive-upgrades" class="shop-category"><p>Loading passive income upgrades...</p></div>
-             </div>
-            <!-- Page: Tasks (NEW) -->
+
+            <!-- Page: Shop -->
+            <div id="shop-screen" class="page">
+                <h2>Upgrades Shop</h2>
+                <div class="shop-tabs">
+                    <button id="tab-click" class="active" onclick="showShopCategory('click-upgrades')">Click Power</button>
+                    <button id="tab-passive" onclick="showShopCategory('passive-upgrades')">Passive Income</button>
+                </div>
+                <div id="click-upgrades" class="shop-category active"><p>Loading click upgrades...</p></div>
+                <div id="passive-upgrades" class="shop-category"><p>Loading passive income upgrades...</p></div>
+            </div>
+
+            <!-- Page: Tasks -->
             <div id="tasks-screen" class="page">
                 <h2>Available Tasks</h2>
                 <div id="tasks-list">
@@ -150,24 +161,45 @@
                     <p>Loading tasks...</p>
                 </div>
             </div>
-            <!-- Page: Profile (Keep as is) -->
-            <div id="profile-screen" class="page"> /* ... Profile content ... */
+
+            <!-- Page: Profile -->
+            <div id="profile-screen" class="page">
                 <h2>Profile & Wallet</h2>
-                <div class="profile-section profile-info"> <p><strong>User ID:</strong> <span id="profile-userid">N/A</span></p> <p><strong>Username:</strong> <span id="profile-username">N/A</span></p> <p><strong>First Name:</strong> <span id="profile-firstname">N/A</span></p> <p><strong>Last Name:</strong> <span id="profile-lastname">N/A</span></p> <p><strong>Total Coins:</strong> <span id="profile-coins">0</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p> <p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p> <p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p> </div>
-                <div class="profile-section mission-section"> <div class="mission-title">🐺 Wolf Name Mission 🐺</div> <p class="mission-description"> Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button> </p> <div class="mission-status incomplete" id="mission-status">Status: Checking...</div> <div id="fine-message-display" class="fine-applied" style="display: none;"></div> <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button> <div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div> </div>
-                <div class="profile-section wallet-section"> <label for="ton-wallet-input">TON Wallet Address:</label> <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address"> <button id="save-wallet-button">Save Wallet</button> <p id="save-status"></p> </div>
-             </div>
+                <div class="profile-section profile-info">
+                    <p><strong>User ID:</strong> <span id="profile-userid">N/A</span></p>
+                    <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
+                    <p><strong>First Name:</strong> <span id="profile-firstname">N/A</span></p>
+                    <p><strong>Last Name:</strong> <span id="profile-lastname">N/A</span></p>
+                    <p><strong>Total Coins:</strong> <span id="profile-coins">0</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p>
+                    <p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p>
+                    <p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p>
+                </div>
+                <div class="profile-section mission-section">
+                    <div class="mission-title">🐺 Wolf Name Mission 🐺</div>
+                    <p class="mission-description"> Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button> </p>
+                    <div class="mission-status incomplete" id="mission-status">Status: Checking...</div>
+                    <div id="fine-message-display" class="fine-applied" style="display: none;"></div>
+                    <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button>
+                    <div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div>
+                </div>
+                <div class="profile-section wallet-section">
+                    <label for="ton-wallet-input">TON Wallet Address:</label>
+                    <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
+                    <button id="save-wallet-button" class="task-button">Save Wallet</button> <!-- Use task-button style -->
+                    <p id="save-status"></p>
+                </div>
+            </div>
         </div>
 
-        <!-- Navigation Bar (Add Tasks Button) -->
+        <!-- Navigation Bar -->
         <nav id="navbar" style="display: none;">
             <button id="nav-game" class="active" onclick="showPage('game-screen')"><span class="material-icons">pets</span><span>Game</span></button>
             <button id="nav-shop" onclick="showPage('shop-screen')"><span class="material-icons">shopping_bag</span><span>Shop</span></button>
-            <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button> <!-- NEW -->
+            <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button>
             <button id="nav-profile" onclick="showPage('profile-screen')"><span class="material-icons">account_circle</span><span>Profile</span></button>
         </nav>
 
-        <!-- Code Input Modal (NEW) -->
+        <!-- Code Input Modal -->
         <div id="code-popup" class="modal-overlay">
             <div class="modal-content">
                 <h3 id="code-popup-title" class="modal-title">Enter Code</h3>
@@ -179,55 +211,46 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // --- Config (Keep as is) ---
+        // --- Config ---
         const firebaseConfig = { /* ... Your Firebase Config ... */
              apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345"
          };
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
         const BASE_TAP_EARN = 1; const SAVE_INTERVAL = 5000; const PASSIVE_INCOME_INTERVAL = 1000; const INCREASING_COST_BASE = 10000; const WOLF_MISSION_REWARD = 50000; const WOLF_EMOJI = '🐺'; const CHEAT_FINE = 100000;
-        const TASK_VERIFICATION_DELAY = 10000; // 10 seconds for link task verification
+        const TASK_VERIFICATION_DELAY = 10000; // 10 seconds
 
-        // --- Telegram & Firebase Vars (Keep as is) ---
+        // --- Telegram & Firebase Vars ---
         let tg = null; let db = null; let currentUser = null; let userData = null; let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null; let isLoading = true;
-        let availableTasks = {}; // <<< NEW: Store loaded task definitions
-        let currentCodeTaskId = null; // <<< NEW: Track which task needs code input
+        let availableTasks = {}; let currentCodeTaskId = null;
 
-        // --- DOM Elements (Add new elements) ---
+        // --- DOM Elements ---
         const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display'); const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
-        const tasksListDiv = document.getElementById('tasks-list'); // <<< NEW
-        const codePopup = document.getElementById('code-popup'); // <<< NEW
-        const codePopupTitle = document.getElementById('code-popup-title'); // <<< NEW
-        const codePopupDescription = document.getElementById('code-popup-description'); // <<< NEW
-        const codePopupInput = document.getElementById('code-popup-input'); // <<< NEW
-        const codePopupCancelBtn = document.getElementById('code-popup-cancel'); // <<< NEW
-        const codePopupSubmitBtn = document.getElementById('code-popup-submit'); // <<< NEW
+        const tasksListDiv = document.getElementById('tasks-list'); const codePopup = document.getElementById('code-popup'); const codePopupTitle = document.getElementById('code-popup-title'); const codePopupDescription = document.getElementById('code-popup-description'); const codePopupInput = document.getElementById('code-popup-input'); const codePopupCancelBtn = document.getElementById('code-popup-cancel'); const codePopupSubmitBtn = document.getElementById('code-popup-submit');
 
-        // --- Upgrade Definitions (Keep as is) ---
-        const upgrades = [ /* ... Full list of upgrades ... */
+        // --- Upgrade Definitions (Keep full list) ---
+        const upgrades = [ /* Omitted for brevity - paste the full upgrades array here */
              { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' }, { id: 'click_2', name: 'Sharper Claws', description: '+2 coins per tap', baseCost: 100000, baseEffect: 2, type: 'click' }, { id: 'click_3', name: 'Meme Energy', description: '+5 coins per tap', baseCost: 500000, baseEffect: 5, type: 'click' }, { id: 'click_4', name: 'Wolf Pack Call', description: '+10 coins per tap', baseCost: 2000000, baseEffect: 10, type: 'click' }, { id: 'click_5', name: 'Lunar Boost', description: '+25 coins per tap', baseCost: 10000000, baseEffect: 25, type: 'click' }, { id: 'click_6', name: 'Golden Howl', description: '+50 coins per tap', baseCost: 50000000, baseEffect: 50, type: 'click' }, { id: 'click_7', name: 'Diamond Fangs', description: '+100 coins per tap', baseCost: 250000000, baseEffect: 100, type: 'click' }, { id: 'click_8', name: 'Alpha Presence', description: '+200 coins per tap', baseCost: 1000000000, baseEffect: 200, type: 'click' }, { id: 'click_9', name: 'Meme Lord Aura', description: '+500 coins per tap', baseCost: 5000000000, baseEffect: 500, type: 'click' }, { id: 'click_10', name: 'Cosmic Wolf', description: '+1000 coins per tap', baseCost: 20000000000, baseEffect: 1000, type: 'click' },
              { id: 'passive_1', name: 'Sniffing Out Coins', description: '+100 profit/hour', baseCost: 10000, baseEffect: 100, type: 'passive' }, { id: 'passive_2', name: 'Digging Spot', description: '+250 profit/hour', baseCost: 50000, baseEffect: 250, type: 'passive' }, { id: 'passive_3', name: 'Buried Treasure Map', description: '+600 profit/hour', baseCost: 150000, baseEffect: 600, type: 'passive' }, { id: 'passive_4', name: 'Meme Stash', description: '+1,500 profit/hour', baseCost: 500000, baseEffect: 1500, type: 'passive' }, { id: 'passive_5', name: 'Coin Tree Sapling', description: '+3,500 profit/hour', baseCost: 1500000, baseEffect: 3500, type: 'passive' }, { id: 'passive_6', name: 'Howling ATM', description: '+8,000 profit/hour', baseCost: 5000000, baseEffect: 8000, type: 'passive' }, { id: 'passive_7', name: 'Loyal Pack Tribute', description: '+18,000 profit/hour', baseCost: 15000000, baseEffect: 18000, type: 'passive' }, { id: 'passive_8', name: 'Wolf Den Bank', description: '+40,000 profit/hour', baseCost: 50000000, baseEffect: 40000, type: 'passive' }, { id: 'passive_9', name: 'Meme Coin Mine', description: '+90,000 profit/hour', baseCost: 150000000, baseEffect: 90000, type: 'passive' }, { id: 'passive_10', name: 'Moonlit Mint', description: '+200K profit/hour', baseCost: 500000000, baseEffect: 200000, type: 'passive' }, { id: 'passive_11', name: 'Crypto Kennel', description: '+450K profit/hour', baseCost: 1200000000, baseEffect: 450000, type: 'passive' }, { id: 'passive_12', name: 'Decentralized Den', description: '+1M profit/hour', baseCost: 3000000000, baseEffect: 1000000, type: 'passive' }, { id: 'passive_13', name: 'Blockchain Burrow', description: '+2.2M profit/hour', baseCost: 7000000000, baseEffect: 2200000, type: 'passive' }, { id: 'passive_14', name: 'Wolf Street Journal', description: '+5M profit/hour', baseCost: 15000000000, baseEffect: 5000000, type: 'passive' }, { id: 'passive_15', name: 'Golden Bone Fund', description: '+11M profit/hour', baseCost: 35000000000, baseEffect: 11000000, type: 'passive' }, { id: 'passive_16', name: 'Diamond Paw Trust', description: '+25M profit/hour', baseCost: 80000000000, baseEffect: 25000000, type: 'passive' }, { id: 'passive_17', name: 'Alpha Investment Group', description: '+55M profit/hour', baseCost: 180000000000, baseEffect: 55000000, type: 'passive' }, { id: 'passive_18', name: 'Meme Hegemony', description: '+120M profit/hour', baseCost: 400000000000, baseEffect: 120000000, type: 'passive' }, { id: 'passive_19', name: 'Lunar Treasury', description: '+250M profit/hour', baseCost: 900000000000, baseEffect: 250000000, type: 'passive' }, { id: 'passive_20', name: 'Cosmic Coin Flow', description: '+500M profit/hour', baseCost: 2000000000000, baseEffect: 500000000, type: 'passive' },
         ];
 
         // --- Initialization ---
         window.onload = () => {
-            // (Keep the robust init logic from previous version)
-            try {
-                isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
-                tg = window.Telegram.WebApp; tg.ready(); tg.expand();
-                try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
-                if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable. Please launch from Telegram."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; }
-                currentUser = tg.initDataUnsafe.user;
-                firebase.initializeApp(firebaseConfig); db = firebase.database();
-                loadUserDataAndInit(); // This now handles loading user data & then tasks
-                setupEventListeners();
-            } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
+             try {
+                 isLoading = true; loadingDiv.textContent = "Initializing Meme Wolf...";
+                 tg = window.Telegram.WebApp; tg.ready(); tg.expand();
+                 try { const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-bg-end').trim(); tg.setHeaderColor(bgColor); tg.setBackgroundColor(bgColor); } catch (themeError) { console.warn("Could not set theme colors:", themeError); }
+                 if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { loadingDiv.textContent = "Error: User data unavailable. Please launch from Telegram."; loadingDiv.style.color = 'var(--error-color)'; console.error("Critical: Telegram user data missing."); return; }
+                 currentUser = tg.initDataUnsafe.user;
+                 firebase.initializeApp(firebaseConfig); db = firebase.database();
+                 loadUserDataAndInit();
+                 setupEventListeners();
+             } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
         };
 
-        // --- Popup Helpers (Keep as is) ---
+        // --- Popup Helpers ---
         function showPopup(params) { if (tg) { tg.showPopup(params); } else { alert(`${params.title}\n\n${params.message}`); } }
         function showInfoPopup(title, message) { showPopup({ title: title || "Info", message: message, buttons: [{ type: "ok" }] }); }
         function showWarningPopup(title, message) { showPopup({ title: title || "⚠️ Warning", message: message, buttons: [{ type: "ok" }] }); }
@@ -235,393 +258,191 @@
 
         // --- Firebase Functions ---
         function loadUserDataAndInit() {
-            // (Modified to load tasks AFTER user data is ready)
-            if (!currentUser || !db) { showError("User/DB not ready."); return; }
-            const userId = currentUser.id.toString();
-            const userRef = db.ref('users/' + userId);
-            loadingDiv.textContent = "Loading your progress...";
-
-            userRef.once('value')
-                .then((snapshot) => {
-                    const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
-
-                    if (snapshot.exists()) {
-                        userData = snapshot.val();
-                        userData.coins = userData.coins ?? defaultData.coins;
-                        userData.upgrades = userData.upgrades ?? defaultData.upgrades;
-                        userData.missions = userData.missions ?? defaultData.missions;
-                        userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
-                        userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks; // <<< Initialize completedTasks
-                        userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet;
-                        userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate;
-                        userData.telegramInfo = defaultData.telegramInfo;
-                    } else {
-                        console.log("New user detected:", userId);
-                        userData = defaultData;
-                        saveUserData(true);
-                    }
-
-                    const cheatDetected = performAntiCheatCheck();
-                    if (!cheatDetected) { calculateOfflineProgress(); }
-                    else { userData.lastUpdate = Date.now(); }
-
-                    // --- NOW Load Tasks ---
-                    return loadAndDisplayTasks(); // Return the promise chain
-                })
-                .then(() => {
-                    // --- Final Initialization AFTER tasks are loaded ---
-                    initializeAppUI(); // Render UI
-                    startPassiveIncome();
-                    isLoading = false; // Mark loading complete
-                    console.log("App Ready.");
-                })
-                .catch((error) => { /* ... Keep robust error handling ... */
-                    console.error("------------------------------------"); console.error("Firebase Load/Init Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------"); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false;
-                 });
+             if (!currentUser || !db) { showError("User/DB not ready."); return; }
+             const userId = currentUser.id.toString(); const userRef = db.ref('users/' + userId);
+             loadingDiv.textContent = "Loading your progress...";
+             userRef.once('value').then((snapshot) => {
+                 const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
+                 if (snapshot.exists()) {
+                     userData = snapshot.val();
+                     userData.coins = userData.coins ?? defaultData.coins; userData.upgrades = userData.upgrades ?? defaultData.upgrades; userData.missions = userData.missions ?? defaultData.missions; userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf; userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks; userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet; userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate; userData.telegramInfo = defaultData.telegramInfo;
+                 } else { console.log("New user detected:", userId); userData = defaultData; saveUserData(true); }
+                 const cheatDetected = performAntiCheatCheck();
+                 if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); }
+                 return loadAndDisplayTasks(); // Chain task loading
+             }).then(() => { // Runs after tasks are loaded (or failed gracefully)
+                 initializeAppUI(); startPassiveIncome(); isLoading = false; console.log("App Ready.");
+             }).catch((error) => { /* ... Robust error handling ... */
+                 console.error("------------------------------------"); console.error("Firebase Load/Init Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------"); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false;
+             });
         }
 
-
         function saveUserData(force = false) {
-            // (Keep robust save logic)
-             if (isLoading || !currentUser || !db || !userData) return;
-             const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout);
+             if (isLoading || !currentUser || !db || !userData) return; const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout);
              if (force || now - lastSaveTime > SAVE_INTERVAL) {
                  console.log("Saving data..."); const userId = currentUser.id.toString(); userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
                  db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error));
              } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
         }
 
-        // --- Anti-Cheat Logic (Keep as is) ---
-        function performAntiCheatCheck() { /* ... Same logic ... */ if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none'; if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) { const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered for user ${currentUser.id}. Fine: ${fineAmount}`); showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied.`); fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block'; return true; } return false; }
+        // --- Anti-Cheat Logic ---
+        function performAntiCheatCheck() {
+            if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none';
+            if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) {
+                const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat triggered for user ${currentUser.id}. Fine: ${fineAmount}`);
+                showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji after claiming the reward!\nA fine of ${formatNumber(fineAmount)} coins has been applied.`);
+                fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block';
+                return true;
+            } return false;
+        }
 
-        // --- Game Logic (Keep as is) ---
-        function handleTap(event) { /* ... */ } function calculateTapPower() { /* ... */ } function calculatePassiveIncomeRate() { /* ... */ } function applyPassiveIncome() { /* ... */ } function startPassiveIncome() { /* ... */ } function scheduleSave() { saveUserData(); } function calculateOfflineProgress() { /* ... Use showRewardPopup ... */ if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds; if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); } }
+        // --- Game Logic ---
+        function handleTap(event) { if (isLoading || !userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
+        function calculateTapPower() { let power = BASE_TAP_EARN; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'click') { const level = userData.upgrades[upgradeId]?.level || 0; power += upgradeDef.baseEffect * level; } } } return power; }
+        function calculatePassiveIncomeRate() { let rate = 0; if (userData && userData.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId); if (upgradeDef && upgradeDef.type === 'passive') { const level = userData.upgrades[upgradeId]?.level || 0; rate += upgradeDef.baseEffect * level; } } } return rate; }
+        function applyPassiveIncome() { if (isLoading || !userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); } }
+        function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); }
+        function scheduleSave() { saveUserData(); }
+        function calculateOfflineProgress() {
+            if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return;
+            const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
+            if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); }
+        }
 
-        // --- Mission Logic (Keep as is) ---
-        function checkAndClaimMission() { /* ... Use showInfoPopup/showRewardPopup ... */ } function copyMissionEmoji() { /* ... */ }
+        // --- Mission Logic ---
+        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Mission Status", "You have already claimed the reward for this mission."); updateMissionUI(missionId, 'claimed', false); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed. Reward: ${WOLF_MISSION_REWARD}`); showRewardPopup("Mission Complete!", `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins!`); updateMissionUI(missionId, 'claimed', false); updateCoinDisplay(); updateProfileStats(); saveUserData(true); } else { updateMissionUI(missionId, 'incomplete', false); showInfoPopup("Mission Incomplete", `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name.`); } }
+        function copyMissionEmoji() { navigator.clipboard.writeText(WOLF_EMOJI).then(() => { copyEmojiBtn.textContent = 'Copied!'; setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500); }).catch(err => { console.error('Failed to copy emoji: ', err); }); }
 
-        // --- Task Logic (NEW) ---
+        // --- Task Logic ---
         function loadAndDisplayTasks() {
-            if (!db) return Promise.reject("Database not initialized"); // Return a rejected promise if DB missing
-            tasksListDiv.innerHTML = '<p>Loading tasks...</p>'; // Show loading state
-
-            return db.ref('tasks').once('value') // Return the promise
-                .then(snapshot => {
-                    tasksListDiv.innerHTML = ''; // Clear loading/previous tasks
-                    if (snapshot.exists()) {
-                        availableTasks = snapshot.val(); // Store tasks globally
-                        let hasTasks = false;
-                        for (const taskId in availableTasks) {
-                            if (Object.hasOwnProperty.call(availableTasks, taskId)) {
-                                renderTaskItem(availableTasks[taskId], taskId);
-                                hasTasks = true;
-                            }
-                        }
-                        if (!hasTasks) {
-                             tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
-                        }
-                    } else {
-                        tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>';
-                        availableTasks = {}; // Clear local cache
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading tasks:", error);
-                    tasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks. Please try again later.</p>';
-                    availableTasks = {}; // Clear local cache
-                    // We don't necessarily stop the whole app here, just the task loading
-                    // Re-throw or handle as appropriate if this error is critical
-                    // For now, just log it and show message.
-                });
+             if (!db) return Promise.reject("Database not initialized"); tasksListDiv.innerHTML = '<p>Loading tasks...</p>';
+             return db.ref('tasks').once('value').then(snapshot => {
+                 tasksListDiv.innerHTML = ''; availableTasks = {}; let hasTasks = false;
+                 if (snapshot.exists()) {
+                     availableTasks = snapshot.val() || {}; // Ensure it's an object
+                     for (const taskId in availableTasks) {
+                         if (Object.hasOwnProperty.call(availableTasks, taskId)) { renderTaskItem(availableTasks[taskId], taskId); hasTasks = true; }
+                     }
+                 }
+                 if (!hasTasks) { tasksListDiv.innerHTML = '<p>No tasks available right now. Check back later!</p>'; }
+             }).catch(error => {
+                 console.error("Error loading tasks:", error); tasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks. Please try again later.</p>'; availableTasks = {};
+             });
         }
 
         function renderTaskItem(taskData, taskId) {
-            if (!taskData || !taskId) return;
-
-            const isCompleted = userData?.completedTasks?.[taskId] === true;
-
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'task-item';
-            itemDiv.dataset.taskId = taskId;
-            itemDiv.dataset.completed = isCompleted; // Set completion status attribute
-
-            const imageUrl = taskData.imageUrl || 'https://via.placeholder.com/50?text=Task'; // Default image
-            const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete the action and enter the code.');
-
-            itemDiv.innerHTML = `
-                <img src="${imageUrl}" alt="${taskData.name}" class="task-item-image" onerror="this.src='https://via.placeholder.com/50?text=Err'">
-                <div class="task-item-info">
-                    <div class="task-item-name">${taskData.name || 'Unnamed Task'}</div>
-                    <div class="task-item-description">${description}</div>
-                    <div class="task-item-reward">
-                        <img src="${COIN_IMAGE_URL}" class="coin-icon" alt="">
-                        <span>+${formatNumber(taskData.reward || 0)}</span>
-                    </div>
-                </div>
-                <div class="task-actions">
-                    <button class="task-button start-task-btn">Start</button>
-                    <button class="task-button verify-task-btn">Verify</button>
-                    <span class="task-claimed-status">Claimed</span>
-                </div>
-            `;
-
-            const startBtn = itemDiv.querySelector('.start-task-btn');
-            const verifyBtn = itemDiv.querySelector('.verify-task-btn');
-            const claimedStatus = itemDiv.querySelector('.task-claimed-status');
-
-            // Set initial visibility based on completion
-            if (isCompleted) {
-                startBtn.style.display = 'none';
-                verifyBtn.style.display = 'none';
-                claimedStatus.style.display = 'block';
-            } else {
-                startBtn.style.display = 'block';
-                verifyBtn.style.display = 'none';
-                claimedStatus.style.display = 'none';
-                startBtn.addEventListener('click', handleStartTaskClick);
-                verifyBtn.addEventListener('click', handleVerifyTaskClick); // Add verify listener now
-            }
-
-            tasksListDiv.appendChild(itemDiv);
+             if (!taskData || !taskId) return; const isCompleted = userData?.completedTasks?.[taskId] === true;
+             const itemDiv = document.createElement('div'); itemDiv.className = 'task-item'; itemDiv.dataset.taskId = taskId; itemDiv.dataset.completed = isCompleted;
+             const imageUrl = taskData.imageUrl || `https://via.placeholder.com/50/1a1a2e/e0e0e0?text=${(taskData.name||'T')[0]}`; // Default image with letter
+             const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete the action and enter the code.');
+             itemDiv.innerHTML = `
+                 <img src="${imageUrl}" alt="" class="task-item-image" onerror="this.style.display='none'">
+                 <div class="task-item-info">
+                     <div class="task-item-name">${taskData.name || 'Unnamed Task'}</div>
+                     <div class="task-item-description">${description}</div>
+                     <div class="task-item-reward"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span>+${formatNumber(taskData.reward || 0)}</span> </div>
+                 </div>
+                 <div class="task-actions">
+                     <button class="task-button start-task-btn">Start</button>
+                     <button class="task-button verify-task-btn">Verify</button>
+                     <span class="task-claimed-status">Claimed</span>
+                 </div>`;
+             const startBtn = itemDiv.querySelector('.start-task-btn'); const verifyBtn = itemDiv.querySelector('.verify-task-btn'); const claimedStatus = itemDiv.querySelector('.task-claimed-status');
+             if (isCompleted) { startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block'; }
+             else { startBtn.style.display = 'block'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'none'; startBtn.addEventListener('click', handleStartTaskClick); verifyBtn.addEventListener('click', handleVerifyTaskClick); }
+             tasksListDiv.appendChild(itemDiv);
         }
 
         function handleStartTaskClick(event) {
-            if (isLoading || !userData) return;
-            const button = event.target;
-            const taskItem = button.closest('.task-item');
-            const taskId = taskItem.dataset.taskId;
-            const taskData = availableTasks[taskId];
-
-            if (!taskData) { console.error("Task data not found for:", taskId); return; }
-            if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "You have already completed this task."); return; }
-
-            // Open link (if provided)
-            if (taskData.link) {
-                 window.open(taskData.link, '_blank');
-                 // Optional: Provide feedback that link opened
-                 // showInfoPopup("Link Opened", "Complete the action in the new tab/window.");
-            } else if (taskData.type === 'link') {
-                // Link task MUST have a link
-                 showWarningPopup("Task Error", "This task is missing its required link.");
-                 return
-            }
-
-
-            button.disabled = true; // Disable start button immediately
-
-            if (taskData.type === 'link') {
-                taskItem.dataset.status = 'verifying'; // Update status visually
-                const verifyBtn = taskItem.querySelector('.verify-task-btn');
-                verifyBtn.style.display = 'block';
-                verifyBtn.disabled = true; // Disable verify initially
-                verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`;
-
-                // Start countdown timer for verification enable
-                let countdown = TASK_VERIFICATION_DELAY / 1000;
-                const intervalId = setInterval(() => {
-                    countdown--;
-                    if (countdown > 0) {
-                        verifyBtn.textContent = `Verify (${countdown}s)`;
-                    } else {
-                        clearInterval(intervalId);
-                        verifyBtn.textContent = 'Verify';
-                        verifyBtn.disabled = false; // Enable verify button
-                        verifyBtn.dataset.startTime = Date.now(); // Store rough start time for basic check
-                    }
-                }, 1000);
-
-            } else if (taskData.type === 'code') {
-                // Show code input popup
-                showCodePopup(taskId, taskData);
-                // Re-enable start button in case user cancels the popup
-                 button.disabled = false;
-            } else {
-                // Unknown task type
-                button.disabled = false; // Re-enable button
-                showWarningPopup("Task Error", "Unknown task type encountered.");
-            }
+             if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId];
+             if (!taskData) { console.error("Task data missing:", taskId); return; } if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
+             if (taskData.link) { tg.openLink(taskData.link); } // Use TG method for links
+             else if (taskData.type === 'link') { showWarningPopup("Task Error", "Task link is missing."); return; }
+             button.disabled = true;
+             if (taskData.type === 'link') {
+                 taskItem.dataset.status = 'verifying'; const verifyBtn = taskItem.querySelector('.verify-task-btn'); verifyBtn.style.display = 'block'; verifyBtn.disabled = true; verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`; let countdown = TASK_VERIFICATION_DELAY / 1000;
+                 const intervalId = setInterval(() => {
+                     countdown--; if (countdown > 0) { verifyBtn.textContent = `Verify (${countdown}s)`; }
+                     else { clearInterval(intervalId); verifyBtn.textContent = 'Verify'; verifyBtn.disabled = false; }
+                 }, 1000);
+             } else if (taskData.type === 'code') { showCodePopup(taskId, taskData); button.disabled = false; /* Allow cancel */ }
+             else { button.disabled = false; showWarningPopup("Task Error", "Unknown task type."); }
         }
 
         function handleVerifyTaskClick(event) {
-            if (isLoading || !userData) return;
-            const button = event.target;
-            const taskItem = button.closest('.task-item');
-            const taskId = taskItem.dataset.taskId;
-            const taskData = availableTasks[taskId];
-
-            if (!taskData) { console.error("Task data not found:", taskId); return; }
-            if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
-
-             button.disabled = true; // Prevent double clicks
-             button.textContent = "Verifying...";
-
-            // Basic time check (can be easily bypassed client-side)
-            // const startTime = parseInt(button.dataset.startTime || '0');
-            // if (Date.now() - startTime < TASK_VERIFICATION_DELAY - 1000) { // Allow a little buffer
-            //     showWarningPopup("Verification Failed", "Please wait the full duration after starting the task.");
-            //     button.disabled = false;
-            //      button.textContent = "Verify";
-            //     return;
-            // }
-
-            // Simulate verification success for link type
-            console.log(`Verification successful (simulated) for task ${taskId}`);
-            claimTaskReward(taskId, taskData.reward);
+             if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId];
+             if (!taskData) { console.error("Task data missing:", taskId); return; } if (userData.completedTasks?.[taskId]) { showInfoPopup("Task Info", "Already completed."); return; }
+             button.disabled = true; button.textContent = "Verifying...";
+             console.log(`Verification successful (simulated) for task ${taskId}`); claimTaskReward(taskId, taskData.reward);
         }
 
-        function showCodePopup(taskId, taskData) {
-            currentCodeTaskId = taskId; // Store task ID for submit handler
-            codePopupTitle.textContent = taskData.name || "Enter Code";
-            codePopupDescription.textContent = taskData.description || "Enter the code found after completing the task.";
-            codePopupInput.value = ''; // Clear previous input
-            codePopup.classList.add('visible');
-             codePopupInput.focus(); // Focus the input field
-        }
-
-        function hideCodePopup() {
-            codePopup.classList.remove('visible');
-            currentCodeTaskId = null;
-        }
-
+        function showCodePopup(taskId, taskData) { currentCodeTaskId = taskId; codePopupTitle.textContent = taskData.name || "Enter Code"; codePopupDescription.textContent = taskData.description || "Enter the code."; codePopupInput.value = ''; codePopup.classList.add('visible'); codePopupInput.focus(); }
+        function hideCodePopup() { codePopup.classList.remove('visible'); currentCodeTaskId = null; }
         function handleCodeSubmit() {
-            if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) {
-                hideCodePopup();
-                return;
-            }
-
-            const taskId = currentCodeTaskId;
-            const taskData = availableTasks[taskId];
-            const submittedCode = codePopupInput.value.trim();
-
-            if (!submittedCode) {
-                showWarningPopup("Input Error", "Please enter the code.");
-                return;
-            }
-
-             // SECURITY RISK: Client-side check only!
-            if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) {
-                console.log(`Code verification successful for task ${taskId}`);
-                hideCodePopup();
-                claimTaskReward(taskId, taskData.reward);
-            } else {
-                showWarningPopup("Incorrect Code", "The code you entered is incorrect. Please try again.");
-                // Keep popup open for retry
-                 codePopupInput.focus();
-                 codePopupInput.select();
-            }
+             if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) { hideCodePopup(); return; }
+             const taskId = currentCodeTaskId; const taskData = availableTasks[taskId]; const submittedCode = codePopupInput.value.trim(); if (!submittedCode) { showWarningPopup("Input Error", "Please enter the code."); return; }
+             // !! SECURITY WARNING: This code check is CLIENT-SIDE ONLY and easily bypassed. !!
+             // !! For real rewards, verification MUST happen on a secure backend (e.g., Firebase Functions). !!
+             if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) {
+                 console.log(`Code verification successful for task ${taskId}`); hideCodePopup(); claimTaskReward(taskId, taskData.reward);
+             } else { showWarningPopup("Incorrect Code", "The code is incorrect. Please try again."); codePopupInput.focus(); codePopupInput.select(); }
         }
 
         function claimTaskReward(taskId, rewardAmount) {
-            if (isLoading || !userData || !taskId || rewardAmount === undefined) return;
-
-            // Final check if already completed
-            if (userData.completedTasks?.[taskId]) {
-                console.warn(`Attempted to claim already completed task: ${taskId}`);
-                updateTaskItemUI(taskId, true); // Ensure UI is correct
-                return;
-            }
-
-            userData.coins += rewardAmount;
-            if (!userData.completedTasks) userData.completedTasks = {}; // Ensure object exists
-            userData.completedTasks[taskId] = true;
-
-            console.log(`Task ${taskId} completed. Reward: ${rewardAmount}`);
-            showRewardPopup("Task Complete!", `You earned ${formatNumber(rewardAmount)} coins!`);
-
-            updateTaskItemUI(taskId, true); // Update the specific task item
-            updateCoinDisplay(); // Update balance display
-            if (document.getElementById('profile-screen').classList.contains('active')) {
-                updateProfileStats(); // Update profile if visible
-            }
-
-            saveUserData(true); // Force save user data
+             if (isLoading || !userData || !taskId || rewardAmount === undefined) return; if (userData.completedTasks?.[taskId]) { console.warn(`Attempted duplicate claim: ${taskId}`); updateTaskItemUI(taskId, true); return; }
+             userData.coins += rewardAmount; if (!userData.completedTasks) userData.completedTasks = {}; userData.completedTasks[taskId] = true;
+             console.log(`Task ${taskId} completed. Reward: ${rewardAmount}`); showRewardPopup("Task Complete!", `You earned ${formatNumber(rewardAmount)} coins!`);
+             updateTaskItemUI(taskId, true); updateCoinDisplay(); if (document.getElementById('profile-screen').classList.contains('active')) { updateProfileStats(); }
+             saveUserData(true);
         }
 
         function updateTaskItemUI(taskId, isCompleted) {
-            const taskItem = tasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`);
-            if (!taskItem) return;
-
-            const startBtn = taskItem.querySelector('.start-task-btn');
-            const verifyBtn = taskItem.querySelector('.verify-task-btn');
-            const claimedStatus = taskItem.querySelector('.task-claimed-status');
-
-            taskItem.dataset.completed = isCompleted;
-            taskItem.dataset.status = isCompleted ? 'completed' : 'pending'; // Reset status
-
-            if (isCompleted) {
-                startBtn.style.display = 'none';
-                verifyBtn.style.display = 'none';
-                claimedStatus.style.display = 'block';
-                // Remove listeners if they were added
-                startBtn.removeEventListener('click', handleStartTaskClick);
-                verifyBtn.removeEventListener('click', handleVerifyTaskClick);
-            } else {
-                // This case might not be needed if UI is only updated *to* completed
-                startBtn.style.display = 'block';
-                verifyBtn.style.display = 'none';
-                claimedStatus.style.display = 'none';
-                startBtn.disabled = false;
-                 verifyBtn.disabled = true; // Reset verify button state
-                 verifyBtn.textContent = 'Verify';
-                // Re-add listeners if needed (though typically not needed when resetting)
-                 startBtn.removeEventListener('click', handleStartTaskClick); // Remove old first
-                 startBtn.addEventListener('click', handleStartTaskClick);
-                 verifyBtn.removeEventListener('click', handleVerifyTaskClick); // Remove old first
-                 verifyBtn.addEventListener('click', handleVerifyTaskClick);
-
-            }
+             const taskItem = tasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`); if (!taskItem) return;
+             const startBtn = taskItem.querySelector('.start-task-btn'); const verifyBtn = taskItem.querySelector('.verify-task-btn'); const claimedStatus = taskItem.querySelector('.task-claimed-status');
+             taskItem.dataset.completed = isCompleted; taskItem.dataset.status = isCompleted ? 'completed' : 'pending';
+             if (isCompleted) { startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block'; startBtn.removeEventListener('click', handleStartTaskClick); verifyBtn.removeEventListener('click', handleVerifyTaskClick); }
+             else { startBtn.style.display = 'block'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'none'; startBtn.disabled = false; verifyBtn.disabled = true; verifyBtn.textContent = 'Verify'; startBtn.removeEventListener('click', handleStartTaskClick); startBtn.addEventListener('click', handleStartTaskClick); verifyBtn.removeEventListener('click', handleVerifyTaskClick); verifyBtn.addEventListener('click', handleVerifyTaskClick); }
         }
 
-
-        // --- UI Functions (initializeAppUI, updateUI, updateCoinDisplay, etc. Keep as is) ---
-        function initializeAppUI() { /* ... */ missionEmojiDisplay.textContent = WOLF_EMOJI; renderShopItems(); updateUI(); loadingDiv.style.display = 'none'; mainContentDiv.style.display = 'flex'; navbar.style.display = 'flex'; }
-        function updateUI() { /* ... */ if (isLoading || !userData || !currentUser) return; updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI(); /* Don't update tasks list here, loaded once */ }
+        // --- UI Functions ---
+        function initializeAppUI() { missionEmojiDisplay.textContent = WOLF_EMOJI; renderShopItems(); updateUI(); loadingDiv.style.display = 'none'; mainContentDiv.style.display = 'flex'; navbar.style.display = 'flex'; }
+        function updateUI() { if (isLoading || !userData || !currentUser) return; updateCoinDisplay(); updateGameStats(); updateShopItemsUI(); updateProfileStats(); updateMissionStatusUI(); /* Task UI updated via claim/load */ }
         function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
         function updateGameStats() { if (!userData) return; tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
-        function updateProfileStats() { /* ... */ if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
-        function updateMissionStatusUI() { /* ... */ } function updateMissionUI(missionId, status, isConditionMet) { /* ... */ }
-        function renderShopItems() { /* ... */ } function updateShopItemsUI() { /* ... */ } function handleBuyButtonClick(event) { /* ... */ } function handleUpgradePurchase(upgradeId) { /* ... */ } function calculateUpgradeCost(upgradeDef, currentLevel) { /* ... */ }
-        function createClickAnimation(x, y, amount) { /* ... */ }
-        function showPage(pageId) {
-            if (isLoading) return;
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            const targetPage = document.getElementById(pageId);
-             if (!targetPage) { console.error("Target page not found:", pageId); return; }
-             targetPage.classList.add('active');
-
-            navButtons.forEach(button => {
-                button.classList.remove('active');
-                 // Handle new tasks button ID
-                 if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active');
-            });
-
-            // Refresh relevant data when switching to certain pages
-            if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); }
-             // Task list is loaded once initially, could add refresh logic here if needed
-             // if (pageId === 'tasks-screen') { loadAndDisplayTasks(); // Reload tasks every time? Maybe not efficient }
-        }
-        function showShopCategory(categoryId) { /* ... */ }
-        function saveWallet() { /* ... */ }
-        function showError(message) { /* ... Keep robust error handler ... */ const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred. Please try again.'; loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false; }
-        function formatNumber(num) { /* ... */ }
+        function updateProfileStats() { if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
+        function updateMissionStatusUI() { if (!userData || !currentUser) return; const missionId = 'lastNameWolf'; const status = userData?.missions?.[missionId] || 'incomplete'; const lastName = currentUser?.last_name || ''; const isConditionMet = lastName.endsWith(WOLF_EMOJI); updateMissionUI(missionId, status, isConditionMet); }
+        function updateMissionUI(missionId, status, isConditionMet) { missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
+        function renderShopItems() { clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData?.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.removeEventListener('click', handleBuyButtonClick); button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
+        function updateShopItemsUI() { if (!userData) return; const currentCoins = userData.coins; upgrades.forEach(upgrade => { const itemDiv = document.getElementById(`shop-item-${upgrade.id}`); if (!itemDiv) return; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); const nameSpan = itemDiv.querySelector('.shop-item-name'); if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`; const costSpan = itemDiv.querySelector('.cost-value'); if (costSpan) costSpan.textContent = formatNumber(cost); const button = itemDiv.querySelector('.buy-button'); if (button) button.disabled = currentCoins < cost; }); }
+        function handleBuyButtonClick(event) { const upgradeId = event.target.dataset.upgradeId; handleUpgradePurchase(upgradeId); }
+        function handleUpgradePurchase(upgradeId) { if (isLoading || !userData) return; const upgradeDef = upgrades.find(u => u.id === upgradeId); if (!upgradeDef) return; const currentLevel = userData.upgrades?.[upgradeId]?.level || 0; const cost = calculateUpgradeCost(upgradeDef, currentLevel); if (userData.coins >= cost) { userData.coins -= cost; if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 }; userData.upgrades[upgradeId].level += 1; console.log(`Purchased ${upgradeDef.name} (Lv. ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); updateUI(); scheduleSave(); } else { console.log("Insufficient funds:", upgradeDef.name); const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`); if (button) { button.style.animation = 'shake 0.5s'; setTimeout(() => button.style.animation = '', 500); } } }
+        function calculateUpgradeCost(upgradeDef, currentLevel) { return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE); }
+        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
+        function showPage(pageId) { if (isLoading) return; document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); const targetPage = document.getElementById(pageId); if (!targetPage) { console.error("Target page not found:", pageId); return; } targetPage.classList.add('active'); navButtons.forEach(button => { button.classList.remove('active'); if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active'); }); if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); } /* Could add logic to refresh tasks if needed: else if (pageId === 'tasks-screen') { loadAndDisplayTasks(); } */ }
+        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId).classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
+        function saveWallet() { if (isLoading || !userData) return; const newAddress = tonWalletInput.value.trim(); userData.tonWallet = newAddress; saveUserData(true); saveStatusP.textContent = 'Wallet address saved!'; setTimeout(() => saveStatusP.textContent = '', 3000); }
+        function showError(message) { const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred.'; loadingDiv.textContent = `Error: ${displayMessage}`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); isLoading = false; }
+        function formatNumber(num) { num = Math.floor(num); const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"]; let suffixIndex = 0; if (num < 1000) return num.toString(); while (num >= 1000 && suffixIndex < suffixes.length - 1) { num /= 1000; suffixIndex++; } return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex]; }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-            // Remove previous if any (good practice)
-             coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission); codePopupCancelBtn.removeEventListener('click', hideCodePopup); codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit);
+             coinContainer.removeEventListener('pointerdown', handleTap); saveWalletButton.removeEventListener('click', saveWallet); copyEmojiBtn.removeEventListener('click', copyMissionEmoji); missionClaimBtn.removeEventListener('click', checkAndClaimMission); codePopupCancelBtn.removeEventListener('click', hideCodePopup); codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit); codePopup.removeEventListener('click', handlePopupOverlayClick); // Ensure removal
 
-            // Add listeners
              coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
              saveWalletButton.addEventListener('click', saveWallet);
              copyEmojiBtn.addEventListener('click', copyMissionEmoji);
              missionClaimBtn.addEventListener('click', checkAndClaimMission);
-             // Code Popup Listeners
              codePopupCancelBtn.addEventListener('click', hideCodePopup);
              codePopupSubmitBtn.addEventListener('click', handleCodeSubmit);
-             // Close popup if overlay clicked (optional)
-             codePopup.addEventListener('click', (event) => { if (event.target === codePopup) { hideCodePopup(); } });
-             // Task listeners are added dynamically in renderTaskItem
+             codePopup.addEventListener('click', handlePopupOverlayClick); // Add overlay click listener
+             // Task button listeners are added in renderTaskItem
         }
+
+        // Helper for closing popup on overlay click
+        function handlePopupOverlayClick(event) {
+            if (event.target === codePopup) { hideCodePopup(); }
+        }
+
 
     </script>
 
