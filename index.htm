@@ -15,17 +15,25 @@
     <style>
         /* --- Global Styles & Reset --- */
         :root {
-            --primary-bg: #1a1a2e; /* Dark blue/purple */
-            --secondary-bg: #162447;
-            --accent-color: #e43f5a; /* Reddish accent */
+            --primary-bg-start: #1a1a2e;
+            --primary-bg-end: #162447;
+            --secondary-bg: rgba(22, 36, 71, 0.8); /* Slightly transparent */
+            --accent-color: #e43f5a;
+            --accent-hover: #c33049;
             --text-color: #e0e0e0;
-            --coin-color: #f7b731; /* Gold */
+            --text-muted-color: #a0a0a0;
+            --coin-color: #f7b731;
             --icon-color: #a0a0a0;
             --icon-active-color: #ffffff;
-            --button-bg: #1f4068;
-            --button-hover-bg: #2a5a8a;
+            --button-bg-start: #1f4068;
+            --button-bg-end: #2a5a8a;
+            --button-hover-bg-start: #2a5a8a;
+            --button-hover-bg-end: #3b7cb8;
+            --success-color: #4caf50;
             --disabled-bg: #444;
             --disabled-text: #888;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --glow-color: rgba(247, 183, 49, 0.6); /* Coin glow */
         }
 
         * {
@@ -39,10 +47,11 @@
             height: 100%;
             width: 100%;
             overflow: hidden; /* Prevent default body scroll */
-            font-family: 'Arial', sans-serif;
-            background-color: var(--primary-bg);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end));
             color: var(--text-color);
             overscroll-behavior: none; /* Prevent pull-to-refresh */
+            font-size: 16px; /* Base font size */
         }
 
         body {
@@ -70,15 +79,22 @@
         }
 
         /* --- Page Structure --- */
+        #main-content {
+            flex-grow: 1;
+            display: flex; /* Use flex here to manage page visibility */
+            overflow: hidden; /* Prevent this container from scrolling */
+        }
+
         .page {
+            width: 100%;
+            height: 100%;
             display: none; /* Hidden by default */
             flex-direction: column;
             flex-grow: 1;
-            overflow-y: auto; /* Allow scrolling within the page */
+            overflow-y: auto; /* Allow scrolling WITHIN the page */
             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-            padding: 20px;
-            padding-bottom: 80px; /* Space for nav bar */
-            background-color: var(--primary-bg);
+            padding: 20px 15px 85px 15px; /* Adjusted padding, leave space for fixed nav */
+            scroll-behavior: smooth;
         }
 
         .page.active {
@@ -94,10 +110,13 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            background-color: var(--secondary-bg);
+            background-color: rgba(15, 23, 42, 0.85); /* Darker, slightly transparent nav */
             border-top: 1px solid var(--accent-color);
-            padding: 10px 0;
+            padding: 8px 0;
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(5px);
             z-index: 100;
+            box-shadow: 0 -2px 10px var(--shadow-color);
         }
 
         nav button {
@@ -109,31 +128,45 @@
             flex-direction: column;
             align-items: center;
             font-size: 0.7em;
-            padding: 5px;
+            padding: 5px 10px;
+            transition: color 0.2s ease;
+            flex-grow: 1; /* Make buttons take equal space */
+            flex-basis: 0;
         }
 
         nav button .material-icons {
-            font-size: 28px;
-            margin-bottom: 2px;
+            font-size: 26px; /* Slightly smaller icons */
+            margin-bottom: 3px;
+        }
+
+        nav button:hover {
+            color: var(--icon-active-color);
         }
 
         nav button.active {
-            color: var(--icon-active-color);
+            color: var(--accent-color); /* Use accent for active nav item */
         }
 
         /* --- Game Screen --- */
         #game-screen {
+            justify-content: space-between; /* Push stats up, coin middle, nothing below */
             align-items: center;
             text-align: center;
+            padding-top: 10px; /* Less top padding */
         }
 
         .stats-bar {
             display: flex;
             justify-content: space-around;
             width: 100%;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-            color: #ccc;
+            max-width: 350px; /* Limit width on larger screens */
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: var(--text-muted-color);
+            background-color: var(--secondary-bg);
+            padding: 8px 10px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px var(--shadow-color);
         }
 
         .stat-item {
@@ -142,7 +175,7 @@
             gap: 5px;
         }
         .stat-item .material-icons {
-            font-size: 18px;
+            font-size: 16px;
             color: var(--coin-color);
         }
 
@@ -151,30 +184,42 @@
              display: flex;
              align-items: center;
              justify-content: center;
-             margin-bottom: 20px;
+             margin-bottom: 15px; /* Less margin */
         }
 
         #coin-icon-balance {
-            width: 35px;
-            height: 35px;
-            margin-right: 10px;
+            width: 30px; /* Slightly smaller */
+            height: 30px;
+            margin-right: 8px;
             vertical-align: middle;
         }
 
         #coin-balance {
-            font-size: 2.5em;
+            font-size: 2.2em; /* Slightly smaller */
             font-weight: bold;
             color: var(--coin-color);
+            text-shadow: 0 0 8px var(--glow-color);
+        }
+
+        /* Container to help center the coin */
+        .coin-area {
+            flex-grow: 1; /* Takes up remaining space */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+             width: 100%;
+             margin-bottom: 10px; /* Space above potential future elements */
         }
 
         #coin-container {
             position: relative;
-            width: 200px; /* Adjust size as needed */
-            height: 200px;
-            margin-top: 30px;
+            width: clamp(180px, 50vmin, 250px); /* Responsive size */
+            height: clamp(180px, 50vmin, 250px);
             cursor: pointer;
             user-select: none; /* Prevent image selection */
             -webkit-user-drag: none; /* Prevent image dragging */
+            border-radius: 50%;
+            /* Removed margin-top, centering is handled by flex parent */
         }
 
          #coin-image {
@@ -182,11 +227,13 @@
             height: 100%;
             transition: transform 0.08s ease-out;
             border-radius: 50%;
-            box-shadow: 0 0 25px rgba(247, 183, 49, 0.5); /* Coin glow */
+            box-shadow: 0 0 30px var(--glow-color); /* Enhanced Coin glow */
+            filter: drop-shadow(0 5px 15px var(--shadow-color)); /* Add depth */
          }
 
         #coin-container:active #coin-image {
-             transform: scale(0.95); /* Click feedback */
+             transform: scale(0.94); /* Slightly more pronounced click feedback */
+             filter: drop-shadow(0 2px 8px var(--shadow-color));
          }
 
         /* --- Click Feedback Animation --- */
@@ -203,61 +250,75 @@
 
         .click-value {
             position: absolute;
-            font-size: 1.5em;
+            font-size: clamp(1.2em, 4vw, 1.8em); /* Responsive font size */
             font-weight: bold;
             color: var(--coin-color);
             user-select: none;
             pointer-events: none;
-            animation: floatUpFadeOut 1s ease-out forwards;
+            animation: floatUpFadeOut 1.2s ease-out forwards;
             white-space: nowrap; /* Prevent wrapping */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         @keyframes floatUpFadeOut {
             0% {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
             100% {
                 opacity: 0;
-                transform: translateY(-60px);
+                transform: translateY(-70px) scale(0.8); /* Float higher, shrink slightly */
             }
         }
 
 
         /* --- Shop Screen --- */
-        #shop-screen h2 {
+        #shop-screen h2, #profile-screen h2 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             color: var(--accent-color);
+            font-size: 1.6em;
+            text-shadow: 1px 1px 2px var(--shadow-color);
         }
 
         .shop-tabs {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--secondary-bg);
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky; /* Make tabs stick while scrolling shop items */
+            top: -20px; /* Adjust based on page padding */
+            background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); /* Match page bg */
+            padding-top: 15px; /* Space above tabs when sticky */
+            z-index: 10;
         }
 
         .shop-tabs button {
             background: none;
             border: none;
             color: var(--icon-color);
-            padding: 10px 20px;
+            padding: 12px 20px;
             cursor: pointer;
             font-size: 1em;
+            font-weight: 500;
             border-bottom: 3px solid transparent;
             margin-bottom: -1px; /* Overlap border */
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .shop-tabs button:hover {
+             color: var(--icon-active-color);
         }
 
         .shop-tabs button.active {
-            color: var(--icon-active-color);
+            color: var(--accent-color);
             border-bottom-color: var(--accent-color);
         }
 
         .shop-category {
             display: none; /* Hide categories by default */
             flex-direction: column;
-            gap: 15px;
+            gap: 12px; /* Slightly reduced gap */
         }
 
         .shop-category.active {
@@ -267,12 +328,13 @@
         .shop-item {
             background-color: var(--secondary-bg);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 10px; /* Slightly more rounded */
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            gap: 12px;
+            box-shadow: 0 3px 8px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .shop-item-info {
@@ -280,14 +342,15 @@
         }
 
         .shop-item-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
+            font-weight: 600; /* Semibold */
+            font-size: 1.05em;
+            margin-bottom: 4px;
+            color: var(--text-color);
         }
 
         .shop-item-details {
-            font-size: 0.9em;
-            color: #ccc;
+            font-size: 0.85em;
+            color: var(--text-muted-color);
             margin-bottom: 8px;
         }
          .shop-item-cost {
@@ -296,106 +359,203 @@
             gap: 5px;
             font-weight: bold;
             color: var(--coin-color);
+            font-size: 0.95em;
          }
         .shop-item-cost img {
-             width: 18px;
-             height: 18px;
+             width: 16px; /* Slightly smaller */
+             height: 16px;
          }
 
         .buy-button {
-            background-color: var(--button-bg);
+            background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
             color: var(--text-color);
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s ease;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
             white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
         }
 
         .buy-button:hover:not(:disabled) {
-            background-color: var(--button-hover-bg);
+            background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
+            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
         }
+         .buy-button:active:not(:disabled) {
+             transform: scale(0.97);
+         }
 
         .buy-button:disabled {
-            background-color: var(--disabled-bg);
+            background: var(--disabled-bg);
             color: var(--disabled-text);
             cursor: not-allowed;
+             box-shadow: none;
         }
 
         /* --- Profile Screen --- */
-        #profile-screen h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--accent-color);
-        }
-
-        .profile-info {
-            background-color: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        .profile-section {
+             background-color: var(--secondary-bg);
+             padding: 20px;
+             border-radius: 12px;
+             margin-bottom: 20px;
+             box-shadow: 0 4px 10px var(--shadow-color);
+             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .profile-info p {
             margin-bottom: 12px;
-            font-size: 1.1em;
+            font-size: 1em; /* Adjusted size */
+            line-height: 1.5;
             word-break: break-all; /* Break long IDs */
+            display: flex;
+            align-items: center;
+             flex-wrap: wrap; /* Allow wrapping if needed */
         }
         .profile-info p strong {
             color: var(--coin-color);
             margin-right: 8px;
+            min-width: 120px; /* Align keys */
+            display: inline-block;
         }
+         .profile-info p span {
+             flex-grow: 1;
+         }
 
-
-        .wallet-section {
-            background-color: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
 
         .wallet-section label {
             display: block;
             margin-bottom: 10px;
-            font-weight: bold;
+            font-weight: 600;
+             color: var(--text-muted-color);
         }
 
         #ton-wallet-input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background-color: var(--primary-bg);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.2); /* Darker input bg */
             color: var(--text-color);
             font-size: 1em;
         }
 
         #save-wallet-button {
-             background-color: var(--accent-color);
+             background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
              color: white;
              border: none;
              padding: 12px 20px;
-             border-radius: 5px;
+             border-radius: 8px;
              cursor: pointer;
              font-weight: bold;
              width: 100%;
              font-size: 1em;
-             transition: background-color 0.2s ease;
+             transition: background 0.2s ease, transform 0.1s ease;
+             box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
         }
         #save-wallet-button:hover {
-             background-color: #c33049; /* Darker accent */
+             background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); /* Swap gradient on hover */
+             box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
         }
+         #save-wallet-button:active {
+             transform: scale(0.98);
+         }
+
         #save-status {
-            margin-top: 10px;
+            margin-top: 12px;
             text-align: center;
-            color: lightgreen;
+            color: var(--success-color);
             font-size: 0.9em;
-            height: 1em; /* Reserve space */
+            height: 1.2em; /* Reserve space */
+            font-weight: 500;
         }
+
+        /* Mission Section */
+        .mission-section {
+             /* Styles inherited from .profile-section */
+             text-align: center;
+        }
+
+        .mission-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        .mission-description {
+            font-size: 0.95em;
+            color: var(--text-muted-color);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .mission-emoji {
+            font-size: 2em;
+            margin: 0 5px;
+            display: inline-block;
+            cursor: default; /* Make it look like text */
+        }
+        .copy-emoji-button {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .copy-emoji-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .mission-status {
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 1em;
+        }
+        .mission-status.incomplete { color: var(--text-muted-color); }
+        .mission-status.complete { color: var(--success-color); }
+        .mission-status.claimed { color: var(--coin-color); }
+
+        .mission-action-button {
+            background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
+            color: var(--text-color);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0, 0.2);
+        }
+        .mission-action-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end));
+            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
+        }
+        .mission-action-button:active:not(:disabled) {
+             transform: scale(0.97);
+         }
+        .mission-action-button:disabled {
+            background: var(--disabled-bg);
+            color: var(--disabled-text);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .reward-display {
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             gap: 5px;
+             font-weight: bold;
+             color: var(--coin-color);
+             margin-top: 5px;
+         }
 
 
         /* --- Utility Classes --- */
@@ -406,14 +566,22 @@
             margin: 0 2px;
         }
 
+         /* --- Basic CSS for shake animation --- */
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+          40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+
     </style>
 </head>
 <body>
     <div id="app">
         <div id="loading">Loading Meme Wolf...</div>
 
-        <!-- Main Content Area (hidden initially) -->
-        <div id="main-content" style="display: none; flex-grow: 1; display: flex; flex-direction: column;">
+        <!-- Main Content Area -->
+        <div id="main-content" style="display: none;">
 
             <!-- Page: Game -->
             <div id="game-screen" class="page active">
@@ -433,10 +601,13 @@
                     <span id="coin-balance">0</span>
                 </div>
 
-                <div id="coin-container">
-                    <img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!">
+                <!-- Centering Container -->
+                <div class="coin-area">
+                     <div id="coin-container">
+                         <img id="coin-image" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me!">
+                     </div>
                 </div>
-                 <div id="click-feedback"></div>
+                <div id="click-feedback"></div>
             </div>
 
             <!-- Page: Shop -->
@@ -460,14 +631,35 @@
             <!-- Page: Profile -->
             <div id="profile-screen" class="page">
                 <h2>Profile & Wallet</h2>
-                 <div class="profile-info">
-                     <p><strong>User ID:</strong> <span id="profile-userid"></span></p>
-                     <p><strong>Username:</strong> <span id="profile-username"></span></p>
-                     <p><strong>Total Coins:</strong> <span id="profile-coins"></span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p>
-                     <p><strong>Tap Power:</strong> <span id="profile-tap-power"></span> / tap</p>
-                     <p><strong>Passive Income:</strong> <span id="profile-passive-income"></span> / hour</p>
+                 <div class="profile-section profile-info">
+                     <p><strong>User ID:</strong> <span id="profile-userid">N/A</span></p>
+                     <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
+                     <p><strong>First Name:</strong> <span id="profile-firstname">N/A</span></p>
+                     <p><strong>Last Name:</strong> <span id="profile-lastname">N/A</span></p>
+                     <p><strong>Total Coins:</strong> <span id="profile-coins">0</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p>
+                     <p><strong>Tap Power:</strong> <span id="profile-tap-power">1</span> / tap</p>
+                     <p><strong>Passive Income:</strong> <span id="profile-passive-income">0</span> / hour</p>
                  </div>
-                 <div class="wallet-section">
+
+                 <!-- Wolf Name Mission Section -->
+                 <div class="profile-section mission-section">
+                    <div class="mission-title">🐺 Wolf Name Mission 🐺</div>
+                    <p class="mission-description">
+                        Add the wolf emoji
+                        <span class="mission-emoji" id="mission-emoji-display">🐺</span>
+                        to the *very end* of your Telegram Last Name!
+                        <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button>
+                    </p>
+                    <div class="mission-status incomplete" id="mission-status">Status: Checking...</div>
+                    <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button>
+                    <div class="reward-display">
+                        <span>Reward: 50K</span>
+                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt="">
+                    </div>
+                 </div>
+                 <!-- End Mission Section -->
+
+                 <div class="profile-section wallet-section">
                      <label for="ton-wallet-input">TON Wallet Address:</label>
                      <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
                      <button id="save-wallet-button">Save Wallet</button>
@@ -479,7 +671,7 @@
         <!-- Navigation Bar -->
         <nav id="navbar" style="display: none;">
             <button id="nav-game" class="active" onclick="showPage('game-screen')">
-                <span class="material-icons">pets</span> <!-- Changed icon -->
+                <span class="material-icons">pets</span>
                 <span>Game</span>
             </button>
             <button id="nav-shop" onclick="showPage('shop-screen')">
@@ -497,7 +689,6 @@
         // --- Config ---
         const firebaseConfig = {
             // --- WARNING: Exposing keys like this is insecure for production ---
-            // --- Use environment variables or backend functions in a real app ---
             apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", // Replace if needed, BUT SECURE IT
             authDomain: "ab-wallet-62482.firebaseapp.com",
             databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com",
@@ -508,16 +699,18 @@
         };
 
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
-        const BASE_TAP_EARN = 0.1; // Initial earn rate (can be adjusted by upgrades)
+        const BASE_TAP_EARN = 1; // <<< CHANGED: Initial earn rate is now 1
         const SAVE_INTERVAL = 5000; // Save data every 5 seconds
         const PASSIVE_INCOME_INTERVAL = 1000; // Calculate passive income every second
         const INCREASING_COST_BASE = 10000; // Extra cost per level for upgrades
+        const WOLF_MISSION_REWARD = 50000; // 50K coins
+        const WOLF_EMOJI = '🐺'; // Mission Emoji
 
         // --- Telegram & Firebase Vars ---
         let tg = null;
         let db = null;
         let currentUser = null;
-        let userData = null;
+        let userData = null; // Stores data fetched from Firebase
         let lastSaveTime = 0;
         let saveTimeout = null;
         let passiveIncomeIntervalId = null;
@@ -533,20 +726,28 @@
         const clickFeedbackDiv = document.getElementById('click-feedback');
         const clickUpgradesDiv = document.getElementById('click-upgrades');
         const passiveUpgradesDiv = document.getElementById('passive-upgrades');
+        // Profile Page Elements
         const profileUserIdSpan = document.getElementById('profile-userid');
         const profileUsernameSpan = document.getElementById('profile-username');
+        const profileFirstNameSpan = document.getElementById('profile-firstname'); // Added
+        const profileLastNameSpan = document.getElementById('profile-lastname'); // Added
         const profileCoinsSpan = document.getElementById('profile-coins');
         const profileTapPowerSpan = document.getElementById('profile-tap-power');
         const profilePassiveIncomeSpan = document.getElementById('profile-passive-income');
         const tonWalletInput = document.getElementById('ton-wallet-input');
         const saveWalletButton = document.getElementById('save-wallet-button');
         const saveStatusP = document.getElementById('save-status');
+        // Mission Elements
+        const missionEmojiDisplay = document.getElementById('mission-emoji-display');
+        const copyEmojiBtn = document.getElementById('copy-emoji-btn');
+        const missionStatusDiv = document.getElementById('mission-status');
+        const missionClaimBtn = document.getElementById('mission-claim-btn');
+        // Other Elements
         const navButtons = document.querySelectorAll('nav button');
         const shopTabButtons = document.querySelectorAll('.shop-tabs button');
         const shopCategories = document.querySelectorAll('.shop-category');
 
-        // --- Upgrade Definitions ---
-        // Structure: id, name, description, baseCost, baseEffect (tap or passive), type ('click' or 'passive')
+        // --- Upgrade Definitions (Same as before) ---
         const upgrades = [
             // Click Upgrades (10 items)
             { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' },
@@ -588,10 +789,9 @@
         window.onload = () => {
             try {
                 tg = window.Telegram.WebApp;
-                tg.ready(); // Inform Telegram the app is ready
-                tg.expand(); // Expand the app to full height
+                tg.ready();
+                tg.expand();
 
-                // Basic user info check
                 if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
                     showError("Could not get Telegram user data. Please launch from Telegram.");
                     return;
@@ -602,63 +802,63 @@
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
 
-                // Load user data or create new
-                loadUserData();
-
-                // Setup Event Listeners
-                setupEventListeners();
+                loadUserData(); // Load/create user data
+                setupEventListeners(); // Setup clicks, etc.
 
             } catch (error) {
                 console.error("Initialization Error:", error);
-                showError(`Initialization failed: ${error.message}`);
+                showError(`Initialization failed: ${error.message}. Try reloading.`);
             }
         };
 
         // --- Firebase Functions ---
         function loadUserData() {
             if (!currentUser || !db) {
-                showError("User or Database not initialized.");
-                return;
+                showError("User or Database not initialized."); return;
             }
-            const userId = currentUser.id.toString(); // Firebase keys must be strings
+            const userId = currentUser.id.toString();
             const userRef = db.ref('users/' + userId);
 
             userRef.once('value')
                 .then((snapshot) => {
+                    const defaultData = {
+                        coins: 0,
+                        upgrades: {},
+                        missions: { lastNameWolf: 'incomplete' }, // Add mission structure
+                        tonWallet: '',
+                        lastUpdate: Date.now(),
+                        telegramInfo: { // Update with latest info on load
+                            id: currentUser.id,
+                            username: currentUser.username || null,
+                            firstName: currentUser.first_name || '',
+                            lastName: currentUser.last_name || ''
+                        }
+                    };
+
                     if (snapshot.exists()) {
                         userData = snapshot.val();
-                        // Ensure essential structures exist if loaded data is old/incomplete
-                        if (!userData.upgrades) userData.upgrades = {};
-                        if (userData.coins === undefined || userData.coins === null) userData.coins = 0;
-                        if (!userData.tonWallet) userData.tonWallet = '';
-                        if (!userData.lastUpdate) userData.lastUpdate = Date.now();
+                        // Merge defaults to handle missing fields in old data
+                        if (!userData.upgrades) userData.upgrades = defaultData.upgrades;
+                        if (userData.coins === undefined || userData.coins === null) userData.coins = defaultData.coins;
+                        if (!userData.tonWallet) userData.tonWallet = defaultData.tonWallet;
+                        if (!userData.lastUpdate) userData.lastUpdate = defaultData.lastUpdate;
+                        // Initialize missions if missing
+                        if (!userData.missions) userData.missions = defaultData.missions;
+                        else if (userData.missions.lastNameWolf === undefined) {
+                            userData.missions.lastNameWolf = 'incomplete'; // Ensure mission field exists
+                        }
+                        // Always update telegramInfo with potentially changed name
+                        userData.telegramInfo = defaultData.telegramInfo;
 
-                        // Calculate offline progress
                         calculateOfflineProgress();
-
                     } else {
                         console.log("New user, creating default data for:", userId);
-                        // Create default data for new user
-                        userData = {
-                            coins: 0,
-                            upgrades: {}, // Store levels like { 'upgrade_id': level }
-                            tonWallet: '',
-                            lastUpdate: Date.now(),
-                            telegramInfo: { // Store some basic info for reference
-                                id: currentUser.id,
-                                username: currentUser.username || 'N/A',
-                                firstName: currentUser.first_name || '',
-                                lastName: currentUser.last_name || ''
-                            }
-                        };
-                        // Save immediately for new user
-                        saveUserData(true); // Force immediate save
+                        userData = defaultData;
+                        saveUserData(true); // Force immediate save for new user
                     }
 
-                    // Start passive income interval AFTER data is loaded/created
-                    startPassiveIncome();
-                    // Initial UI setup
-                    initializeAppUI();
+                    startPassiveIncome(); // Start passive income after data is ready
+                    initializeAppUI(); // Setup UI
                 })
                 .catch((error) => {
                     console.error("Firebase Load Error:", error);
@@ -667,29 +867,30 @@
         }
 
         function saveUserData(force = false) {
-             if (!currentUser || !db || !userData) return; // Not ready
+             if (!currentUser || !db || !userData) return;
 
              const now = Date.now();
-             userData.lastUpdate = now; // Update last saved timestamp
+             userData.lastUpdate = now;
 
-             // Debounce saving unless forced
              clearTimeout(saveTimeout);
              if (force || now - lastSaveTime > SAVE_INTERVAL) {
                 console.log("Saving data to Firebase...");
                 const userId = currentUser.id.toString();
+                // Update potentially changed user info before saving
+                userData.telegramInfo = {
+                    id: currentUser.id,
+                    username: currentUser.username || null,
+                    firstName: currentUser.first_name || '',
+                    lastName: currentUser.last_name || ''
+                };
                 db.ref('users/' + userId).set(userData)
                     .then(() => {
                         console.log("Data saved successfully.");
                         lastSaveTime = now;
                     })
-                    .catch((error) => {
-                        console.error("Firebase Save Error:", error);
-                        // Maybe notify user if save fails repeatedly?
-                    });
+                    .catch((error) => console.error("Firebase Save Error:", error));
              } else {
-                 // Schedule a save if not forced and interval hasn't passed
                  saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime));
-                 console.log("Scheduling save...");
              }
         }
 
@@ -700,47 +901,46 @@
             const tapValue = calculateTapPower();
             userData.coins += tapValue;
 
-            // Create click animation at touch/click position
-            // Use event.touches for multi-touch if needed
-            let clientX, clientY;
+             let clientX, clientY;
              if (event.touches && event.touches.length > 0) {
-                // Handle touch events (multiple touches)
                 for (let i = 0; i < event.touches.length; i++) {
                     clientX = event.touches[i].clientX;
                     clientY = event.touches[i].clientY;
                     createClickAnimation(clientX, clientY, tapValue);
                 }
              } else {
-                 // Handle mouse click event
                  clientX = event.clientX;
                  clientY = event.clientY;
                  createClickAnimation(clientX, clientY, tapValue);
              }
 
-
             updateCoinDisplay();
-            scheduleSave(); // Use scheduled save instead of immediate
+            scheduleSave();
         }
 
         function calculateTapPower() {
-            let power = BASE_TAP_EARN;
-            for (const upgradeId in userData.upgrades) {
-                const upgradeDef = upgrades.find(u => u.id === upgradeId);
-                if (upgradeDef && upgradeDef.type === 'click') {
-                    const level = userData.upgrades[upgradeId]?.level || 0;
-                    power += upgradeDef.baseEffect * level;
+            let power = BASE_TAP_EARN; // Base is now 1
+            if (userData && userData.upgrades) {
+                for (const upgradeId in userData.upgrades) {
+                    const upgradeDef = upgrades.find(u => u.id === upgradeId);
+                    if (upgradeDef && upgradeDef.type === 'click') {
+                        const level = userData.upgrades[upgradeId]?.level || 0;
+                        power += upgradeDef.baseEffect * level;
+                    }
                 }
             }
             return power;
         }
 
-         function calculatePassiveIncomeRate() {
+        function calculatePassiveIncomeRate() {
              let rate = 0; // Per hour
-             for (const upgradeId in userData.upgrades) {
-                 const upgradeDef = upgrades.find(u => u.id === upgradeId);
-                 if (upgradeDef && upgradeDef.type === 'passive') {
-                     const level = userData.upgrades[upgradeId]?.level || 0;
-                     rate += upgradeDef.baseEffect * level;
+             if (userData && userData.upgrades) {
+                 for (const upgradeId in userData.upgrades) {
+                     const upgradeDef = upgrades.find(u => u.id === upgradeId);
+                     if (upgradeDef && upgradeDef.type === 'passive') {
+                         const level = userData.upgrades[upgradeId]?.level || 0;
+                         rate += upgradeDef.baseEffect * level;
+                     }
                  }
              }
              return rate;
@@ -748,99 +948,195 @@
 
          function applyPassiveIncome() {
             if (!userData) return;
-
             const hourlyRate = calculatePassiveIncomeRate();
-            const incomePerSecond = hourlyRate / 3600;
+            const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000);
 
-            if (incomePerSecond > 0) {
-                userData.coins += incomePerSecond;
-                updateCoinDisplay(); // Update display frequently
-                // Saving is handled by the scheduled save mechanism
+            if (incomePerTick > 0) {
+                userData.coins += incomePerTick;
+                updateCoinDisplay();
+                // Save is debounced via scheduleSave calls elsewhere
             }
         }
 
         function calculateOfflineProgress() {
             if (!userData || !userData.lastUpdate) return;
-
             const now = Date.now();
             const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000));
-            const hourlyRate = calculatePassiveIncomeRate(); // Use the *current* rate based on upgrades
+            // Limit offline time to avoid huge jumps? (e.g., max 24 hours)
+            // const maxOfflineSeconds = 24 * 60 * 60;
+            // offlineSeconds = Math.min(offlineSeconds, maxOfflineSeconds);
+
+            const hourlyRate = calculatePassiveIncomeRate();
             const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
 
             if (offlineIncome > 0) {
                 userData.coins += offlineIncome;
                 console.log(`Applied offline income: ${formatNumber(offlineIncome)} coins for ${offlineSeconds} seconds.`);
-                // Optionally, show a notification to the user about offline earnings
                  tg?.showPopup({
                     title: "Welcome Back!",
-                    message: `You earned ${formatNumber(offlineIncome)} coins while you were away!`,
+                    message: `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`,
                     buttons: [{ type: "ok" }],
                 });
             }
-            // Update lastUpdate timestamp immediately after calculating
-            userData.lastUpdate = now;
+            userData.lastUpdate = now; // Update lastUpdate *after* calculation
         }
 
         function startPassiveIncome() {
-             if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); // Clear existing interval if any
+             if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId);
              passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL);
          }
 
          function scheduleSave() {
-             // Request a save, which will be debounced by saveUserData
              saveUserData();
          }
+
+        // --- Mission Logic ---
+        function checkAndClaimMission() {
+            if (!userData || !currentUser) return;
+
+            const missionId = 'lastNameWolf';
+            const currentStatus = userData.missions?.[missionId] || 'incomplete';
+            const lastName = currentUser.last_name || ''; // Get current last name from TG object
+
+            if (currentStatus === 'claimed') {
+                updateMissionUI(missionId, 'claimed', false); // Already claimed
+                return;
+            }
+
+            const isConditionMet = lastName.endsWith(WOLF_EMOJI);
+
+            if (isConditionMet) {
+                if (currentStatus === 'incomplete') {
+                     // Condition met, not yet claimed
+                     userData.missions[missionId] = 'complete';
+                     userData.coins += WOLF_MISSION_REWARD;
+                     userData.missions[missionId] = 'claimed'; // Mark as claimed immediately after rewarding
+
+                     console.log(`Mission '${missionId}' completed and claimed. Reward: ${WOLF_MISSION_REWARD}`);
+
+                     // Show success feedback
+                     tg?.showPopup({
+                         title: "Mission Complete!",
+                         message: `Well done! You earned ${formatNumber(WOLF_MISSION_REWARD)} coins for adding the ${WOLF_EMOJI} to your name!`,
+                         buttons: [{ type: "ok" }],
+                     });
+
+                     updateMissionUI(missionId, 'claimed', false); // Update UI to claimed state
+                     updateCoinDisplay(); // Show new coin total
+                     updateProfileStats(); // Update profile coin display too
+                     saveUserData(true); // Force save immediately after claim
+                } else {
+                    // Condition met but already claimed (should be handled by initial check, but safeguard)
+                    updateMissionUI(missionId, 'claimed', false);
+                }
+            } else {
+                 // Condition not met
+                 updateMissionUI(missionId, 'incomplete', false); // Keep as incomplete, disable button
+                 tg?.showPopup({
+                     title: "Mission Incomplete",
+                     message: `Make sure the ${WOLF_EMOJI} emoji is at the very end of your Telegram Last Name, then try checking again.`,
+                     buttons: [{ type: "ok" }],
+                 });
+            }
+        }
+
+        function copyMissionEmoji() {
+            navigator.clipboard.writeText(WOLF_EMOJI)
+                .then(() => {
+                    copyEmojiBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500);
+                })
+                .catch(err => {
+                    console.error('Failed to copy emoji: ', err);
+                    // Fallback or alert? For simplicity, just log error.
+                });
+        }
 
 
         // --- UI Functions ---
         function initializeAppUI() {
+            missionEmojiDisplay.textContent = WOLF_EMOJI; // Set mission emoji
             renderShopItems();
-            updateUI(); // Full UI update
+            updateUI(); // Full UI update including mission status
             loadingDiv.style.display = 'none';
-            mainContentDiv.style.display = 'flex'; // Use flex for main content layout
-            navbar.style.display = 'flex'; // Show navbar
+            mainContentDiv.style.display = 'flex';
+            navbar.style.display = 'flex';
         }
 
         function updateUI() {
             if (!userData || !currentUser) return;
-
-            const currentCoins = userData.coins;
-            const currentTapPower = calculateTapPower();
-            const currentPassiveRate = calculatePassiveIncomeRate();
-
-            // Game Screen
-            updateCoinDisplay(); // Uses userData.coins directly
-            tapPowerDisplaySpan.textContent = formatNumber(currentTapPower);
-            passiveIncomeDisplaySpan.textContent = formatNumber(currentPassiveRate);
-
-
-            // Shop Screen - Update button states and costs
+            updateCoinDisplay();
+            updateGameStats();
             updateShopItemsUI();
-
-            // Profile Screen
-            profileUserIdSpan.textContent = currentUser.id;
-            profileUsernameSpan.textContent = currentUser.username || `${currentUser.first_name} ${currentUser.last_name || ''}`.trim() || 'N/A';
-            profileCoinsSpan.textContent = formatNumber(currentCoins);
-            profileTapPowerSpan.textContent = formatNumber(currentTapPower);
-            profilePassiveIncomeSpan.textContent = formatNumber(currentPassiveRate);
-            tonWalletInput.value = userData.tonWallet || '';
+            updateProfileStats();
+            updateMissionStatusUI(); // Separate function for mission UI
         }
 
          function updateCoinDisplay() {
-             if (userData) {
-                 coinBalanceSpan.textContent = formatNumber(userData.coins);
-             }
+             if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins);
          }
+
+         function updateGameStats() {
+             tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower());
+             passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate());
+         }
+
+         function updateProfileStats() {
+             profileUserIdSpan.textContent = currentUser.id || 'N/A';
+             profileUsernameSpan.textContent = currentUser.username || 'N/A';
+             profileFirstNameSpan.textContent = currentUser.first_name || 'N/A';
+             profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; // Display current last name
+             profileCoinsSpan.textContent = formatNumber(userData.coins);
+             profileTapPowerSpan.textContent = formatNumber(calculateTapPower());
+             profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate());
+             tonWalletInput.value = userData.tonWallet || '';
+         }
+
+        function updateMissionStatusUI() {
+            const missionId = 'lastNameWolf';
+            const status = userData?.missions?.[missionId] || 'incomplete';
+            const lastName = currentUser?.last_name || '';
+            const isConditionMet = lastName.endsWith(WOLF_EMOJI);
+
+            updateMissionUI(missionId, status, isConditionMet);
+        }
+
+
+        function updateMissionUI(missionId, status, isConditionMet) {
+            // General UI update based on status stored in Firebase
+            missionStatusDiv.classList.remove('incomplete', 'complete', 'claimed');
+            missionStatusDiv.classList.add(status); // 'incomplete', 'complete', or 'claimed'
+
+            switch (status) {
+                case 'incomplete':
+                    missionStatusDiv.textContent = 'Status: Incomplete';
+                    missionClaimBtn.textContent = 'Check & Claim Reward';
+                    // Enable button ONLY if the name condition IS met, allowing check/claim attempt
+                    missionClaimBtn.disabled = false;
+                    break;
+                case 'complete': // This state might be brief, immediately goes to claimed after reward
+                    missionStatusDiv.textContent = 'Status: Completed!';
+                    missionClaimBtn.textContent = 'Claim Reward';
+                    missionClaimBtn.disabled = false; // Ready to claim
+                    break;
+                case 'claimed':
+                    missionStatusDiv.textContent = 'Status: Reward Claimed!';
+                    missionClaimBtn.textContent = 'Claimed';
+                    missionClaimBtn.disabled = true; // Permanently disable
+                    break;
+            }
+        }
 
 
         function renderShopItems() {
+            // (Function remains largely the same as before - Ensure it uses formatNumber)
             clickUpgradesDiv.innerHTML = ''; // Clear existing
             passiveUpgradesDiv.innerHTML = '';
 
             upgrades.forEach(upgrade => {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'shop-item';
-                itemDiv.id = `shop-item-${upgrade.id}`; // Add ID for easier updates
+                itemDiv.id = `shop-item-${upgrade.id}`;
 
                 const level = userData?.upgrades?.[upgrade.id]?.level || 0;
                 const cost = calculateUpgradeCost(upgrade, level);
@@ -857,11 +1153,8 @@
                     <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button>
                 `;
 
-                if (upgrade.type === 'click') {
-                    clickUpgradesDiv.appendChild(itemDiv);
-                } else if (upgrade.type === 'passive') {
-                    passiveUpgradesDiv.appendChild(itemDiv);
-                }
+                if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv);
+                else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv);
             });
 
              // Add event listeners to the new buttons
@@ -873,69 +1166,54 @@
         }
 
          function updateShopItemsUI() {
+             // (Function remains largely the same as before - Ensure it uses formatNumber)
              if (!userData) return;
              const currentCoins = userData.coins;
 
              upgrades.forEach(upgrade => {
                  const itemDiv = document.getElementById(`shop-item-${upgrade.id}`);
-                 if (!itemDiv) return; // Should not happen if renderShopItems was called
+                 if (!itemDiv) return;
 
                  const level = userData.upgrades?.[upgrade.id]?.level || 0;
                  const cost = calculateUpgradeCost(upgrade, level);
 
-                 // Update Level in name
                  const nameSpan = itemDiv.querySelector('.shop-item-name');
                  if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`;
 
-                 // Update Cost display
                  const costSpan = itemDiv.querySelector('.cost-value');
-                  if (costSpan) costSpan.textContent = formatNumber(cost);
+                 if (costSpan) costSpan.textContent = formatNumber(cost); // USE FORMATTER
 
-                 // Update Button State
                  const button = itemDiv.querySelector('.buy-button');
-                 if (button) {
-                     button.disabled = currentCoins < cost;
-                 }
+                 if (button) button.disabled = currentCoins < cost;
              });
          }
 
          function handleBuyButtonClick(event) {
+             // (Function remains the same as before)
              const upgradeId = event.target.dataset.upgradeId;
              handleUpgradePurchase(upgradeId);
          }
 
 
         function handleUpgradePurchase(upgradeId) {
+             // (Function remains largely the same as before - Ensure it uses formatNumber for logs)
             if (!userData) return;
-
             const upgradeDef = upgrades.find(u => u.id === upgradeId);
-            if (!upgradeDef) {
-                console.error("Upgrade definition not found:", upgradeId);
-                return;
-            }
+            if (!upgradeDef) return;
 
             const currentLevel = userData.upgrades?.[upgradeId]?.level || 0;
             const cost = calculateUpgradeCost(upgradeDef, currentLevel);
 
             if (userData.coins >= cost) {
-                // Sufficient funds
                 userData.coins -= cost;
-
-                // Initialize upgrade entry if it doesn't exist
-                if (!userData.upgrades[upgradeId]) {
-                    userData.upgrades[upgradeId] = { level: 0 };
-                }
+                if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 };
                 userData.upgrades[upgradeId].level += 1;
 
-                console.log(`Purchased ${upgradeDef.name} (Level ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`);
+                console.log(`Purchased ${upgradeDef.name} (Level ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); // USE FORMATTER
 
-                // Update UI immediately for responsiveness
                 updateUI();
-                // Save data (debounced)
                 scheduleSave();
-
             } else {
-                // Insufficient funds - maybe add visual feedback (shake button?)
                 console.log("Insufficient funds for:", upgradeDef.name);
                  const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`);
                  if (button) {
@@ -946,43 +1224,42 @@
         }
 
         function calculateUpgradeCost(upgradeDef, currentLevel) {
-            // Cost increases by INCREASING_COST_BASE for each level already purchased
+            // (Function remains the same as before)
             return upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE);
         }
 
 
         function createClickAnimation(x, y, amount) {
+             // (Function remains the same as before - Ensure it uses formatNumber)
             const feedback = document.createElement('div');
             feedback.className = 'click-value';
-            feedback.textContent = `+${formatNumber(amount)}`; // Format the number briefly
+            feedback.textContent = `+${formatNumber(amount)}`; // USE FORMATTER
 
-            // Adjust position slightly to center the text near the click/touch point
-            feedback.style.left = `${x - feedback.offsetWidth / 2}px`;
-            feedback.style.top = `${y - 20}px`; // Start slightly above the click point
+            feedback.style.left = `${x}px`; // Center horizontally on click point
+            feedback.style.top = `${y}px`; // Start vertically at click point
+            feedback.style.transform = 'translate(-50%, -100%)'; // Adjust position to be above and centered
 
             clickFeedbackDiv.appendChild(feedback);
 
-            // Remove the element after the animation finishes
-            setTimeout(() => {
-                feedback.remove();
-            }, 1000); // Match animation duration
+            setTimeout(() => { feedback.remove(); }, 1150); // Slightly longer than animation
         }
 
 
         function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
 
             navButtons.forEach(button => {
                 button.classList.remove('active');
-                 if (button.id === `nav-${pageId.split('-')[0]}`) { // Match nav button id pattern
-                     button.classList.add('active');
-                 }
+                 if (button.id === `nav-${pageId.split('-')[0]}`) button.classList.add('active');
             });
 
-            // Save data when switching pages as a good checkpoint
+            // Refresh mission status & profile stats when navigating to profile
+            if (pageId === 'profile-screen') {
+                updateProfileStats();
+                updateMissionStatusUI();
+            }
+
             scheduleSave();
         }
 
@@ -991,72 +1268,59 @@
             document.getElementById(categoryId).classList.add('active');
 
             shopTabButtons.forEach(button => button.classList.remove('active'));
-             document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); // Match tab button id pattern
+             document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active');
         }
 
         function saveWallet() {
+            // (Function remains the same as before)
             if (!userData) return;
             const newAddress = tonWalletInput.value.trim();
             userData.tonWallet = newAddress;
-            saveUserData(true); // Force save for wallet changes
+            saveUserData(true);
             saveStatusP.textContent = 'Wallet address saved!';
-            setTimeout(() => saveStatusP.textContent = '', 3000); // Clear status message
+            setTimeout(() => saveStatusP.textContent = '', 3000);
         }
 
         function showError(message) {
             loadingDiv.textContent = `Error: ${message}`;
             loadingDiv.style.color = 'red';
             console.error("App Error:", message);
-            // Hide other elements if error occurs early
             mainContentDiv.style.display = 'none';
             navbar.style.display = 'none';
         }
 
         // --- Utility Functions ---
         function formatNumber(num) {
-            num = Math.floor(num); // Work with integers for display formatting
+            // (Function remains the same as before)
+            num = Math.floor(num);
             const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
             let suffixIndex = 0;
 
-            if (num < 1000) {
-                return num.toString();
-            }
+            if (num < 1000) return num.toString();
 
             while (num >= 1000 && suffixIndex < suffixes.length - 1) {
                 num /= 1000;
                 suffixIndex++;
             }
-
-            // Show one decimal place for thousands and above
-             return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex];
-             // Simpler alternative: always show 1 decimal if > 1000
-             // return num.toFixed(1) + suffixes[suffixIndex];
+            return num.toFixed(num < 10 ? 2 : num < 100 ? 1 : 0) + suffixes[suffixIndex];
         }
 
         // --- Event Listeners Setup ---
         function setupEventListeners() {
-            // Coin Tap Listener (handles both touch and mouse)
-             coinContainer.addEventListener('pointerdown', handleTap, { passive: false }); // Use pointerdown for better multi-touch start detection
+             // Coin Tap Listener
+             coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
 
-
-            // Save Wallet Button
+             // Save Wallet Button
             saveWalletButton.addEventListener('click', saveWallet);
 
-            // Navigation buttons are handled by onclick attributes in HTML for simplicity here
-            // Shop tabs are handled by onclick attributes in HTML
+            // Mission Buttons
+            copyEmojiBtn.addEventListener('click', copyMissionEmoji);
+            missionClaimBtn.addEventListener('click', checkAndClaimMission);
+
+            // Navigation/Shop Tabs use onclick in HTML
         }
 
     </script>
-
-    <!-- Basic CSS for shake animation -->
-    <style>
-        @keyframes shake {
-          10%, 90% { transform: translate3d(-1px, 0, 0); }
-          20%, 80% { transform: translate3d(2px, 0, 0); }
-          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-          40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-    </style>
 
 </body>
 </html>
