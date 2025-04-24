@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Meme Wolf Tapper</title>
+    <!-- Google Material Symbols Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="style.css">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -22,10 +24,11 @@
         <!-- Header Info -->
         <header class="app-header">
             <div class="user-info-short">
-                <span id="username-display">Player</span> | <span id="user-id-display"></span>
+                <!-- Profile Pic placeholder in header -->
+                <img id="header-profile-pic" src="default-avatar.png" alt="P" class="header-avatar">
+                <span id="username-display">Player</span>
             </div>
             <div class="balance-container">
-                <!-- Use new coin image URL -->
                 <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-small">
                 <span id="coin-balance">0</span>
             </div>
@@ -36,81 +39,119 @@
             <!-- Game Page -->
             <div id="game-page" class="page active-page">
                 <div class="stats-display">
-                    <span>Earn/Tap: <span id="earn-per-tap">0.1</span></span>
-                    <span>Earn/Hour: <span id="earn-per-hour">0</span></span>
+                    <span>
+                        <span class="material-symbols-outlined stats-icon">touch_app</span>
+                        Earn/Tap: <span id="earn-per-tap">0.1</span>
+                    </span>
+                    <span>
+                         <span class="material-symbols-outlined stats-icon">hourglass_top</span>
+                        Earn/Hour: <span id="earn-per-hour">0</span>
+                    </span>
                 </div>
                 <div class="clicker-area">
                     <button id="clicker-button" class="clicker-button">
-                        <!-- Use new coin image URL -->
                         <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Tap Me" id="clicker-image">
                     </button>
-                    <div id="click-feedback-container"></div> <!-- For +1 animations -->
+                    <div id="click-feedback-container"></div>
                 </div>
                  <div class="progress-info">
-                    <!-- Optional: Add energy bar or other mechanics here -->
+                     <!-- Maybe an energy bar later -->
                  </div>
             </div>
 
-            <!-- Boosts Page (Combined Shop) -->
+            <!-- Boosts Page (Tabbed) -->
             <div id="boosts-page" class="page">
-                <h2>🚀 Boosts</h2>
+                <h2>
+                    <span class="material-symbols-outlined page-title-icon">rocket_launch</span>
+                    Boosts
+                </h2>
 
-                <!-- Click Upgrades Section -->
-                <section id="click-upgrades-section">
-                    <h3>Tap Power</h3>
+                <!-- Tab Navigation -->
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab-button active" data-tab-target="#boosts-tap-content">
+                            <span class="material-symbols-outlined">touch_app</span> Tap Power
+                        </button>
+                        <button class="tab-button" data-tab-target="#boosts-passive-content">
+                             <span class="material-symbols-outlined">schedule</span> Hourly Income
+                        </button>
+                         <!-- Add more tabs here if needed (e.g., Specials) -->
+                    </div>
+                </div>
+
+
+                <!-- Tab Content -->
+                <div class="tab-content active" id="boosts-tap-content">
                     <div id="click-upgrades-list" class="shop-list">
-                        <!-- Click upgrade items will be loaded here by JS -->
+                        <!-- Click upgrade items loaded here -->
                         <p>Loading tap upgrades...</p>
                     </div>
-                </section>
+                </div>
 
-                 <!-- Passive Income Section -->
-                <section id="passive-income-section">
-                    <h3>Hourly Income</h3>
-                    <p class="passive-income-info">
+                <div class="tab-content" id="boosts-passive-content">
+                     <p class="passive-income-info">
                         Total Passive Income:
                         <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-tiny">
                         <span id="total-passive-income-display">0</span> / hour
                     </p>
                     <div id="passive-upgrades-list" class="shop-list">
-                        <!-- Passive upgrade items will be loaded here by JS -->
+                        <!-- Passive upgrade items loaded here -->
                          <p>Loading income upgrades...</p>
                     </div>
-                </section>
+                </div>
             </div>
 
             <!-- Profile Page -->
             <div id="profile-page" class="page">
-                <h2>Profile</h2>
+                 <h2>
+                    <span class="material-symbols-outlined page-title-icon">account_circle</span>
+                    Profile
+                </h2>
+                <div class="profile-header">
+                     <img id="profile-page-pic" src="default-avatar.png" alt="Profile Picture" class="profile-picture-large">
+                     <h3 id="profile-fullname">User Name</h3>
+                     <p class="profile-username-id">
+                        <span id="profile-username">@username</span> | ID: <span id="profile-userid">000000</span>
+                     </p>
+                </div>
                 <div class="profile-info">
-                    <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
-                    <p><strong>Telegram ID:</strong> <span id="profile-userid">N/A</span></p>
-                    <p><strong>Current Balance:</strong>
-                        <!-- Use new coin image URL -->
-                        <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-tiny">
-                        <span id="profile-balance">0</span>
-                    </p>
-                    <p><strong>TON Wallet:</strong></p>
+                    <div class="info-item">
+                        <span class="info-label">
+                            <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt="Coin" class="coin-icon-tiny">
+                            Balance:
+                        </span>
+                        <span id="profile-balance" class="info-value">0</span>
+                    </div>
+                     <div class="info-item">
+                         <span class="info-label">
+                            <span class="material-symbols-outlined stats-icon">account_balance_wallet</span>
+                             TON Wallet:
+                         </span>
+                     </div>
                     <input type="text" id="ton-wallet-input" placeholder="Enter your TON wallet address">
-                    <button id="save-wallet-button">Save Wallet</button>
+                    <button id="save-wallet-button" class="profile-button">
+                        <span class="material-symbols-outlined">save</span> Save Wallet
+                    </button>
                     <p id="wallet-status"></p>
                 </div>
-                 <button id="sync-data-button">Force Sync Data</button>
+                 <button id="sync-data-button" class="profile-button secondary">
+                     <span class="material-symbols-outlined">sync</span> Force Sync Data
+                 </button>
             </div>
         </main>
 
-        <!-- Navigation (Updated for 3 tabs) -->
+        <!-- Navigation -->
         <nav class="bottom-nav">
             <button class="nav-button active" data-page="game-page">
-                <img src="game-icon.png" alt="Game"> <!-- Use your icon -->
+                <span class="material-symbols-outlined">stadia_controller</span> <!-- Changed icon -->
                 <span>Game</span>
             </button>
             <button class="nav-button" data-page="boosts-page">
-                 <img src="boost-icon.png" alt="Boosts"> <!-- Use a boost/rocket icon -->
+                <span class="material-symbols-outlined">rocket_launch</span> <!-- Changed icon -->
                 <span>Boosts</span>
             </button>
             <button class="nav-button" data-page="profile-page">
-                 <img src="profile-icon.png" alt="Profile"> <!-- Use your icon -->
+                <span class="material-symbols-outlined">account_circle</span> <!-- Changed icon -->
                 <span>Profile</span>
             </button>
         </nav>
