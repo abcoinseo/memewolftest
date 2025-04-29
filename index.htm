@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Existing head content... -->
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script
         async
@@ -9,28 +8,32 @@
         onload="initAnalytics()"
         type="text/javascript"
     ></script>
+
+    <!-- Add Telegram Analytics script to HTML head -->
     <script
         async
         src="https://unpkg.com/@telegram-apps/analytics@latest/dist/index.js"
         onload="initAnalytics()"
         type="text/javascript"
     ></script>
+
+    <!-- ADDED: Monetag SDK Script -->
+    <script async src='//whephiwums.com/sdk.js' data-zone='9276049' data-sdk='show_9276049'></script>
+
     <script>
-    function initAnalytics() {
-      // Combine initializations if both scripts use the same function name
-      if (window.telegramAnalytics && typeof window.telegramAnalytics.init === 'function') {
-        window.telegramAnalytics.init({
-          token: '7117728183:AAHNrUikov1d9lN1aojYGNyobKHOOvodUm4',
-          appName: 'MemeWolf',
-        });
-      }
-      // Add initialization for tganalytics.xyz if needed, ensuring no conflicts
-      // Example: if tganalytics.xyz uses window.tg_analytics.init()
-      // if (window.tg_analytics && typeof window.tg_analytics.init === 'function') {
-      //   window.tg_analytics.init({ /* config */ });
-      // }
-      console.log("Analytics initialized (check console for details/errors).");
-    }
+        function initAnalytics() {
+          // Initialize both analytics SDKs if they exist
+          if (window.telegramAnalytics && typeof window.telegramAnalytics.init === 'function') {
+              window.telegramAnalytics.init({
+                  token: '7117728183:AAHNrUikov1d9lN1aojYGNyobKHOOvodUm4', // Your TG Analytics Token
+                  appName: 'MemeWolf',
+              });
+              console.log("Telegram Analytics Initialized");
+          }
+          // Note: tganalytics.xyz doesn't seem to have a standard init function in the provided snippet.
+          // Ensure its initialization logic is correct based on its documentation if needed.
+          console.log("Analytics Initialized (or attempted)");
+        }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -41,7 +44,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- Existing styles --- */
+        /* --- Global Styles & Reset --- */
         :root {
             --primary-bg-start: #1a1a2e; --primary-bg-end: #162447; --secondary-bg: rgba(22, 36, 71, 0.8); --accent-color: #e43f5a; --accent-hover: #c33049; --text-color: #e0e0e0; --text-muted-color: #a0a0a0; --coin-color: #f7b731; --icon-color: #a0a0a0; --icon-active-color: #ffffff; --button-bg-start: #1f4068; --button-bg-end: #2a5a8a; --button-hover-bg-start: #2a5a8a; --button-hover-bg-end: #3b7cb8; --success-color: #4caf50; --warning-color: #ff9800; --error-color: #f44336; --disabled-bg: #444; --disabled-text: #888; --shadow-color: rgba(0, 0, 0, 0.3); --glow-color: rgba(247, 183, 49, 0.6);
         }
@@ -58,8 +61,6 @@
         nav button .material-icons { font-size: 26px; margin-bottom: 3px; }
         nav button:hover { color: var(--icon-active-color); }
         nav button.active { color: var(--accent-color); }
-
-        /* --- Game Screen Styles --- */
         #game-screen { justify-content: space-between; align-items: center; text-align: center; padding-top: 10px; }
         .stats-bar { display: flex; justify-content: space-around; width: 100%; max-width: 350px; margin-bottom: 10px; font-size: 0.85em; color: var(--text-muted-color); background-color: var(--secondary-bg); padding: 8px 10px; border-radius: 10px; box-shadow: 0 1px 3px var(--shadow-color); }
         .stat-item { display: flex; align-items: center; gap: 5px; }
@@ -74,41 +75,55 @@
         #click-feedback { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 99; }
         .click-value { position: absolute; font-size: clamp(1.2em, 4vw, 1.8em); font-weight: bold; color: var(--coin-color); user-select: none; pointer-events: none; animation: floatUpFadeOut 1.2s ease-out forwards; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
         @keyframes floatUpFadeOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-70px) scale(0.8); } }
-
-        /* --- Common Page/Section Styles --- */
-        .page h2 { text-align: center; margin-bottom: 25px; color: var(--accent-color); font-size: 1.6em; text-shadow: 1px 1px 2px var(--shadow-color); }
-        .profile-section, .ads-section-content { /* Combine common section styling */ background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
-        .task-button { /* General purpose button style */ background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
-        .task-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
-        .task-button:active:not(:disabled) { transform: scale(0.97); }
-        .task-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7;}
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
-
-        /* --- Shop Styles --- */
-        .shop-tabs { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: -20px; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding-top: 15px; z-index: 10; }
-        .shop-tabs button { background: none; border: none; color: var(--icon-color); padding: 12px 20px; cursor: pointer; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; }
-        .shop-tabs button:hover { color: var(--icon-active-color); }
-        .shop-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
-        .shop-category { display: none; flex-direction: column; gap: 12px; }
-        .shop-category.active { display: flex; }
-        .shop-category > p { color: var(--text-muted-color); text-align: center; padding: 20px; font-style: italic; }
+        #shop-screen h2, #profile-screen h2, #tasks-screen h2, #ads-screen h2 { /* Added ads-screen */ text-align: center; margin-bottom: 25px; color: var(--accent-color); font-size: 1.6em; text-shadow: 1px 1px 2px var(--shadow-color); }
+        .shop-tabs, .task-tabs { /* Combined tab styling */ display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: -20px; /* Sticky tabs */ background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding-top: 15px; z-index: 10; }
+        .shop-tabs button, .task-tabs button { background: none; border: none; color: var(--icon-color); padding: 12px 20px; cursor: pointer; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; }
+        .shop-tabs button:hover, .task-tabs button:hover { color: var(--icon-active-color); }
+        .shop-tabs button.active, .task-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+        .shop-category, .task-list-category { /* Combined category styling */ display: none; flex-direction: column; gap: 12px; /* Container for items */ }
+        .shop-category.active, .task-list-category.active { display: flex; }
         .shop-item { background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
         .shop-item-info { flex-grow: 1; }
         .shop-item-name { font-weight: 600; font-size: 1.05em; margin-bottom: 4px; color: var(--text-color); }
         .shop-item-details { font-size: 0.85em; color: var(--text-muted-color); margin-bottom: 8px; }
         .shop-item-cost { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
         .shop-item-cost img { width: 16px; height: 16px; }
-        .buy-button { /* Uses .task-button styles */ }
-
-        /* --- Tasks Styles --- */
-        .task-tabs { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); position: sticky; top: -20px; background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding-top: 15px; z-index: 10; }
-        .task-tabs button { background: none; border: none; color: var(--icon-color); padding: 12px 20px; cursor: pointer; font-size: 1em; font-weight: 500; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; }
-        .task-tabs button:hover { color: var(--icon-active-color); }
-        .task-tabs button.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
-        .task-list-category { display: none; flex-direction: column; gap: 12px; }
-        .task-list-category.active { display: flex; }
-        .task-list-category > p { color: var(--text-muted-color); text-align: center; padding: 20px; font-style: italic; }
+        .buy-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .buy-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .buy-button:active:not(:disabled) { transform: scale(0.97); }
+        .buy-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7;}
+        .profile-section { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .profile-info p { margin-bottom: 12px; font-size: 1em; line-height: 1.5; word-break: break-all; display: flex; align-items: center; flex-wrap: wrap; }
+        .profile-info p strong { color: var(--coin-color); margin-right: 8px; min-width: 120px; display: inline-block; }
+        .profile-info p span { flex-grow: 1; }
+        .wallet-section label, .lucky-code-section label { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-muted-color); }
+        #ton-wallet-input, #lucky-code-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; }
+        #save-wallet-button { /* Inherits .task-button styles now */ background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; transition: background 0.2s ease, transform 0.1s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        #save-wallet-button:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        #save-wallet-button:active { transform: scale(0.98); }
+        #save-status, #lucky-code-status { margin-top: 12px; text-align: center; font-size: 0.9em; height: 1.2em; font-weight: 500; }
+        #save-status { color: var(--success-color); }
+        #lucky-code-status { color: var(--warning-color); }
+        #lucky-code-status.success { color: var(--success-color); }
+        #lucky-code-status.claimed { color: var(--coin-color); }
+        .mission-section { text-align: center; }
+        .mission-title { font-size: 1.2em; font-weight: 600; margin-bottom: 10px; color: var(--text-color); }
+        .mission-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 15px; line-height: 1.5; }
+        .mission-emoji { font-size: 2em; margin: 0 5px; display: inline-block; cursor: default; }
+        .copy-emoji-button { background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 10px; font-size: 0.8em; border-radius: 5px; cursor: pointer; margin-left: 10px; transition: background-color 0.2s ease, color 0.2s ease; }
+        .copy-emoji-button:hover { background-color: var(--accent-color); color: white; }
+        .mission-status { font-weight: bold; margin: 15px 0; font-size: 1em; }
+        .mission-status.incomplete { color: var(--text-muted-color); }
+        .mission-status.claimed { color: var(--coin-color); }
+        .mission-action-button { /* Inherits .task-button styles */ background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 10px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .mission-action-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .mission-action-button:active:not(:disabled) { transform: scale(0.97); }
+        .mission-action-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
+        .reward-display { display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; color: var(--coin-color); margin-top: 5px; }
+        .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
+        .coin-icon { width: 1em; height: 1em; vertical-align: middle; margin: 0 2px; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 40%, 60% { transform: translate3d(3px, 0, 0); } }
+        /* Removed #tasks-list, replaced by .task-list-category */
         .task-item { display: flex; gap: 15px; align-items: center; background-color: var(--secondary-bg); padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px var(--shadow-color); border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.2s ease; }
         .task-item:hover { transform: translateY(-2px); box-shadow: 0 5px 12px var(--shadow-color); }
         .task-item-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background-color: var(--primary-bg-start); }
@@ -118,42 +133,16 @@
         .task-item-reward { display: flex; align-items: center; gap: 5px; font-weight: bold; color: var(--coin-color); font-size: 0.95em; }
         .task-item-reward img { width: 16px; height: 16px; }
         .task-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+        .task-button { background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end)); color: var(--text-color); border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85em; transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0, 0.2); }
+        .task-button:hover:not(:disabled) { background: linear-gradient(135deg, var(--button-hover-bg-start), var(--button-hover-bg-end)); box-shadow: 0 4px 8px rgba(0,0,0, 0.3); }
+        .task-button:active:not(:disabled) { transform: scale(0.97); }
+        .task-button:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; box-shadow: none; opacity: 0.7; }
         .verify-task-btn, .task-claimed-status { display: none; }
         .task-claimed-status { font-size: 0.9em; font-weight: bold; color: var(--success-color); }
         .task-item[data-completed="true"] .start-task-btn, .task-item[data-completed="true"] .verify-task-btn { display: none; }
         .task-item[data-completed="true"] .task-claimed-status { display: block; }
-
-        /* --- Profile Styles --- */
-        .profile-info p { margin-bottom: 12px; font-size: 1em; line-height: 1.5; word-break: break-all; display: flex; align-items: center; flex-wrap: wrap; }
-        .profile-info p strong { color: var(--coin-color); margin-right: 8px; min-width: 120px; display: inline-block; }
-        .profile-info p span { flex-grow: 1; }
-        .wallet-section label, .lucky-code-section label, .mission-section .mission-title { display: block; margin-bottom: 10px; font-weight: 600; color: var(--text-muted-color); }
-        .mission-section .mission-title { color: var(--text-color); font-size: 1.2em; text-align: center;}
-        #ton-wallet-input, #lucky-code-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background-color: rgba(0, 0, 0, 0.2); color: var(--text-color); font-size: 1em; }
-        #save-wallet-button { background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; width: 100%; padding: 12px 20px; font-size: 1em; /* Inherits .task-button structure */ }
-        #save-wallet-button:hover { background: linear-gradient(135deg, var(--accent-hover), var(--accent-color)); }
-        #save-status, #lucky-code-status { margin-top: 12px; text-align: center; font-size: 0.9em; height: 1.2em; font-weight: 500; }
-        #save-status { color: var(--success-color); }
-        #lucky-code-status { color: var(--warning-color); }
-        #lucky-code-status.success { color: var(--success-color); }
-        #lucky-code-status.claimed { color: var(--coin-color); }
-        #lucky-code-status.error { color: var(--error-color); }
-        .mission-section { text-align: center; }
-        .mission-description { font-size: 0.95em; color: var(--text-muted-color); margin-bottom: 15px; line-height: 1.5; }
-        .mission-emoji { font-size: 2em; margin: 0 5px; display: inline-block; cursor: default; }
-        .copy-emoji-button { background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 10px; font-size: 0.8em; border-radius: 5px; cursor: pointer; margin-left: 10px; transition: background-color 0.2s ease, color 0.2s ease; }
-        .copy-emoji-button:hover { background-color: var(--accent-color); color: white; }
-        .mission-status { font-weight: bold; margin: 15px 0; font-size: 1em; }
-        .mission-status.incomplete { color: var(--text-muted-color); }
-        .mission-status.claimed { color: var(--coin-color); }
-        .mission-action-button { /* Inherits .task-button styles */ width: auto; padding: 10px 25px; font-size: 0.95em; }
-        .reward-display { display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; color: var(--coin-color); margin-top: 5px; }
-        .fine-applied { color: var(--error-color); font-weight: bold; margin-top: 10px; font-size: 0.9em; }
-        .lucky-code-section { text-align: center; }
-        #lucky-code-input { text-align: center; margin-bottom: 10px; text-transform: uppercase; }
-        #claim-lucky-code-btn { /* Inherits .task-button styles */ width: 100%; padding: 12px 20px; font-size: 1em; }
-
-        /* --- Modal Styles --- */
+        /* No specific style needed for verifying, buttons will show/hide */
+        .task-list-category > p { /* Style for placeholder messages */ color: var(--text-muted-color); text-align: center; padding: 20px; font-style: italic; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); animation: fadeIn 0.3s ease-out; }
         .modal-overlay.visible { display: flex; }
         .modal-content { background: linear-gradient(135deg, var(--primary-bg-start), var(--primary-bg-end)); padding: 25px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 1px solid rgba(255, 255, 255, 0.1); width: 90%; max-width: 400px; text-align: center; animation: slideIn 0.3s ease-out; }
@@ -166,13 +155,84 @@
         .modal-button.cancel:hover { background: #555; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .lucky-code-section { text-align: center; }
+        #lucky-code-input { text-align: center; margin-bottom: 10px; text-transform: uppercase; }
+        #claim-lucky-code-btn { /* Uses .task-button styles */ width: 100%; padding: 12px 20px; font-size: 1em; }
 
-        /* --- Ads Screen Styles --- */
-        #ads-screen { align-items: center; text-align: center; }
-        .ads-section-content { width: 100%; max-width: 450px; } /* Limit width */
-        #ads-status-display { font-size: 1.1em; color: var(--text-muted-color); margin-bottom: 15px; min-height: 1.2em; }
-        #ads-reward-info { font-size: 0.9em; color: var(--text-muted-color); margin-bottom: 25px; }
-        #watch-ad-button { /* Uses .task-button styles */ width: 80%; max-width: 300px; padding: 15px 20px; font-size: 1.1em; margin: 0 auto; /* Center button */ }
+        /* ADDED: Ads Screen Styles */
+        #ads-screen {
+            justify-content: flex-start; /* Align items to top */
+            align-items: center;
+            text-align: center;
+        }
+        .ads-section {
+            background-color: var(--secondary-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 450px; /* Limit width */
+        }
+        .ads-section p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+            color: var(--text-muted-color);
+        }
+        .ads-section p:first-child { /* Style the intro paragraph */
+            font-size: 1.05em;
+            color: var(--text-color);
+        }
+        #ad-status-container {
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+        #ad-status-container p {
+            margin-bottom: 8px;
+        }
+        #ad-status-container span {
+            font-weight: bold;
+            color: var(--text-color);
+        }
+         #ad-status-container .coin-icon { /* Align coin icon */
+            vertical-align: text-bottom;
+            width: 1.1em;
+            height: 1.1em;
+         }
+        #watch-ad-button {
+            /* Inherits .task-button styles */
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1.1em; /* Make button prominent */
+            background: linear-gradient(135deg, var(--success-color), #388E3C); /* Green gradient */
+        }
+         #watch-ad-button:hover:not(:disabled) {
+            background: linear-gradient(135deg, #388E3C, #2E7D32);
+            box-shadow: 0 4px 8px rgba(0,0,0, 0.3);
+         }
+         #watch-ad-button:disabled {
+             background: var(--disabled-bg); /* Use standard disabled */
+             opacity: 0.7;
+         }
+        #ad-cooldown-timer {
+            font-size: 0.9em;
+            color: var(--warning-color); /* Use warning color for cooldown */
+            font-weight: 500;
+        }
+        #ad-message {
+            font-size: 0.95em;
+            min-height: 1.2em; /* Prevent layout shift */
+        }
+        #ad-message.error {
+            color: var(--error-color);
+        }
+        #ad-message.success {
+             color: var(--success-color);
+         }
+         #ad-message.limit {
+             color: var(--text-muted-color);
+         }
 
     </style>
 </head>
@@ -209,10 +269,12 @@
             <!-- Page: Tasks -->
             <div id="tasks-screen" class="page">
                 <h2>Tasks Hub</h2>
+                 <!-- ADDED: Task Tabs -->
                 <div class="task-tabs">
                     <button id="tab-available" class="active" onclick="showTaskListCategory('available-tasks-list')">Available</button>
                     <button id="tab-completed" onclick="showTaskListCategory('completed-tasks-list')">Completed</button>
                 </div>
+                 <!-- ADDED: Task List Containers -->
                 <div id="available-tasks-list" class="task-list-category active">
                     <p>Loading available tasks...</p>
                 </div>
@@ -221,14 +283,18 @@
                 </div>
             </div>
 
-            <!-- Page: Ads -->
+            <!-- ADDED: Page: Ads -->
             <div id="ads-screen" class="page">
                 <h2>Watch Ads for Coins</h2>
-                <div class="ads-section-content">
-                    <div id="ads-status-display">Loading ad status...</div>
-                    <p id="ads-reward-info">Earn 100 - 2,000 <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""> per ad.</p>
-                    <button id="watch-ad-button" class="task-button" disabled>Watch Ad</button>
-                    <p style="font-size: 0.8em; margin-top: 15px; color: var(--text-muted-color);">(Ad simulation only for now)</p>
+                <div class="ads-section">
+                    <p>Watch short ads to earn extra Meme Wolf coins!</p>
+                    <div id="ad-status-container">
+                        <p>Daily Ads Watched: <span id="ads-watched-today">0</span> / <span id="ads-daily-limit">20</span></p>
+                        <p>Reward per Ad: <span id="ad-reward-amount">1000</span> <img class="coin-icon" src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" alt=""></p>
+                    </div>
+                    <button id="watch-ad-button" class="task-button" disabled>Loading Ads...</button>
+                    <p id="ad-cooldown-timer" style="display: none;"></p>
+                    <p id="ad-message"></p>
                 </div>
             </div>
 
@@ -251,7 +317,7 @@
                     <p class="mission-description"> Add the wolf emoji <span class="mission-emoji" id="mission-emoji-display">🐺</span> to the *very end* of your Telegram Last Name! <button class="copy-emoji-button" id="copy-emoji-btn">Copy Emoji</button> </p>
                     <div class="mission-status incomplete" id="mission-status">Status: Checking...</div>
                     <div id="fine-message-display" class="fine-applied" style="display: none;"></div>
-                    <button class="mission-action-button task-button" id="mission-claim-btn" disabled>Check & Claim Reward</button>
+                    <button class="mission-action-button" id="mission-claim-btn" disabled>Check & Claim Reward</button>
                     <div class="reward-display"><span>Reward: 50K</span> <img src="https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png" class="coin-icon" alt=""></div>
                 </div>
                 <!-- Daily Lucky Code Section -->
@@ -276,8 +342,8 @@
             <button id="nav-game" class="active" onclick="showPage('game-screen')"><span class="material-icons">pets</span><span>Game</span></button>
             <button id="nav-shop" onclick="showPage('shop-screen')"><span class="material-icons">shopping_bag</span><span>Shop</span></button>
             <button id="nav-tasks" onclick="showPage('tasks-screen')"><span class="material-icons">checklist</span><span>Tasks</span></button>
-            <!-- ADDED Ads Nav Button -->
-            <button id="nav-ads" onclick="showPage('ads-screen')"><span class="material-icons">smart_display</span><span>Ads</span></button>
+            <!-- ADDED: Ads Nav Button -->
+            <button id="nav-ads" onclick="showPage('ads-screen')"><span class="material-icons">play_circle_filled</span><span>Ads</span></button>
             <button id="nav-profile" onclick="showPage('profile-screen')"><span class="material-icons">account_circle</span><span>Profile</span></button>
         </nav>
 
@@ -301,92 +367,40 @@
              apiKey: "AIzaSyCyH3Z92F8RQweInLC5w_bk_AaLx6XT7UE", authDomain: "ab-wallet-62482.firebaseapp.com", databaseURL: "https://ab-wallet-62482-default-rtdb.firebaseio.com", projectId: "ab-wallet-62482", storageBucket: "ab-wallet-62482.firebasestorage.app", messagingSenderId: "642030839072", appId: "1:642030839072:web:77fc92375ba72e2ee62345"
          };
         const COIN_IMAGE_URL = "https://preview--ab-wallet-tap-power.lovable.app/lovable-uploads/3a2a084b-4cf2-4293-8e80-3f202d4abe87.png";
-        const BASE_TAP_EARN = 1;
-        const SAVE_INTERVAL = 5000; // 5 seconds
-        const PASSIVE_INCOME_INTERVAL = 1000; // 1 second
-        const INCREASING_COST_BASE = 10000;
-        const WOLF_MISSION_REWARD = 50000;
-        const WOLF_EMOJI = '🐺';
-        const CHEAT_FINE = 100000;
-        const TASK_VERIFICATION_DELAY = 10000; // 10 seconds
-
-        // --- NEW Ads Config ---
-        const MAX_DAILY_ADS = 20;
-        const AD_REWARD_MIN = 100;
-        const AD_REWARD_MAX = 2000;
-        const AD_COOLDOWN_SECONDS = 15; // Cooldown between watching ads
-        const AD_SIMULATION_DURATION = 3000; // Simulate ad watching for 3 seconds
+        const BASE_TAP_EARN = 1; const SAVE_INTERVAL = 5000; const PASSIVE_INCOME_INTERVAL = 1000; const INCREASING_COST_BASE = 10000; const WOLF_MISSION_REWARD = 50000; const WOLF_EMOJI = '🐺'; const CHEAT_FINE = 100000;
+        const TASK_VERIFICATION_DELAY = 10000; // 10 seconds for link verification
+        // ADDED: Ads Config
+        const ADS_DAILY_LIMIT = 20;
+        const AD_REWARD_AMOUNT = 1000; // Adjust as needed
+        const AD_COOLDOWN_SECONDS = 15; // 15 seconds cooldown
+        const MONETAG_ZONE_ID = 9276049; // Keep this updated if it changes
 
         // --- Telegram & Firebase Vars ---
-        let tg = null;
-        let db = null;
-        let currentUser = null;
-        let userData = null;
-        let lastSaveTime = 0;
-        let saveTimeout = null;
-        let passiveIncomeIntervalId = null;
-        let isLoading = true;
-        let availableTasks = {};
-        let currentCodeTaskId = null;
-        let dailyLuckyCodeData = null;
-
-        // --- NEW Ads State Vars ---
-        let adsWatchedToday = 0;
-        let lastAdWatchTimestamp = 0;
-        let adCooldownIntervalId = null;
-        const ADS_STORAGE_KEY_PREFIX = 'memeWolfAdsWatched_';
+        let tg = null; let db = null; let currentUser = null; let userData = null; let lastSaveTime = 0; let saveTimeout = null; let passiveIncomeIntervalId = null; let isLoading = true;
+        let availableTasks = {}; let currentCodeTaskId = null; let dailyLuckyCodeData = null;
+        // ADDED: Ads State Vars
+        let adCooldownInterval = null;
+        let adCooldownEndTime = 0;
+        let monetagSdkReady = false; // Track if SDK function exists
 
         // --- DOM Elements ---
-        const loadingDiv = document.getElementById('loading');
-        const mainContentDiv = document.getElementById('main-content');
-        const navbar = document.getElementById('navbar');
-        const coinBalanceSpan = document.getElementById('coin-balance');
-        const tapPowerDisplaySpan = document.getElementById('tap-power-display');
-        const passiveIncomeDisplaySpan = document.getElementById('passive-income-display');
-        const coinContainer = document.getElementById('coin-container');
-        const clickFeedbackDiv = document.getElementById('click-feedback');
-        const clickUpgradesDiv = document.getElementById('click-upgrades');
-        const passiveUpgradesDiv = document.getElementById('passive-upgrades');
-        const profileUserIdSpan = document.getElementById('profile-userid');
-        const profileUsernameSpan = document.getElementById('profile-username');
-        const profileFirstNameSpan = document.getElementById('profile-firstname');
-        const profileLastNameSpan = document.getElementById('profile-lastname');
-        const profileCoinsSpan = document.getElementById('profile-coins');
-        const profileTapPowerSpan = document.getElementById('profile-tap-power');
-        const profilePassiveIncomeSpan = document.getElementById('profile-passive-income');
-        const tonWalletInput = document.getElementById('ton-wallet-input');
-        const saveWalletButton = document.getElementById('save-wallet-button');
-        const saveStatusP = document.getElementById('save-status');
-        const missionEmojiDisplay = document.getElementById('mission-emoji-display');
-        const copyEmojiBtn = document.getElementById('copy-emoji-btn');
-        const missionStatusDiv = document.getElementById('mission-status');
-        const missionClaimBtn = document.getElementById('mission-claim-btn');
-        const fineMessageDisplay = document.getElementById('fine-message-display');
-        const navButtons = document.querySelectorAll('nav button');
-        const shopTabButtons = document.querySelectorAll('.shop-tabs button');
-        const shopCategories = document.querySelectorAll('.shop-category');
-        const availableTasksListDiv = document.getElementById('available-tasks-list');
-        const completedTasksListDiv = document.getElementById('completed-tasks-list');
-        const taskTabButtons = document.querySelectorAll('.task-tabs button');
-        const taskListCategories = document.querySelectorAll('.task-list-category');
-        const codePopup = document.getElementById('code-popup');
-        const codePopupTitle = document.getElementById('code-popup-title');
-        const codePopupDescription = document.getElementById('code-popup-description');
-        const codePopupInput = document.getElementById('code-popup-input');
-        const codePopupCancelBtn = document.getElementById('code-popup-cancel');
-        const codePopupSubmitBtn = document.getElementById('code-popup-submit');
-        const luckyCodeInput = document.getElementById('lucky-code-input');
-        const claimLuckyCodeBtn = document.getElementById('claim-lucky-code-btn');
-        const luckyCodeStatus = document.getElementById('lucky-code-status');
-        // NEW Ads DOM Elements
-        const adsScreenDiv = document.getElementById('ads-screen');
-        const adsStatusDisplay = document.getElementById('ads-status-display');
+        const loadingDiv = document.getElementById('loading'); const mainContentDiv = document.getElementById('main-content'); const navbar = document.getElementById('navbar'); const coinBalanceSpan = document.getElementById('coin-balance'); const tapPowerDisplaySpan = document.getElementById('tap-power-display'); const passiveIncomeDisplaySpan = document.getElementById('passive-income-display'); const coinContainer = document.getElementById('coin-container'); const clickFeedbackDiv = document.getElementById('click-feedback'); const clickUpgradesDiv = document.getElementById('click-upgrades'); const passiveUpgradesDiv = document.getElementById('passive-upgrades'); const profileUserIdSpan = document.getElementById('profile-userid'); const profileUsernameSpan = document.getElementById('profile-username'); const profileFirstNameSpan = document.getElementById('profile-firstname'); const profileLastNameSpan = document.getElementById('profile-lastname'); const profileCoinsSpan = document.getElementById('profile-coins'); const profileTapPowerSpan = document.getElementById('profile-tap-power'); const profilePassiveIncomeSpan = document.getElementById('profile-passive-income'); const tonWalletInput = document.getElementById('ton-wallet-input'); const saveWalletButton = document.getElementById('save-wallet-button'); const saveStatusP = document.getElementById('save-status'); const missionEmojiDisplay = document.getElementById('mission-emoji-display'); const copyEmojiBtn = document.getElementById('copy-emoji-btn'); const missionStatusDiv = document.getElementById('mission-status'); const missionClaimBtn = document.getElementById('mission-claim-btn'); const fineMessageDisplay = document.getElementById('fine-message-display'); const navButtons = document.querySelectorAll('nav button'); const shopTabButtons = document.querySelectorAll('.shop-tabs button'); const shopCategories = document.querySelectorAll('.shop-category');
+        const availableTasksListDiv = document.getElementById('available-tasks-list'); // UPDATED
+        const completedTasksListDiv = document.getElementById('completed-tasks-list'); // ADDED
+        const taskTabButtons = document.querySelectorAll('.task-tabs button'); // ADDED
+        const taskListCategories = document.querySelectorAll('.task-list-category'); // ADDED
+        const codePopup = document.getElementById('code-popup'); const codePopupTitle = document.getElementById('code-popup-title'); const codePopupDescription = document.getElementById('code-popup-description'); const codePopupInput = document.getElementById('code-popup-input'); const codePopupCancelBtn = document.getElementById('code-popup-cancel'); const codePopupSubmitBtn = document.getElementById('code-popup-submit');
+        const luckyCodeInput = document.getElementById('lucky-code-input'); const claimLuckyCodeBtn = document.getElementById('claim-lucky-code-btn'); const luckyCodeStatus = document.getElementById('lucky-code-status');
+        // ADDED: Ads Screen DOM Elements
+        const adsWatchedTodaySpan = document.getElementById('ads-watched-today');
+        const adsDailyLimitSpan = document.getElementById('ads-daily-limit');
+        const adRewardAmountSpan = document.getElementById('ad-reward-amount');
         const watchAdButton = document.getElementById('watch-ad-button');
-        const adsRewardInfo = document.getElementById('ads-reward-info'); // Optional: Reference if needed dynamically
-
+        const adCooldownTimerP = document.getElementById('ad-cooldown-timer');
+        const adMessageP = document.getElementById('ad-message');
 
         // --- Upgrade Definitions ---
-        const upgrades = [
+        const upgrades = [ /* Omitted for brevity */
              { id: 'click_1', name: 'Stronger Paws', description: '+1 coin per tap', baseCost: 10000, baseEffect: 1, type: 'click' }, { id: 'click_2', name: 'Sharper Claws', description: '+2 coins per tap', baseCost: 100000, baseEffect: 2, type: 'click' }, { id: 'click_3', name: 'Meme Energy', description: '+5 coins per tap', baseCost: 500000, baseEffect: 5, type: 'click' }, { id: 'click_4', name: 'Wolf Pack Call', description: '+10 coins per tap', baseCost: 2000000, baseEffect: 10, type: 'click' }, { id: 'click_5', name: 'Lunar Boost', description: '+25 coins per tap', baseCost: 10000000, baseEffect: 25, type: 'click' }, { id: 'click_6', name: 'Golden Howl', description: '+50 coins per tap', baseCost: 50000000, baseEffect: 50, type: 'click' }, { id: 'click_7', name: 'Diamond Fangs', description: '+100 coins per tap', baseCost: 250000000, baseEffect: 100, type: 'click' }, { id: 'click_8', name: 'Alpha Presence', description: '+200 coins per tap', baseCost: 1000000000, baseEffect: 200, type: 'click' }, { id: 'click_9', name: 'Meme Lord Aura', description: '+500 coins per tap', baseCost: 5000000000, baseEffect: 500, type: 'click' }, { id: 'click_10', name: 'Cosmic Wolf', description: '+1000 coins per tap', baseCost: 20000000000, baseEffect: 1000, type: 'click' },
              { id: 'passive_1', name: 'Sniffing Out Coins', description: '+100 profit/hour', baseCost: 10000, baseEffect: 100, type: 'passive' }, { id: 'passive_2', name: 'Digging Spot', description: '+250 profit/hour', baseCost: 50000, baseEffect: 250, type: 'passive' }, { id: 'passive_3', name: 'Buried Treasure Map', description: '+600 profit/hour', baseCost: 150000, baseEffect: 600, type: 'passive' }, { id: 'passive_4', name: 'Meme Stash', description: '+1,500 profit/hour', baseCost: 500000, baseEffect: 1500, type: 'passive' }, { id: 'passive_5', name: 'Coin Tree Sapling', description: '+3,500 profit/hour', baseCost: 1500000, baseEffect: 3500, type: 'passive' }, { id: 'passive_6', name: 'Howling ATM', description: '+8,000 profit/hour', baseCost: 5000000, baseEffect: 8000, type: 'passive' }, { id: 'passive_7', name: 'Loyal Pack Tribute', description: '+18,000 profit/hour', baseCost: 15000000, baseEffect: 18000, type: 'passive' }, { id: 'passive_8', name: 'Wolf Den Bank', description: '+40,000 profit/hour', baseCost: 50000000, baseEffect: 40000, type: 'passive' }, { id: 'passive_9', name: 'Meme Coin Mine', description: '+90,000 profit/hour', baseCost: 150000000, baseEffect: 90000, type: 'passive' }, { id: 'passive_10', name: 'Moonlit Mint', description: '+200K profit/hour', baseCost: 500000000, baseEffect: 200000, type: 'passive' }, { id: 'passive_11', name: 'Crypto Kennel', description: '+450K profit/hour', baseCost: 1200000000, baseEffect: 450000, type: 'passive' }, { id: 'passive_12', name: 'Decentralized Den', description: '+1M profit/hour', baseCost: 3000000000, baseEffect: 1000000, type: 'passive' }, { id: 'passive_13', name: 'Blockchain Burrow', description: '+2.2M profit/hour', baseCost: 7000000000, baseEffect: 2200000, type: 'passive' }, { id: 'passive_14', name: 'Wolf Street Journal', description: '+5M profit/hour', baseCost: 15000000000, baseEffect: 5000000, type: 'passive' }, { id: 'passive_15', name: 'Golden Bone Fund', description: '+11M profit/hour', baseCost: 35000000000, baseEffect: 11000000, type: 'passive' }, { id: 'passive_16', name: 'Diamond Paw Trust', description: '+25M profit/hour', baseCost: 80000000000, baseEffect: 25000000, type: 'passive' }, { id: 'passive_17', name: 'Alpha Investment Group', description: '+55M profit/hour', baseCost: 180000000000, baseEffect: 55000000, type: 'passive' }, { id: 'passive_18', name: 'Meme Hegemony', description: '+120M profit/hour', baseCost: 400000000000, baseEffect: 120000000, type: 'passive' }, { id: 'passive_19', name: 'Lunar Treasury', description: '+250M profit/hour', baseCost: 900000000000, baseEffect: 250000000, type: 'passive' }, { id: 'passive_20', name: 'Cosmic Coin Flow', description: '+500M profit/hour', baseCost: 2000000000000, baseEffect: 500000000, type: 'passive' },
         ];
@@ -400,7 +414,19 @@
                  if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) { showError("User data unavailable. Please launch from Telegram."); return; }
                  currentUser = tg.initDataUnsafe.user;
                  firebase.initializeApp(firebaseConfig); db = firebase.database();
-                 loadUserDataAndInit(); // This now also loads ad data
+
+                 // Check if Monetag SDK function exists after a short delay
+                 setTimeout(() => {
+                     monetagSdkReady = typeof window[`show_${MONETAG_ZONE_ID}`] === 'function';
+                     console.log("Monetag SDK Ready:", monetagSdkReady);
+                     if (!monetagSdkReady) {
+                         console.warn(`Monetag function show_${MONETAG_ZONE_ID} not found. Ads may not work.`);
+                     }
+                     // Proceed with loading user data regardless of SDK status for now
+                     // UI updates will handle button states later
+                     loadUserDataAndInit();
+                 }, 500); // Wait 500ms for external SDK to potentially load
+
                  setupEventListeners();
              } catch (error) { console.error("Critical Initialization Error:", error); showError(`Initialization failed: ${error.message}. Please try reloading.`); }
         };
@@ -417,89 +443,164 @@
              const userId = currentUser.id.toString(); const userRef = db.ref('users/' + userId);
              loadingDiv.textContent = "Loading your progress...";
              userRef.once('value').then((snapshot) => {
-                 const defaultData = { coins: 0, upgrades: {}, missions: { lastNameWolf: 'incomplete' }, completedTasks: {}, lastLuckyCodeClaim: null, tonWallet: '', lastUpdate: Date.now(), telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' } };
+                 // ADDED: Ads data structure to default
+                 const defaultData = {
+                     coins: 0,
+                     upgrades: {},
+                     missions: { lastNameWolf: 'incomplete' },
+                     completedTasks: {},
+                     lastLuckyCodeClaim: null,
+                     tonWallet: '',
+                     ads: { // New section for ads tracking
+                         watchedToday: 0,
+                         lastWatchedDate: null // Store date string 'YYYY-MM-DD'
+                     },
+                     lastUpdate: Date.now(),
+                     telegramInfo: { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' }
+                 };
                  if (snapshot.exists()) {
                      userData = snapshot.val();
-                     userData.coins = userData.coins ?? defaultData.coins; userData.upgrades = userData.upgrades ?? defaultData.upgrades; userData.missions = userData.missions ?? defaultData.missions; userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf; userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks; userData.lastLuckyCodeClaim = userData.lastLuckyCodeClaim ?? defaultData.lastLuckyCodeClaim; userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet; userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate; userData.telegramInfo = defaultData.telegramInfo;
-                 } else { console.log("New user detected:", userId); userData = defaultData; saveUserData(true); }
+                     // Ensure all properties exist, using defaults if necessary
+                     userData.coins = userData.coins ?? defaultData.coins;
+                     userData.upgrades = userData.upgrades ?? defaultData.upgrades;
+                     userData.missions = userData.missions ?? defaultData.missions;
+                     userData.missions.lastNameWolf = userData.missions.lastNameWolf ?? defaultData.missions.lastNameWolf;
+                     userData.completedTasks = userData.completedTasks ?? defaultData.completedTasks;
+                     userData.lastLuckyCodeClaim = userData.lastLuckyCodeClaim ?? defaultData.lastLuckyCodeClaim;
+                     userData.tonWallet = userData.tonWallet ?? defaultData.tonWallet;
+                     // ADDED: Ensure ads structure exists
+                     userData.ads = userData.ads ?? defaultData.ads;
+                     userData.ads.watchedToday = userData.ads.watchedToday ?? defaultData.ads.watchedToday;
+                     userData.ads.lastWatchedDate = userData.ads.lastWatchedDate ?? defaultData.ads.lastWatchedDate;
+                     userData.lastUpdate = userData.lastUpdate ?? defaultData.lastUpdate;
+                     userData.telegramInfo = defaultData.telegramInfo; // Always update TG info on load
+                 } else {
+                     console.log("New user detected:", userId);
+                     userData = defaultData;
+                     saveUserData(true); // Save default data for new user
+                 }
+
+                 // ADDED: Reset daily ad count if needed
+                 checkAndResetDailyAds();
+
                  const cheatDetected = performAntiCheatCheck();
-                 if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); }
-                 loadAdData(); // Load ad data from local storage
+                 if (!cheatDetected) { calculateOfflineProgress(); } else { userData.lastUpdate = Date.now(); } // Update timestamp if cheat detected
+
                  return Promise.all([loadAndDisplayTasks(), loadDailyLuckyCode()]);
              }).then(() => {
                  initializeAppUI(); startPassiveIncome(); isLoading = false; console.log("App Ready.");
-             }).catch((error) => { console.error("Firebase Load/Init Error:", error); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false; });
+             }).catch((error) => { /* ... Robust error handling ... */
+                 console.error("------------------------------------"); console.error("Firebase Load/Init Error Occurred:"); console.error("Full Error Object:", error); console.error("Error Code:", error?.code); console.error("Error Message:", error?.message); console.error("------------------------------------"); let displayMessage = `Failed to load data. Check connection & reload.`; if (error?.code) { displayMessage += ` (Code: ${error.code})`; } if (String(error).includes('WebAppPopupOpened')) { console.warn("Suppressed 'WebAppPopupOpened' from user display."); } showError(displayMessage); isLoading = false;
+             });
         }
+
+        // --- Daily Reset Helper ---
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // ADDED: Function to check and reset daily limits (like ads)
+        function checkAndResetDailyAds() {
+            if (!userData || !userData.ads) return;
+            const todayStr = getTodayDateString();
+            if (userData.ads.lastWatchedDate !== todayStr) {
+                console.log(`New day detected (${todayStr}). Resetting daily ad count.`);
+                userData.ads.watchedToday = 0;
+                userData.ads.lastWatchedDate = todayStr;
+                // Note: No immediate save here, will be saved on next action or interval
+            }
+        }
+
 
         function loadDailyLuckyCode() {
              if (!db) return Promise.reject("DB not ready for lucky code"); console.log("Loading daily code...");
              return db.ref('dailyLuckyCode').once('value').then(snapshot => {
                  dailyLuckyCodeData = snapshot.exists() ? snapshot.val() : null;
                  console.log("Daily code data:", dailyLuckyCodeData);
-                 updateLuckyCodeSectionUI();
+                 updateLuckyCodeSectionUI(); // Update UI after loading code data
              }).catch(error => { console.error("Error loading daily code:", error); dailyLuckyCodeData = null; updateLuckyCodeSectionUI(); });
         }
 
         function saveUserData(force = false) {
              if (isLoading || !currentUser || !db || !userData) return; const now = Date.now(); userData.lastUpdate = now; clearTimeout(saveTimeout);
              if (force || now - lastSaveTime > SAVE_INTERVAL) {
-                 console.log("Saving data..."); const userId = currentUser.id.toString();
+                 console.log("Saving data..."); const userId = currentUser.id.toString(); // Update TG info just before saving
                  userData.telegramInfo = { id: currentUser.id, username: currentUser.username || null, firstName: currentUser.first_name || '', lastName: currentUser.last_name || '' };
+                 // Ensure ads data is included
+                 if (!userData.ads) userData.ads = { watchedToday: 0, lastWatchedDate: null };
+
                  db.ref('users/' + userId).set(userData).then(() => { console.log("Data saved."); lastSaveTime = now; }).catch((error) => console.error("Firebase Save Error:", error));
              } else { saveTimeout = setTimeout(() => saveUserData(true), SAVE_INTERVAL - (now - lastSaveTime)); }
         }
 
         // --- Anti-Cheat Logic ---
         function performAntiCheatCheck() {
-            if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none';
+            if (!userData || !currentUser) return false; const missionId = 'lastNameWolf'; const missionStatus = userData.missions?.[missionId]; const currentLastName = currentUser.last_name || ''; fineMessageDisplay.style.display = 'none'; // Reset fine message display
             if (missionStatus === 'claimed' && !currentLastName.endsWith(WOLF_EMOJI)) {
                 const fineAmount = CHEAT_FINE; userData.coins = Math.max(0, userData.coins - fineAmount); userData.missions[missionId] = 'incomplete'; console.warn(`Anti-cheat: User ${currentUser.id} removed emoji. Fine: ${formatNumber(fineAmount)}`);
                 showWarningPopup("🚨 Cheating Detected!", `You removed the ${WOLF_EMOJI} emoji from your name! A fine of ${formatNumber(fineAmount)} coins has been applied.`);
                 fineMessageDisplay.textContent = `Fine Applied: -${formatNumber(fineAmount)} coins for removing emoji.`; fineMessageDisplay.style.display = 'block';
-                return true;
-            } return false;
+                 // Don't save immediately, let the next scheduled save handle it or force save after UI update
+                return true; // Cheat detected
+            } return false; // No cheat detected
         }
 
         // --- Game Logic ---
-        function handleTap(event) { if (isLoading || !userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
+        function handleTap(event) { if (isLoading || !userData) return; const tapValue = calculateTapPower(); userData.coins += tapValue; let clientX, clientY; if (event.touches && event.touches.length > 0) { // Handle multi-touch points separately
+                for (let i = 0; i < event.touches.length; i++) { clientX = event.touches[i].clientX; clientY = event.touches[i].clientY; createClickAnimation(clientX, clientY, tapValue); } } else { clientX = event.clientX; clientY = event.clientY; createClickAnimation(clientX, clientY, tapValue); } updateCoinDisplay(); scheduleSave(); }
         function calculateTapPower() { let power = BASE_TAP_EARN; if (userData?.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId && u.type === 'click'); if (upgradeDef) { power += (upgradeDef.baseEffect || 0) * (userData.upgrades[upgradeId]?.level || 0); } } } return power; }
         function calculatePassiveIncomeRate() { let rate = 0; if (userData?.upgrades) { for (const upgradeId in userData.upgrades) { const upgradeDef = upgrades.find(u => u.id === upgradeId && u.type === 'passive'); if (upgradeDef) { rate += (upgradeDef.baseEffect || 0) * (userData.upgrades[upgradeId]?.level || 0); } } } return rate; }
-        function applyPassiveIncome() { if (isLoading || !userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); } }
+        function applyPassiveIncome() { if (isLoading || !userData) return; const hourlyRate = calculatePassiveIncomeRate(); const incomePerTick = hourlyRate / 3600 * (PASSIVE_INCOME_INTERVAL / 1000); if (incomePerTick > 0) { userData.coins += incomePerTick; updateCoinDisplay(); /* Only update coin display, not full UI */ } }
         function startPassiveIncome() { if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); passiveIncomeIntervalId = setInterval(applyPassiveIncome, PASSIVE_INCOME_INTERVAL); }
         function scheduleSave() { saveUserData(); }
         function calculateOfflineProgress() {
-            if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
+            if (!userData || !userData.lastUpdate) return; const now = Date.now(); const offlineSeconds = Math.max(0, Math.floor((now - userData.lastUpdate) / 1000)); if (offlineSeconds < 10) return; // Ignore very short offline periods
+            const hourlyRate = calculatePassiveIncomeRate(); const offlineIncome = (hourlyRate / 3600) * offlineSeconds;
             if (offlineIncome > 0) { userData.coins += offlineIncome; console.log(`Offline income: ${formatNumber(offlineIncome)} for ${offlineSeconds}s.`); showRewardPopup("Welcome Back!", `You earned ${formatNumber(offlineIncome)} ${WOLF_EMOJI} coins while away!`); }
+            // No need to update lastUpdate here, will be updated on next save
         }
 
         // --- Mission Logic ---
-        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Already Claimed", "Wolf Name Mission reward already claimed."); updateMissionUI(missionId, 'claimed'); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed.`); showRewardPopup("Mission Complete!", `Earned ${formatNumber(WOLF_MISSION_REWARD)} coins!`); updateMissionUI(missionId, 'claimed'); updateUI(); saveUserData(true); } else { updateMissionUI(missionId, 'incomplete'); showInfoPopup("Mission Incomplete", `Add the ${WOLF_EMOJI} emoji to the *very end* of your Telegram Last Name to complete the mission.`); } }
+        function checkAndClaimMission() { if (isLoading || !userData || !currentUser) return; const missionId = 'lastNameWolf'; const currentStatus = userData.missions?.[missionId] || 'incomplete'; const lastName = currentUser.last_name || ''; if (currentStatus === 'claimed') { showInfoPopup("Already Claimed", "Wolf Name Mission reward already claimed."); updateMissionUI(missionId, 'claimed'); return; } const isConditionMet = lastName.endsWith(WOLF_EMOJI); if (isConditionMet) { userData.coins += WOLF_MISSION_REWARD; userData.missions[missionId] = 'claimed'; console.log(`Mission '${missionId}' claimed.`); showRewardPopup("Mission Complete!", `Earned ${formatNumber(WOLF_MISSION_REWARD)} coins!`); updateMissionUI(missionId, 'claimed'); updateUI(); // Update all UI to reflect coin change etc.
+                saveUserData(true); // Force save after claim
+            } else { updateMissionUI(missionId, 'incomplete'); showInfoPopup("Mission Incomplete", `Add the ${WOLF_EMOJI} emoji to the *very end* of your Telegram Last Name to complete the mission.`); } }
         function copyMissionEmoji() { navigator.clipboard.writeText(WOLF_EMOJI).then(() => { copyEmojiBtn.textContent = 'Copied!'; setTimeout(() => { copyEmojiBtn.textContent = 'Copy Emoji'; }, 1500); }).catch(err => { console.error('Failed to copy emoji: ', err); showWarningPopup("Copy Failed", "Could not copy emoji automatically. Please copy it manually: " + WOLF_EMOJI); }); }
 
-        // --- Task Logic ---
+        // --- Task Logic --- (Omitted for brevity, assumed unchanged)
         function loadAndDisplayTasks() {
-             if (!db) return Promise.reject("DB missing");
-             availableTasksListDiv.innerHTML = '<p>Loading available tasks...</p>'; completedTasksListDiv.innerHTML = '<p>Loading completed tasks...</p>';
-             return db.ref('tasks').once('value').then(snapshot => {
-                 availableTasksListDiv.innerHTML = ''; completedTasksListDiv.innerHTML = ''; availableTasks = {}; let hasAvailable = false; let hasCompleted = false;
-                 if (snapshot.exists()) {
-                     availableTasks = snapshot.val() || {};
-                     for (const taskId in availableTasks) {
-                         if (Object.hasOwnProperty.call(availableTasks, taskId)) {
-                             const taskData = availableTasks[taskId];
-                             const isCompleted = userData?.completedTasks?.[taskId] === true;
-                             renderTaskItem(taskData, taskId, isCompleted);
-                             if (isCompleted) hasCompleted = true; else hasAvailable = true;
-                         }
-                     }
-                 }
-                 if (!hasAvailable) { availableTasksListDiv.innerHTML = '<p>No available tasks right now. Check back later!</p>'; }
-                 if (!hasCompleted) { completedTasksListDiv.innerHTML = '<p>You haven\'t completed any tasks yet.</p>'; }
-             }).catch(error => { console.error("Error loading tasks:", error); availableTasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks.</p>'; completedTasksListDiv.innerHTML = ''; availableTasks = {}; });
+            if (!db) return Promise.reject("DB missing");
+            availableTasksListDiv.innerHTML = '<p>Loading available tasks...</p>';
+            completedTasksListDiv.innerHTML = '<p>Loading completed tasks...</p>';
+            return db.ref('tasks').once('value').then(snapshot => {
+                availableTasksListDiv.innerHTML = '';
+                completedTasksListDiv.innerHTML = '';
+                availableTasks = {};
+                let hasAvailable = false; let hasCompleted = false;
+                if (snapshot.exists()) {
+                    availableTasks = snapshot.val() || {};
+                    // Ensure userData.completedTasks exists before iterating
+                    userData.completedTasks = userData.completedTasks || {};
+                    for (const taskId in availableTasks) {
+                        if (Object.hasOwnProperty.call(availableTasks, taskId)) {
+                            const taskData = availableTasks[taskId];
+                            const isCompleted = userData.completedTasks[taskId] === true;
+                            renderTaskItem(taskData, taskId, isCompleted);
+                            if (isCompleted) hasCompleted = true; else hasAvailable = true;
+                        }
+                    }
+                }
+                if (!hasAvailable) availableTasksListDiv.innerHTML = '<p>No available tasks right now.</p>';
+                if (!hasCompleted) completedTasksListDiv.innerHTML = '<p>No completed tasks yet.</p>';
+            }).catch(error => { console.error("Error loading tasks:", error); availableTasksListDiv.innerHTML = '<p style="color: var(--error-color);">Could not load tasks.</p>'; completedTasksListDiv.innerHTML = ''; availableTasks = {}; });
         }
-        function renderTaskItem(taskData, taskId, isCompleted) {
+        function renderTaskItem(taskData, taskId, isCompleted) { /* As before */
              if (!taskData || !taskId) return;
-             const itemDiv = document.createElement('div'); itemDiv.className = 'task-item'; itemDiv.dataset.taskId = taskId; itemDiv.dataset.completed = isCompleted;
+             const itemDiv = document.createElement('div'); itemDiv.className = 'task-item'; itemDiv.dataset.taskId = taskId; itemDiv.dataset.completed = isCompleted; // Use passed value
+
              const imageUrl = taskData.imageUrl || `https://via.placeholder.com/50/1a1a2e/e0e0e0?text=${(taskData.name||'T')[0]}`; const description = taskData.description || (taskData.type === 'link' ? 'Complete the linked action.' : 'Complete and enter code.');
              itemDiv.innerHTML = `
                  <img src="${imageUrl}" alt="" class="task-item-image" onerror="this.style.display='none'">
@@ -516,263 +617,354 @@
                      <button class="task-button verify-task-btn">Verify</button>
                      <span class="task-claimed-status">Claimed</span>
                  </div>`;
+
              const startBtn = itemDiv.querySelector('.start-task-btn'); const verifyBtn = itemDiv.querySelector('.verify-task-btn'); const claimedStatus = itemDiv.querySelector('.task-claimed-status');
+
              if (isCompleted) {
-                 startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block';
-                 completedTasksListDiv.appendChild(itemDiv);
+                 startBtn.style.display = 'none';
+                 verifyBtn.style.display = 'none';
+                 claimedStatus.style.display = 'block';
+                 completedTasksListDiv.appendChild(itemDiv); // Append to Completed list
              } else {
-                 startBtn.style.display = 'block'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'none';
-                 startBtn.addEventListener('click', handleStartTaskClick); verifyBtn.addEventListener('click', handleVerifyTaskClick);
-                 availableTasksListDiv.appendChild(itemDiv);
+                 startBtn.style.display = 'block';
+                 verifyBtn.style.display = 'none'; // Verify button hidden initially
+                 claimedStatus.style.display = 'none';
+                 startBtn.addEventListener('click', handleStartTaskClick);
+                 verifyBtn.addEventListener('click', handleVerifyTaskClick); // Listener still needed for later
+                 availableTasksListDiv.appendChild(itemDiv); // Append to Available list
              }
         }
-        function handleStartTaskClick(event) { if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId]; if (!taskData) return; if (userData.completedTasks?.[taskId]) { showInfoPopup("Already Completed", "This task is already completed."); return; }
-             if (taskData.link) { try { tg.openLink(taskData.link); } catch (e) { console.warn("tg.openLink failed, using window.open:", e); window.open(taskData.link, '_blank');} } else if (taskData.type === 'link') { showWarningPopup("Task Error", "Task link is missing."); return; }
-             button.disabled = true;
+        function handleStartTaskClick(event) { /* As before */
+            if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId]; if (!taskData) return; if (userData.completedTasks?.[taskId]) { showInfoPopup("Already Completed", "This task is already completed."); return; } // Prevent starting completed tasks
+
+             // Open link if provided
+             if (taskData.link) {
+                 try { tg.openLink(taskData.link); } catch (e) { console.warn("tg.openLink failed, using window.open:", e); window.open(taskData.link, '_blank');}
+             } else if (taskData.type === 'link') { // Check if it's a link type but missing link
+                 showWarningPopup("Task Error", "Task link is missing."); return;
+             }
+
+             button.disabled = true; // Disable Start button after click
+
              if (taskData.type === 'link') {
-                 taskItem.dataset.status = 'verifying'; const verifyBtn = taskItem.querySelector('.verify-task-btn'); button.style.display = 'none'; verifyBtn.style.display = 'block'; verifyBtn.disabled = true; verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`; let countdown = TASK_VERIFICATION_DELAY / 1000; const intervalId = setInterval(() => { countdown--; if (countdown > 0) { verifyBtn.textContent = `Verify (${countdown}s)`; } else { clearInterval(intervalId); verifyBtn.textContent = 'Verify'; verifyBtn.disabled = false; } }, 1000);
-             } else if (taskData.type === 'code') { showCodePopup(taskId, taskData); button.disabled = false; } else { button.disabled = false; showWarningPopup("Task Error", "Unknown or invalid task type."); }
-        }
-        function handleVerifyTaskClick(event) { if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId]; if (!taskData || userData.completedTasks?.[taskId]) return;
+                 taskItem.dataset.status = 'verifying';
+                 const verifyBtn = taskItem.querySelector('.verify-task-btn');
+                 button.style.display = 'none'; // Hide Start button
+                 verifyBtn.style.display = 'block'; // Show Verify button
+                 verifyBtn.disabled = true;
+                 verifyBtn.textContent = `Verify (${TASK_VERIFICATION_DELAY / 1000}s)`; let countdown = TASK_VERIFICATION_DELAY / 1000; const intervalId = setInterval(() => { countdown--; if (countdown > 0) { verifyBtn.textContent = `Verify (${countdown}s)`; } else { clearInterval(intervalId); verifyBtn.textContent = 'Verify'; verifyBtn.disabled = false; // Enable verify button after delay
+                     } }, 1000);
+             } else if (taskData.type === 'code') {
+                 showCodePopup(taskId, taskData);
+                 button.disabled = false; // Re-enable start button if they cancel popup
+             } else {
+                 button.disabled = false; // Re-enable button
+                 showWarningPopup("Task Error", "Unknown or invalid task type.");
+             }
+         }
+        function handleVerifyTaskClick(event) { /* As before */
+            if (isLoading || !userData) return; const button = event.target; const taskItem = button.closest('.task-item'); const taskId = taskItem.dataset.taskId; const taskData = availableTasks[taskId]; if (!taskData) return; if (userData.completedTasks?.[taskId]) return; // Already completed check
+
              button.disabled = true; button.textContent = "Verifying...";
-             console.log(`Verification successful (simulated): ${taskId}`); claimTaskReward(taskId, taskData.reward);
+             console.log(`Verification successful (simulated): ${taskId}`);
+             claimTaskReward(taskId, taskData.reward);
+         }
+        function showCodePopup(taskId, taskData) { /* As before */ currentCodeTaskId = taskId; codePopupTitle.textContent = taskData.name || "Enter Code"; codePopupDescription.textContent = taskData.description || "Enter the code."; codePopupInput.value = ''; codePopup.classList.add('visible'); codePopupInput.focus(); }
+        function hideCodePopup() { /* As before */ codePopup.classList.remove('visible'); currentCodeTaskId = null; }
+        function handleCodeSubmit() { /* As before */
+             if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) { hideCodePopup(); return; } const taskId = currentCodeTaskId; const taskData = availableTasks[taskId]; const submittedCode = codePopupInput.value.trim(); if (!submittedCode) { showWarningPopup("Input Error", "Please enter the code."); return; } /* !! SECURITY WARNING: Client-side check only !! */ if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) { console.log(`Code verification successful: ${taskId}`); hideCodePopup(); claimTaskReward(taskId, taskData.reward); } else { showWarningPopup("Incorrect Code", "The code you entered is incorrect. Please try again."); codePopupInput.focus(); codePopupInput.select(); }
         }
-        function showCodePopup(taskId, taskData) { currentCodeTaskId = taskId; codePopupTitle.textContent = taskData.name || "Enter Code"; codePopupDescription.textContent = taskData.description || "Enter the code."; codePopupInput.value = ''; codePopup.classList.add('visible'); codePopupInput.focus(); }
-        function hideCodePopup() { codePopup.classList.remove('visible'); currentCodeTaskId = null; }
-        function handleCodeSubmit() { if (!currentCodeTaskId || !availableTasks[currentCodeTaskId] || !userData) { hideCodePopup(); return; } const taskId = currentCodeTaskId; const taskData = availableTasks[taskId]; const submittedCode = codePopupInput.value.trim(); if (!submittedCode) { showWarningPopup("Input Error", "Please enter the code."); return; } if (taskData.code && submittedCode.toLowerCase() === taskData.code.toLowerCase()) { console.log(`Code verification successful: ${taskId}`); hideCodePopup(); claimTaskReward(taskId, taskData.reward); } else { showWarningPopup("Incorrect Code", "The code you entered is incorrect. Please try again."); codePopupInput.focus(); codePopupInput.select(); } }
-        function claimTaskReward(taskId, rewardAmount) {
+        function claimTaskReward(taskId, rewardAmount) { /* As before */
              if (isLoading || !userData || !taskId || rewardAmount === undefined) return;
-             if (userData.completedTasks?.[taskId]) { console.warn(`Duplicate claim attempt blocked: ${taskId}`); moveTaskToCompletedUI(taskId); return; }
-             userData.coins += rewardAmount; if (!userData.completedTasks) userData.completedTasks = {}; userData.completedTasks[taskId] = true;
-             console.log(`Task ${taskId} completed. Reward: +${formatNumber(rewardAmount)}`); showRewardPopup("Task Complete!", `You earned +${formatNumber(rewardAmount)} coins!`);
-             moveTaskToCompletedUI(taskId); updateUI(); saveUserData(true);
+             if (userData.completedTasks?.[taskId]) {
+                 console.warn(`Duplicate claim attempt blocked: ${taskId}`);
+                 moveTaskToCompletedUI(taskId); return;
+             }
+             userData.coins += rewardAmount;
+             if (!userData.completedTasks) userData.completedTasks = {};
+             userData.completedTasks[taskId] = true;
+             console.log(`Task ${taskId} completed. Reward: +${formatNumber(rewardAmount)}`);
+             showRewardPopup("Task Complete!", `You earned +${formatNumber(rewardAmount)} coins!`);
+             moveTaskToCompletedUI(taskId);
+             updateUI(); saveUserData(true);
         }
-        function moveTaskToCompletedUI(taskId) {
-             const taskItem = availableTasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`);
-             if (!taskItem) { const alreadyCompletedItem = completedTasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`); if (alreadyCompletedItem) { console.log(`Task ${taskId} already in completed list UI.`); const startBtn = alreadyCompletedItem.querySelector('.start-task-btn'); const verifyBtn = alreadyCompletedItem.querySelector('.verify-task-btn'); const claimedStatus = alreadyCompletedItem.querySelector('.task-claimed-status'); if(startBtn) startBtn.style.display = 'none'; if(verifyBtn) verifyBtn.style.display = 'none'; if(claimedStatus) claimedStatus.style.display = 'block'; alreadyCompletedItem.dataset.completed = "true"; } else { console.warn(`Task item ${taskId} not found in either list during move.`); } return; }
+        function moveTaskToCompletedUI(taskId) { /* As before */
+            const taskItem = availableTasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`);
+             if (!taskItem) {
+                 const alreadyCompletedItem = completedTasksListDiv.querySelector(`.task-item[data-task-id="${taskId}"]`);
+                 if (alreadyCompletedItem) {
+                     console.log(`Task ${taskId} already in completed list UI.`);
+                     const startBtn = alreadyCompletedItem.querySelector('.start-task-btn'); const verifyBtn = alreadyCompletedItem.querySelector('.verify-task-btn'); const claimedStatus = alreadyCompletedItem.querySelector('.task-claimed-status');
+                     if(startBtn) startBtn.style.display = 'none'; if(verifyBtn) verifyBtn.style.display = 'none'; if(claimedStatus) claimedStatus.style.display = 'block';
+                     alreadyCompletedItem.dataset.completed = "true";
+                 } else { console.warn(`Task item ${taskId} not found in either list during move.`); } return;
+             }
              const startBtn = taskItem.querySelector('.start-task-btn'); const verifyBtn = taskItem.querySelector('.verify-task-btn'); const claimedStatus = taskItem.querySelector('.task-claimed-status');
-             taskItem.dataset.completed = "true"; startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block';
+             taskItem.dataset.completed = "true";
+             startBtn.style.display = 'none'; verifyBtn.style.display = 'none'; claimedStatus.style.display = 'block';
              startBtn.removeEventListener('click', handleStartTaskClick); verifyBtn.removeEventListener('click', handleVerifyTaskClick);
              completedTasksListDiv.appendChild(taskItem);
-             if (availableTasksListDiv.children.length === 0) { availableTasksListDiv.innerHTML = '<p>No available tasks right now. Check back later!</p>'; }
-             const completedPlaceholder = completedTasksListDiv.querySelector('p'); if (completedPlaceholder && completedTasksListDiv.children.length > 1) { completedPlaceholder.remove(); }
+             if (availableTasksListDiv.children.length === 0) { availableTasksListDiv.innerHTML = '<p>No available tasks right now.</p>'; }
+             const completedPlaceholder = completedTasksListDiv.querySelector('p');
+             if (completedPlaceholder && completedTasksListDiv.children.length > 1) { completedPlaceholder.remove(); }
         }
 
-        // --- Daily Lucky Code Logic ---
-        function updateLuckyCodeSectionUI() {
+        // --- Daily Lucky Code Logic --- (Unchanged)
+        function updateLuckyCodeSectionUI() { /* As before */
             if (!claimLuckyCodeBtn || !luckyCodeInput || !luckyCodeStatus) return;
-             if (dailyLuckyCodeData === null) { luckyCodeStatus.textContent = "Checking for daily code..."; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Checking..."; return; }
-             if (!dailyLuckyCodeData || !dailyLuckyCodeData.code) { luckyCodeStatus.textContent = "No daily code available today."; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Unavailable"; return; }
-             const todayUTCString = getTodayDateString(); const lastClaimDate = userData?.lastLuckyCodeClaim;
-             if (lastClaimDate === todayUTCString) { luckyCodeStatus.textContent = `🎁 Claimed today! +${formatNumber(dailyLuckyCodeData.reward || 0)}`; luckyCodeStatus.className = 'lucky-code-status claimed'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Claimed Today"; } else { luckyCodeStatus.textContent = ""; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = false; claimLuckyCodeBtn.disabled = false; claimLuckyCodeBtn.textContent = "Claim Reward"; }
+             if (dailyLuckyCodeData === null) {
+                 luckyCodeStatus.textContent = "Checking for daily code..."; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Checking..."; return;
+             }
+             if (!dailyLuckyCodeData || !dailyLuckyCodeData.code) {
+                 luckyCodeStatus.textContent = "No daily code available today."; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Unavailable"; return;
+             }
+             const todayUTCString = new Date().toISOString().split('T')[0];
+             const lastClaimDate = userData?.lastLuckyCodeClaim;
+             if (lastClaimDate === todayUTCString) {
+                 luckyCodeStatus.textContent = `🎁 Claimed today! +${formatNumber(dailyLuckyCodeData.reward || 0)}`; luckyCodeStatus.className = 'lucky-code-status claimed'; luckyCodeInput.disabled = true; claimLuckyCodeBtn.disabled = true; claimLuckyCodeBtn.textContent = "Claimed Today";
+             } else {
+                 luckyCodeStatus.textContent = ""; luckyCodeStatus.className = 'lucky-code-status'; luckyCodeInput.disabled = false; claimLuckyCodeBtn.disabled = false; claimLuckyCodeBtn.textContent = "Claim Reward";
+             }
         }
-        function handleLuckyCodeClaim() {
-            if (isLoading || !userData || !dailyLuckyCodeData || !dailyLuckyCodeData.code) { showWarningPopup("Hold On!", "Daily code is not available or not loaded yet. Try again shortly."); updateLuckyCodeSectionUI(); return; }
-            const todayUTCString = getTodayDateString(); if (userData.lastLuckyCodeClaim === todayUTCString) { showInfoPopup("Already Claimed", "You've already claimed the lucky code for today."); updateLuckyCodeSectionUI(); return; }
-            const enteredCode = luckyCodeInput.value.trim().toUpperCase(); if (!enteredCode) { luckyCodeStatus.textContent = "Please enter the code."; luckyCodeStatus.className = 'lucky-code-status'; return; }
-            if (enteredCode === dailyLuckyCodeData.code.toUpperCase()) {
-                const reward = dailyLuckyCodeData.reward || 0; userData.coins += reward; userData.lastLuckyCodeClaim = todayUTCString; console.log(`Lucky code claimed. Reward: +${reward}`);
-                showRewardPopup("Code Accepted!", `Woohoo! +${formatNumber(reward)} lucky coins added!`); luckyCodeInput.value = ''; updateUI(); saveUserData(true);
-            } else {
-                luckyCodeStatus.textContent = "Incorrect code. Try again!"; luckyCodeStatus.className = 'lucky-code-status error'; luckyCodeInput.focus(); luckyCodeInput.select();
-                claimLuckyCodeBtn.style.animation = 'shake 0.5s'; setTimeout(() => claimLuckyCodeBtn.style.animation = '', 500);
-            }
-        }
-
-        // --- NEW Ads Logic ---
-        function getTodayDateString() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-            const day = String(today.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function loadAdData() {
-            const todayStr = getTodayDateString();
-            const storageKey = ADS_STORAGE_KEY_PREFIX + todayStr;
-            const storedValue = localStorage.getItem(storageKey);
-
-            if (storedValue) {
-                adsWatchedToday = parseInt(storedValue, 10) || 0;
-                console.log(`Loaded ads watched today (${todayStr}): ${adsWatchedToday}`);
-            } else {
-                adsWatchedToday = 0;
-                console.log(`No ad data found for today (${todayStr}), starting at 0.`);
-                // Clean up old keys (optional, but good practice)
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith(ADS_STORAGE_KEY_PREFIX) && key !== storageKey) {
-                        localStorage.removeItem(key);
-                    }
-                });
-            }
-            // Reset cooldown timer from previous sessions
-            lastAdWatchTimestamp = 0;
-            if (adCooldownIntervalId) clearInterval(adCooldownIntervalId);
-            adCooldownIntervalId = null;
+        function handleLuckyCodeClaim() { /* As before */
+            if (isLoading || !userData || !dailyLuckyCodeData || !dailyLuckyCodeData.code) { showWarningPopup("Hold On!", "Daily code is not available or not loaded yet."); updateLuckyCodeSectionUI(); return; }
+             const todayUTCString = new Date().toISOString().split('T')[0];
+             if (userData.lastLuckyCodeClaim === todayUTCString) { showInfoPopup("Already Claimed", "You've already claimed the lucky code for today."); updateLuckyCodeSectionUI(); return; }
+             const enteredCode = luckyCodeInput.value.trim().toUpperCase();
+             if (!enteredCode) { luckyCodeStatus.textContent = "Please enter the code."; luckyCodeStatus.className = 'lucky-code-status'; return; }
+             if (enteredCode === dailyLuckyCodeData.code.toUpperCase()) {
+                 const reward = dailyLuckyCodeData.reward || 0; userData.coins += reward; userData.lastLuckyCodeClaim = todayUTCString; console.log(`Lucky code claimed. Reward: +${reward}`);
+                 showRewardPopup("Code Accepted!", `Woohoo! +${formatNumber(reward)} lucky coins added!`); luckyCodeInput.value = ''; updateUI(); saveUserData(true);
+             } else {
+                 luckyCodeStatus.textContent = "Incorrect code. Try again!"; luckyCodeStatus.className = 'lucky-code-status error'; luckyCodeInput.focus(); luckyCodeInput.select();
+                 claimLuckyCodeBtn.style.animation = 'shake 0.5s'; setTimeout(() => claimLuckyCodeBtn.style.animation = '', 500);
+             }
         }
 
-        function saveAdData() {
-            const todayStr = getTodayDateString();
-            const storageKey = ADS_STORAGE_KEY_PREFIX + todayStr;
-            try {
-                 localStorage.setItem(storageKey, adsWatchedToday.toString());
-            } catch (e) {
-                 console.error("Failed to save ad data to localStorage:", e);
-                 // Potentially inform user if storage is full/unavailable
-            }
-        }
 
-        function updateAdsScreenUI() {
-            if (!adsStatusDisplay || !watchAdButton) return; // Ensure elements exist
+        // --- Ads Logic ---
+        function updateAdsUI() {
+            if (isLoading || !userData || !userData.ads) return;
 
-            // Reload ad data to ensure daily reset if the app was open overnight
-            loadAdData();
+            // Ensure daily count is reset if needed (redundant check, but safe)
+            checkAndResetDailyAds();
 
-            const remainingAds = MAX_DAILY_ADS - adsWatchedToday;
+            const watchedToday = userData.ads.watchedToday || 0;
+            const limitReached = watchedToday >= ADS_DAILY_LIMIT;
             const now = Date.now();
-            const cooldownTimeRemaining = Math.max(0, AD_COOLDOWN_SECONDS - Math.floor((now - lastAdWatchTimestamp) / 1000));
+            const cooldownActive = now < adCooldownEndTime;
 
-            adsStatusDisplay.textContent = `Ads remaining today: ${remainingAds}/${MAX_DAILY_ADS}`;
+            // Update display
+            adsWatchedTodaySpan.textContent = watchedToday;
+            adsDailyLimitSpan.textContent = ADS_DAILY_LIMIT;
+            adRewardAmountSpan.textContent = formatNumber(AD_REWARD_AMOUNT);
+            adMessageP.textContent = ''; // Clear previous messages
+            adMessageP.className = 'ad-message'; // Reset class
 
-            if (remainingAds <= 0) {
+            if (!monetagSdkReady) {
+                watchAdButton.disabled = true;
+                watchAdButton.textContent = "Ads Unavailable";
+                adMessageP.textContent = "Ad service failed to load.";
+                adMessageP.className = 'ad-message error';
+            } else if (limitReached) {
                 watchAdButton.disabled = true;
                 watchAdButton.textContent = "Daily Limit Reached";
-                if (adCooldownIntervalId) {
-                    clearInterval(adCooldownIntervalId);
-                    adCooldownIntervalId = null;
-                }
-            } else if (cooldownTimeRemaining > 0) {
+                adMessageP.textContent = "Come back tomorrow for more rewards!";
+                adMessageP.className = 'ad-message limit';
+                adCooldownTimerP.style.display = 'none'; // Hide cooldown if limit reached
+                if (adCooldownInterval) clearInterval(adCooldownInterval); // Clear any running cooldown timer
+            } else if (cooldownActive) {
                 watchAdButton.disabled = true;
-                // Start cooldown timer display if not already running
-                if (!adCooldownIntervalId) {
-                    startAdCooldownTimer();
-                }
+                // Timer update is handled by startAdCooldown's interval
             } else {
-                 // Available to watch
+                // Ready to watch
                 watchAdButton.disabled = false;
-                watchAdButton.textContent = "Watch Ad";
-                if (adCooldownIntervalId) { // Clear any leftover interval if cooldown finished elsewhere
-                    clearInterval(adCooldownIntervalId);
-                    adCooldownIntervalId = null;
-                }
+                watchAdButton.textContent = "Watch Ad & Earn";
+                adCooldownTimerP.style.display = 'none';
+                if (adCooldownInterval) clearInterval(adCooldownInterval); // Ensure interval is clear if cooldown ended
             }
-        }
-
-        function startAdCooldownTimer() {
-            if (adCooldownIntervalId) clearInterval(adCooldownIntervalId); // Clear previous interval
-
-            watchAdButton.disabled = true;
-            const intervalCallback = () => {
-                const now = Date.now();
-                const timeLeft = Math.max(0, AD_COOLDOWN_SECONDS - Math.floor((now - lastAdWatchTimestamp) / 1000));
-
-                if (timeLeft > 0) {
-                    watchAdButton.textContent = `Next Ad in ${timeLeft}s`;
-                } else {
-                    clearInterval(adCooldownIntervalId);
-                    adCooldownIntervalId = null;
-                    updateAdsScreenUI(); // Update button state correctly (enable if limit not reached)
-                }
-            };
-
-            intervalCallback(); // Run once immediately
-            adCooldownIntervalId = setInterval(intervalCallback, 1000);
         }
 
         function handleWatchAdClick() {
-             if (isLoading || !userData) return;
+            if (isLoading || !userData || !userData.ads) return;
 
-             const remainingAds = MAX_DAILY_ADS - adsWatchedToday;
-             const now = Date.now();
-             const cooldownTimeRemaining = Math.max(0, AD_COOLDOWN_SECONDS - Math.floor((now - lastAdWatchTimestamp) / 1000));
+            // Check preconditions again
+            const watchedToday = userData.ads.watchedToday || 0;
+            const limitReached = watchedToday >= ADS_DAILY_LIMIT;
+            const now = Date.now();
+            const cooldownActive = now < adCooldownEndTime;
 
-             if (remainingAds <= 0) {
-                 showInfoPopup("Limit Reached", `You have watched the maximum of ${MAX_DAILY_ADS} ads for today.`);
-                 updateAdsScreenUI(); // Ensure UI is up-to-date
-                 return;
-             }
+            if (limitReached || cooldownActive || !monetagSdkReady) {
+                console.log("Ad watch prevented:", { limitReached, cooldownActive, monetagSdkReady });
+                updateAdsUI(); // Refresh UI state just in case
+                return;
+            }
 
-             if (cooldownTimeRemaining > 0) {
-                  showInfoPopup("Cooldown Active", `Please wait ${cooldownTimeRemaining} more seconds before watching another ad.`);
-                  return;
-             }
+            // Check if the SDK function *still* exists (paranoid check)
+            const showAdFunction = window[`show_${MONETAG_ZONE_ID}`];
+            if (typeof showAdFunction !== 'function') {
+                console.error(`Monetag function show_${MONETAG_ZONE_ID} is not available!`);
+                adMessageP.textContent = "Error: Ad service unavailable.";
+                adMessageP.className = 'ad-message error';
+                watchAdButton.disabled = true;
+                watchAdButton.textContent = "Ads Unavailable";
+                monetagSdkReady = false; // Mark as not ready
+                return;
+            }
 
-             // --- Ad Simulation ---
-             console.log("Simulating ad watch...");
-             watchAdButton.disabled = true;
-             watchAdButton.textContent = "Watching Ad...";
-             lastAdWatchTimestamp = Date.now(); // Set timestamp *before* simulation starts cooldown timer
+            watchAdButton.disabled = true;
+            watchAdButton.textContent = "Loading Ad...";
+            adMessageP.textContent = ''; // Clear message
 
-             // !! IMPORTANT: Replace this setTimeout with your actual Ad Network integration !!
-             // Example: monetag.showRewardedVideo({ onSuccess: handleAdReward, onFailure: handleAdFailure });
-             setTimeout(() => {
-                 // This block runs *after* the simulated ad duration
-                 const reward = Math.floor(Math.random() * (AD_REWARD_MAX - AD_REWARD_MIN + 1)) + AD_REWARD_MIN;
+            console.log("Attempting to show Monetag ad...");
 
-                 userData.coins += reward;
-                 adsWatchedToday += 1;
-                 saveAdData(); // Save progress to local storage
+            try {
+                showAdFunction().then(() => {
+                    // SUCCESS: Ad watched completely
+                    console.log("Monetag ad watched successfully.");
 
-                 console.log(`Ad watched successfully. Reward: +${formatNumber(reward)}. Watched today: ${adsWatchedToday}`);
-                 showRewardPopup("Ad Watched!", `You earned +${formatNumber(reward)} coins!`);
+                    // Grant Reward
+                    userData.coins += AD_REWARD_AMOUNT;
+                    userData.ads.watchedToday += 1;
+                    userData.ads.lastWatchedDate = getTodayDateString(); // Ensure date is set
 
-                 updateUI(); // Update coin balance display etc.
-                 // updateAdsScreenUI will handle starting the cooldown timer display
-                 updateAdsScreenUI();
+                    console.log(`Ad reward granted: +${formatNumber(AD_REWARD_AMOUNT)}. Watched today: ${userData.ads.watchedToday}`);
 
-             }, AD_SIMULATION_DURATION); // Simulate watching for X seconds
+                    showRewardPopup("Ad Watched!", `You earned +${formatNumber(AD_REWARD_AMOUNT)} coins!`);
 
-             // Start the cooldown timer display immediately after clicking
-             startAdCooldownTimer();
+                    // Update UI (coin balance & ad section)
+                    updateCoinDisplay();
+                    updateAdsUI(); // Will show updated count and potentially disable button if limit hit
+
+                    // Start Cooldown (only if limit not reached)
+                    if (userData.ads.watchedToday < ADS_DAILY_LIMIT) {
+                        startAdCooldown();
+                    }
+
+                    // Save Data
+                    saveUserData(true);
+
+                }).catch((error) => {
+                    // CATCH: SDK error or potentially ad closed early (Monetag might not use catch for this)
+                    // This catch is more likely for SDK-level errors.
+                    console.error("Monetag ad failed or was closed early (via catch):", error);
+                    adMessageP.textContent = "Ad failed or was skipped.";
+                    adMessageP.className = 'ad-message error';
+
+                    // Re-enable button *only if* limit not reached and cooldown not active
+                    updateAdsUI();
+                });
+
+                // Fallback/Safety: If .then() or .catch() doesn't fire (e.g., SDK hangs?),
+                // re-enable the button after a timeout? This is risky.
+                // Let's rely on the .then/.catch and the updateAdsUI calls for now.
+
+            } catch (error) {
+                // CATCH: Error calling the showAdFunction itself
+                console.error(`Error calling Monetag show_${MONETAG_ZONE_ID} function:`, error);
+                adMessageP.textContent = "Error launching ad service.";
+                adMessageP.className = 'ad-message error';
+                updateAdsUI(); // Re-enable button if appropriate
+            }
+        }
+
+        function startAdCooldown() {
+            if (isLoading) return; // Don't start cooldown if app isn't ready
+
+            adCooldownEndTime = Date.now() + AD_COOLDOWN_SECONDS * 1000;
+            if (adCooldownInterval) clearInterval(adCooldownInterval); // Clear previous interval if any
+
+            watchAdButton.disabled = true; // Ensure button is disabled
+            adCooldownTimerP.style.display = 'block'; // Show timer
+
+            const updateTimer = () => {
+                const now = Date.now();
+                const remainingSeconds = Math.max(0, Math.ceil((adCooldownEndTime - now) / 1000));
+
+                if (remainingSeconds > 0) {
+                    watchAdButton.textContent = `Next ad in ${remainingSeconds}s`;
+                    adCooldownTimerP.textContent = `Please wait ${remainingSeconds} seconds...`;
+                } else {
+                    clearInterval(adCooldownInterval);
+                    adCooldownInterval = null;
+                    adCooldownTimerP.style.display = 'none';
+                    // Update the entire Ads UI section to check limits and re-enable button if needed
+                    updateAdsUI();
+                }
+            };
+
+            adCooldownInterval = setInterval(updateTimer, 1000);
+            updateTimer(); // Run immediately to show initial time
         }
 
 
         // --- UI Functions ---
         function initializeAppUI() {
-             missionEmojiDisplay.textContent = WOLF_EMOJI;
-             renderShopItems();
-             updateUI(); // This now includes updateAdsScreenUI
-             loadingDiv.style.display = 'none';
-             mainContentDiv.style.display = 'flex';
-             navbar.style.display = 'flex';
+            missionEmojiDisplay.textContent = WOLF_EMOJI;
+            renderShopItems();
+            updateUI(); // Initial full UI update
+            loadingDiv.style.display = 'none';
+            mainContentDiv.style.display = 'flex';
+            navbar.style.display = 'flex';
+            // Set initial Ads page state after data is loaded
+            updateAdsUI();
         }
-
-        function updateUI() { // Master UI update function
-             if (isLoading || !userData || !currentUser) return;
-             updateCoinDisplay();
-             updateGameStats();
-             updateShopItemsUI();
-             updateProfileStats();
-             updateMissionStatusUI();
-             updateLuckyCodeSectionUI();
-             updateAdsScreenUI(); // Keep Ads UI updated
+        function updateUI() {
+            if (isLoading || !userData || !currentUser) return;
+            updateCoinDisplay();
+            updateGameStats();
+            updateShopItemsUI();
+            updateProfileStats();
+            updateMissionStatusUI();
+            updateLuckyCodeSectionUI();
+            updateAdsUI(); // ADDED: Update ads section as well
         }
-
         function updateCoinDisplay() { if (userData) coinBalanceSpan.textContent = formatNumber(userData.coins); }
         function updateGameStats() { if (!userData) return; tapPowerDisplaySpan.textContent = formatNumber(calculateTapPower()); passiveIncomeDisplaySpan.textContent = formatNumber(calculatePassiveIncomeRate()); }
         function updateProfileStats() { if (!userData || !currentUser) return; profileUserIdSpan.textContent = currentUser.id || 'N/A'; profileUsernameSpan.textContent = currentUser.username || 'N/A'; profileFirstNameSpan.textContent = currentUser.first_name || 'N/A'; profileLastNameSpan.textContent = currentUser.last_name || 'N/A'; profileCoinsSpan.textContent = formatNumber(userData.coins); profileTapPowerSpan.textContent = formatNumber(calculateTapPower()); profilePassiveIncomeSpan.textContent = formatNumber(calculatePassiveIncomeRate()); tonWalletInput.value = userData.tonWallet || ''; }
         function updateMissionStatusUI() { if (!userData || !currentUser) return; const missionId = 'lastNameWolf'; const status = userData?.missions?.[missionId] || 'incomplete'; updateMissionUI(missionId, status); }
-        function updateMissionUI(missionId, status) { missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
-        function renderShopItems() { clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; if (!userData) { console.warn("Cannot render shop, userData missing."); return; } upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button task-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.removeEventListener('click', handleBuyButtonClick); button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
+        function updateMissionUI(missionId, status) {
+             missionStatusDiv.classList.remove('incomplete', 'claimed'); missionStatusDiv.classList.add(status === 'claimed' ? 'claimed' : 'incomplete'); switch (status) { case 'incomplete': missionStatusDiv.textContent = 'Status: Incomplete'; missionClaimBtn.textContent = 'Check & Claim Reward'; missionClaimBtn.disabled = false; break; case 'claimed': missionStatusDiv.textContent = 'Status: Reward Claimed!'; missionClaimBtn.textContent = 'Claimed'; missionClaimBtn.disabled = true; break; } }
+        function renderShopItems() { clickUpgradesDiv.innerHTML = ''; passiveUpgradesDiv.innerHTML = ''; if (!userData) { console.warn("Cannot render shop, userData missing."); return; } upgrades.forEach(upgrade => { const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item'; itemDiv.id = `shop-item-${upgrade.id}`; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); itemDiv.innerHTML = ` <div class="shop-item-info"> <div class="shop-item-name">${upgrade.name} (Lv. ${level})</div> <div class="shop-item-details">${upgrade.description}</div> <div class="shop-item-cost"> <img src="${COIN_IMAGE_URL}" class="coin-icon" alt=""> <span class="cost-value">${formatNumber(cost)}</span> </div> </div> <button class="buy-button" data-upgrade-id="${upgrade.id}">Buy</button> `; if (upgrade.type === 'click') clickUpgradesDiv.appendChild(itemDiv); else if (upgrade.type === 'passive') passiveUpgradesDiv.appendChild(itemDiv); }); document.querySelectorAll('.buy-button').forEach(button => { button.removeEventListener('click', handleBuyButtonClick); button.addEventListener('click', handleBuyButtonClick); }); updateShopItemsUI(); }
         function updateShopItemsUI() { if (!userData) return; const currentCoins = userData.coins; upgrades.forEach(upgrade => { const itemDiv = document.getElementById(`shop-item-${upgrade.id}`); if (!itemDiv) return; const level = userData.upgrades?.[upgrade.id]?.level || 0; const cost = calculateUpgradeCost(upgrade, level); const nameSpan = itemDiv.querySelector('.shop-item-name'); if (nameSpan) nameSpan.textContent = `${upgrade.name} (Lv. ${level})`; const costSpan = itemDiv.querySelector('.cost-value'); if (costSpan) costSpan.textContent = formatNumber(cost); const button = itemDiv.querySelector('.buy-button'); if (button) button.disabled = currentCoins < cost; }); }
         function handleBuyButtonClick(event) { const upgradeId = event.target.dataset.upgradeId; handleUpgradePurchase(upgradeId); }
         function handleUpgradePurchase(upgradeId) { if (isLoading || !userData) return; const upgradeDef = upgrades.find(u => u.id === upgradeId); if (!upgradeDef) return; const currentLevel = userData.upgrades?.[upgradeId]?.level || 0; const cost = calculateUpgradeCost(upgradeDef, currentLevel); if (userData.coins >= cost) { userData.coins -= cost; if (!userData.upgrades[upgradeId]) userData.upgrades[upgradeId] = { level: 0 }; userData.upgrades[upgradeId].level += 1; console.log(`Purchased ${upgradeDef.name} (Lv. ${userData.upgrades[upgradeId].level}), Cost: ${formatNumber(cost)}`); updateUI(); scheduleSave(); } else { console.log("Insufficient funds:", upgradeDef.name); const button = document.querySelector(`.buy-button[data-upgrade-id="${upgradeId}"]`); if (button) { button.style.animation = 'shake 0.5s'; setTimeout(() => button.style.animation = '', 500); } } }
-        function calculateUpgradeCost(upgradeDef, currentLevel) { const scalingFactor = Math.max(1, Math.floor(upgradeDef.baseCost / 100000)); return Math.floor(upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE * scalingFactor * (1 + currentLevel * 0.05))); }
-        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
-        function showPage(pageId) { if (isLoading) return; document.querySelectorAll('.page').forEach(page => page.classList.remove('active')); const targetPage = document.getElementById(pageId); if (!targetPage) { console.error("Target page not found:", pageId); return; } targetPage.classList.add('active'); targetPage.scrollTop = 0; navButtons.forEach(button => { button.classList.remove('active'); // Match nav button ID, allowing for 'game-screen' -> 'nav-game'
-             const navId = `nav-${pageId.split('-')[0]}`;
-             if (button.id === navId) button.classList.add('active'); });
-             // Update specific sections when their page is shown
-             if (pageId === 'profile-screen') { updateProfileStats(); updateMissionStatusUI(); updateLuckyCodeSectionUI(); }
-             else if (pageId === 'shop-screen') { updateShopItemsUI(); }
-             else if (pageId === 'tasks-screen') { const activeTabId = document.querySelector('.task-tabs button.active')?.id || 'tab-available'; const listId = activeTabId === 'tab-available' ? 'available-tasks-list' : 'completed-tasks-list'; showTaskListCategory(listId); }
-             else if (pageId === 'ads-screen') { updateAdsScreenUI(); } // Update ads screen when shown
+        function calculateUpgradeCost(upgradeDef, currentLevel) {
+            const scalingFactor = Math.max(1, Math.floor(upgradeDef.baseCost / 100000));
+            return Math.floor(upgradeDef.baseCost + (currentLevel * INCREASING_COST_BASE * scalingFactor * (1 + currentLevel * 0.05)));
         }
-        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId)?.classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`)?.classList.add('active'); }
-        function showTaskListCategory(categoryId) { taskListCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId)?.classList.add('active'); taskTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`)?.classList.add('active'); }
+        function createClickAnimation(x, y, amount) { const feedback = document.createElement('div'); feedback.className = 'click-value'; feedback.textContent = `+${formatNumber(amount)}`; feedback.style.left = `${x}px`; feedback.style.top = `${y}px`; feedback.style.transform = 'translate(-50%, -100%)'; clickFeedbackDiv.appendChild(feedback); setTimeout(() => { feedback.remove(); }, 1150); }
+        function showPage(pageId) {
+             if (isLoading) return;
+             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+             const targetPage = document.getElementById(pageId);
+             if (!targetPage) { console.error("Target page not found:", pageId); return; }
+             targetPage.classList.add('active');
+             targetPage.scrollTop = 0; /* Scroll to top on page change */
+             navButtons.forEach(button => {
+                 button.classList.remove('active');
+                 // Match button ID format: nav-game matches game-screen
+                 if (button.id === `nav-${pageId.split('-')[0]}`) {
+                     button.classList.add('active');
+                 }
+             });
+
+             // Specific updates when switching pages
+             if (pageId === 'profile-screen') {
+                 updateUI(); // Update profile-related UI
+             } else if (pageId === 'tasks-screen') {
+                 const activeTabId = document.querySelector('.task-tabs button.active')?.id || 'tab-available'; // Default to available if none active
+                 const listId = activeTabId === 'tab-available' ? 'available-tasks-list' : 'completed-tasks-list';
+                 showTaskListCategory(listId); // Reshow the correct task list
+             } else if (pageId === 'ads-screen') {
+                 updateAdsUI(); // Refresh ads UI when switching to it
+             }
+         }
+        function showShopCategory(categoryId) { shopCategories.forEach(cat => cat.classList.remove('active')); document.getElementById(categoryId).classList.add('active'); shopTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
+        function showTaskListCategory(categoryId) { taskListCategories.forEach(cat => cat.classList.remove('active')); const listToShow = document.getElementById(categoryId); if (listToShow) listToShow.classList.add('active'); taskTabButtons.forEach(button => button.classList.remove('active')); document.getElementById(`tab-${categoryId.split('-')[0]}`).classList.add('active'); }
         function saveWallet() { if (isLoading || !userData) return; const newAddress = tonWalletInput.value.trim(); userData.tonWallet = newAddress; saveUserData(true); saveStatusP.textContent = 'Wallet address saved!'; saveStatusP.style.color = 'var(--success-color)'; setTimeout(() => saveStatusP.textContent = '', 3000); }
-        function showError(message) { const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred.'; loadingDiv.textContent = `Error:\n${displayMessage}\nPlease Reload.`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); if (adCooldownIntervalId) clearInterval(adCooldownIntervalId); isLoading = false; }
+        function showError(message) { const displayMessage = typeof message === 'string' ? message : 'An unknown error occurred.'; loadingDiv.textContent = `Error:\n${displayMessage}\nPlease Reload.`; loadingDiv.style.color = 'var(--error-color)'; loadingDiv.style.display = 'flex'; console.error("App Error Displayed:", displayMessage); mainContentDiv.style.display = 'none'; navbar.style.display = 'none'; if (passiveIncomeIntervalId) clearInterval(passiveIncomeIntervalId); if (adCooldownInterval) clearInterval(adCooldownInterval); // Clear ad cooldown on error
+             isLoading = false; }
         function formatNumber(num) { num = Math.floor(num); const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod"]; let suffixIndex = 0; if (num < 1000) return num.toString(); while (num >= 1000 && suffixIndex < suffixes.length - 1) { num /= 1000; suffixIndex++; } let precision = 2; if (num >= 100) precision = 0; else if (num >= 10) precision = 1; const numString = num.toFixed(precision); return (precision > 0 ? parseFloat(numString) : numString) + suffixes[suffixIndex]; }
 
         // --- Event Listeners Setup ---
@@ -786,7 +978,7 @@
              codePopupSubmitBtn.removeEventListener('click', handleCodeSubmit);
              codePopup.removeEventListener('click', handlePopupOverlayClick);
              claimLuckyCodeBtn.removeEventListener('click', handleLuckyCodeClaim);
-             watchAdButton.removeEventListener('click', handleWatchAdClick); // Remove listener for Ads button
+             watchAdButton.removeEventListener('click', handleWatchAdClick); // ADDED: Remove Ads listener
 
              // Add core listeners
              coinContainer.addEventListener('pointerdown', handleTap, { passive: false });
@@ -795,12 +987,13 @@
              missionClaimBtn.addEventListener('click', checkAndClaimMission);
              codePopupCancelBtn.addEventListener('click', hideCodePopup);
              codePopupSubmitBtn.addEventListener('click', handleCodeSubmit);
-             codePopup.addEventListener('click', handlePopupOverlayClick);
+             codePopup.addEventListener('click', handlePopupOverlayClick); // For closing by clicking outside
              claimLuckyCodeBtn.addEventListener('click', handleLuckyCodeClaim);
-             watchAdButton.addEventListener('click', handleWatchAdClick); // Add listener for Ads button
+             watchAdButton.addEventListener('click', handleWatchAdClick); // ADDED: Add Ads listener
 
-             // Task/Shop listeners added dynamically
-             // Nav/Tab listeners via onclick HTML
+             // Task listeners added dynamically in renderTaskItem
+             // Shop listeners added dynamically in renderShopItems
+             // Nav/Tab listeners added via onclick in HTML
         }
         function handlePopupOverlayClick(event) { if (event.target === codePopup) { hideCodePopup(); } }
 
