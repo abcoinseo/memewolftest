@@ -9,6 +9,23 @@
         type="text/javascript"
     ></script>
 
+
+    <!-- Telegram Web App SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Telegram Mini App Analytics SDK -->
+<script type="module">
+  import { Analytics } from 'https://cdn.jsdelivr.net/npm/@tma.js/analytics';
+
+  const analytics = Analytics.init({
+    token: "eyJhcHBfbmFtZSI6Ik1lbWVXb2xmIiwiYXBwX3VybCI6Imh0dHBzOi8vdC5tZS9NZW1ld29sZmVhcm5ib3QiLCJhcHBfZG9tYWluIjoiaHR0cHM6Ly9tZW1ld29sZmJvdC52ZXJjZWwuYXBwLyJ9!aHpBDg5nS3R8RqG692rUXAHxunVeLkJEzq7R2UIyP1M="
+  });
+
+  // Basic analytics event tracking
+  analytics.track("app_opened");
+</script>
+
+
     <!-- Add Telegram Analytics script to HTML head -->
     <script
         async
